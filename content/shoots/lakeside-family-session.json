@@ -1,0 +1,16 @@
+{
+  "title": "Lakeside Family Session",
+  "slug": "lakeside-family-session",
+  "category": "family",
+  "description": "A warm sunset session by the lake with the whole family.",
+  "photos": [
+    {
+      "src": "/images/family/lakeside-siblings.jpg",
+      "alt": "Young man with his three younger siblings by a lake at sunset"
+    },
+    {
+      "src": "/images/family/lakeside-mom.jpg",
+      "alt": "Young man and his mother posing together by a lake at sunset"
+    }
+  ]
+}

@@ -10,11 +10,13 @@
     },
     {
       "src": "/images/senior/senior-fall-2.jpg",
-      "alt": "Senior portrait in profile in a golden field"
+      "alt": "Senior portrait in profile in a golden field",
+      "heroEligible": false
     },
     {
       "src": "/images/senior/senior-fall-3.jpg",
-      "alt": "Senior portrait leaning against a rustic wooden wall"
+      "alt": "Senior portrait leaning against a rustic wooden wall",
+      "heroEligible": false
     }
   ]
 }

@@ -56,7 +56,11 @@ export default function Home() {
         </div>
         <div className="mt-12 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
           {SPECIALTIES.map(({ title, description, href, category }) => {
-            const photo = shootsByCategory(category)[0]?.photos[0];
+            const photo =
+              shootsByCategory(category)
+                .flatMap((shoot) => shoot.photos)
+                .find((p) => p.heroEligible !== false) ??
+              shootsByCategory(category)[0]?.photos[0];
             return (
               <Link
                 key={title}

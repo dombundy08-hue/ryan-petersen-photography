@@ -1,0 +1,33 @@
+{
+  "title": "Dominick's Senior Session",
+  "slug": "dominicks-senior-session",
+  "category": "senior",
+  "description": "A full evening senior session — casual portraits around town, a golden-hour fence line, and an athletic set out on the road.",
+  "photos": [
+    {
+      "src": "/images/senior/dominick-1.jpg",
+      "alt": "Senior portrait leaning on a deck railing, smiling"
+    },
+    {
+      "src": "/images/senior/dominick-2.jpg",
+      "alt": "Senior portrait leaning on a wooden fence at golden hour"
+    },
+    {
+      "src": "/images/senior/dominick-3.jpg",
+      "alt": "Senior portrait laughing on outdoor steps"
+    },
+    {
+      "src": "/images/senior/dominick-4.jpg",
+      "alt": "Senior portrait against a dramatic sunset sky"
+    },
+    {
+      "src": "/images/senior/dominick-5-bw.jpg",
+      "alt": "Black and white senior portrait, moody sunset sky",
+      "heroEligible": false
+    },
+    {
+      "src": "/images/senior/dominick-running.jpg",
+      "alt": "Senior athletic portrait, running in Colorado training gear"
+    }
+  ]
+}

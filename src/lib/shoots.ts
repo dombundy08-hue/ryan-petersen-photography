@@ -7,6 +7,16 @@ export type PhotoCategory = "senior" | "family" | "nature";
 export interface Photo {
   src: string;
   alt: string;
+  /**
+   * Whether this photo is a good candidate for the home page's rotating
+   * hero carousel. The hero crops to a wide banner via object-cover, so a
+   * profile shot, a photo where the subject is looking away, or an action
+   * shot mid-motion can end up with the face cropped out or unrecognizable
+   * even though the same photo works fine in a portfolio gallery. Defaults
+   * to true when omitted — set explicitly to false on any photo where the
+   * face isn't clearly visible/forward-facing.
+   */
+  heroEligible?: boolean;
 }
 
 export interface Shoot {
@@ -59,8 +69,14 @@ export function getShoot(category: string, slug: string): Shoot | undefined {
   );
 }
 
-/** Every photo across every shoot, flattened — used by the home hero carousel. */
-export const allPhotos: (Photo & { category: PhotoCategory })[] =
-  shoots.flatMap((shoot) =>
+/**
+ * Every photo across every shoot, flattened — used by the home hero
+ * carousel. Filtered to heroEligible !== false so profile/away-facing/
+ * action shots that read poorly once cropped into a wide banner never show
+ * up there (they're still visible in the shoot's own gallery page).
+ */
+export const allPhotos: (Photo & { category: PhotoCategory })[] = shoots
+  .flatMap((shoot) =>
     shoot.photos.map((photo) => ({ ...photo, category: shoot.category }))
-  );
+  )
+  .filter((photo) => photo.heroEligible !== false);
