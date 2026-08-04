@@ -1,0 +1,20 @@
+{
+  "title": "Autumn Senior Session",
+  "slug": "autumn-senior-session",
+  "category": "senior",
+  "description": "A golden-hour senior session with warm autumn tones — a stone wall, an open field, and an old wooden barn.",
+  "photos": [
+    {
+      "src": "/images/senior/senior-fall-1.jpg",
+      "alt": "Senior portrait sitting on a stone wall at golden hour"
+    },
+    {
+      "src": "/images/senior/senior-fall-2.jpg",
+      "alt": "Senior portrait in profile in a golden field"
+    },
+    {
+      "src": "/images/senior/senior-fall-3.jpg",
+      "alt": "Senior portrait leaning against a rustic wooden wall"
+    }
+  ]
+}

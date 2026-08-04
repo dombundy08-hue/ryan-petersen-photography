@@ -1,32 +1,37 @@
 ﻿import Image from "next/image";
 import Link from "next/link";
-import { ArrowRight } from "lucide-react";
+import { ArrowRight, Camera } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Section } from "@/components/section";
 import { HeroCarousel } from "@/components/hero-carousel";
-import { allPhotos, shootsByCategory } from "@/lib/shoots";
+import { allPhotos, shootsByCategory, type PhotoCategory } from "@/lib/shoots";
 
-const SPECIALTIES = [
+const SPECIALTIES: {
+  title: string;
+  description: string;
+  href: string;
+  category: PhotoCategory;
+}[] = [
   {
     title: "Senior Photos",
     description:
       "A milestone worth doing right — portraits that actually look like you.",
     href: "/portfolio#senior",
-    photo: shootsByCategory("senior")[0].photos[0],
+    category: "senior",
   },
   {
     title: "Family Photos",
     description:
       "Relaxed sessions built around your family, not a stiff studio pose.",
     href: "/portfolio#family",
-    photo: shootsByCategory("family")[0].photos[0],
+    category: "family",
   },
   {
     title: "Nature Photos",
     description:
       "Landscapes and outdoor moments shot with an eye for natural light.",
     href: "/portfolio#nature",
-    photo: shootsByCategory("nature")[0].photos[0],
+    category: "nature",
   },
 ];
 
@@ -50,40 +55,53 @@ export default function Home() {
           </h2>
         </div>
         <div className="mt-12 grid gap-6 sm:grid-cols-3">
-          {SPECIALTIES.map(({ title, description, href, photo }) => (
-            <Link
-              key={title}
-              href={href}
-              className="group relative flex aspect-[3/4] flex-col justify-end overflow-hidden rounded-xl border border-border"
-            >
-              <Image
-                src={photo.src}
-                alt={photo.alt}
-                fill
-                sizes="(max-width: 640px) 100vw, 33vw"
-                className="object-cover transition-transform duration-500 group-hover:scale-105"
-              />
-              <div
-                className="absolute inset-0"
-                style={{
-                  background:
-                    "linear-gradient(180deg, rgba(16,13,10,0) 40%, rgba(16,13,10,0.9) 100%)",
-                }}
-              />
-              <div className="relative p-6">
-                <h3 className="font-heading text-xl font-medium text-foreground">
-                  {title}
-                </h3>
-                <p className="mt-1 text-sm text-foreground/75">
-                  {description}
-                </p>
-                <span className="mt-3 inline-flex items-center gap-1 text-sm font-medium text-primary">
-                  See the gallery
-                  <ArrowRight className="size-4 transition-transform group-hover:translate-x-0.5" />
-                </span>
-              </div>
-            </Link>
-          ))}
+          {SPECIALTIES.map(({ title, description, href, category }) => {
+            const photo = shootsByCategory(category)[0]?.photos[0];
+            return (
+              <Link
+                key={title}
+                href={href}
+                className="group relative flex aspect-[3/4] flex-col justify-end overflow-hidden rounded-xl border border-border bg-secondary"
+              >
+                {photo ? (
+                  <Image
+                    src={photo.src}
+                    alt={photo.alt}
+                    fill
+                    sizes="(max-width: 640px) 100vw, 33vw"
+                    className="object-cover transition-transform duration-500 group-hover:scale-105"
+                  />
+                ) : (
+                  <div className="absolute inset-0 flex items-center justify-center">
+                    <Camera
+                      className="size-10 text-foreground/20"
+                      strokeWidth={1.5}
+                      aria-hidden="true"
+                    />
+                  </div>
+                )}
+                <div
+                  className="absolute inset-0"
+                  style={{
+                    background:
+                      "linear-gradient(180deg, rgba(16,13,10,0) 40%, rgba(16,13,10,0.9) 100%)",
+                  }}
+                />
+                <div className="relative p-6">
+                  <h3 className="font-heading text-xl font-medium text-foreground">
+                    {title}
+                  </h3>
+                  <p className="mt-1 text-sm text-foreground/75">
+                    {description}
+                  </p>
+                  <span className="mt-3 inline-flex items-center gap-1 text-sm font-medium text-primary">
+                    {photo ? "See the gallery" : "Coming soon"}
+                    <ArrowRight className="size-4 transition-transform group-hover:translate-x-0.5" />
+                  </span>
+                </div>
+              </Link>
+            );
+          })}
         </div>
       </Section>
 

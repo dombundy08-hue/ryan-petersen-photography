@@ -1,0 +1,12 @@
+{
+  "title": "Ballfield Sunset",
+  "slug": "ballfield-sunset",
+  "category": "nature",
+  "description": "A quiet sunset caught through the fence at the local ballpark.",
+  "photos": [
+    {
+      "src": "/images/nature/sunset-ballfield.jpg",
+      "alt": "Sunset through a chain-link fence at a baseball field"
+    }
+  ]
+}
