@@ -1,0 +1,15 @@
+[build]
+  command = "npm run build"
+  publish = "out"
+
+# GH_PAGES_BASE_PATH is intentionally NOT set here — Netlify serves this
+# site at its own domain root, so basePath should stay empty (the default
+# in next.config.ts). Only the GitHub Pages deploy needs that variable.
+#
+# Set NEXT_PUBLIC_WEB3FORMS_KEY (contact form) and, once you know this
+# site's Netlify URL, NEXT_PUBLIC_SITE_URL, in Site settings > Environment
+# variables — not here, so they're not committed to the repo.
+
+# No SPA fallback redirect needed — every route (including shoot detail
+# pages) is pre-rendered to a real HTML file via generateStaticParams, and
+# Netlify serves out/404.html automatically for genuinely missing paths.

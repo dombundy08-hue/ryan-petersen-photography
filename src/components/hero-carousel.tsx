@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
-import type { Photo } from "@/lib/photos";
+import type { Photo } from "@/lib/shoots";
 
 const INTERVAL_MS = 5000;
 
@@ -67,10 +67,7 @@ export function HeroCarousel({ photos }: { photos: Photo[] }) {
       />
 
       <div className="relative z-10 mx-auto max-w-3xl px-4 text-center sm:px-6">
-        <span className="inline-flex items-center gap-1.5 rounded-full border border-primary/40 bg-black/20 px-3 py-1 text-xs font-medium tracking-wide text-primary backdrop-blur-sm">
-          Senior &middot; Family &middot; Nature Photography
-        </span>
-        <h1 className="mt-6 font-heading text-4xl font-medium italic tracking-tight text-foreground sm:text-6xl md:text-7xl">
+        <h1 className="font-heading text-4xl font-medium italic tracking-tight text-foreground sm:text-6xl md:text-7xl">
           Creating memorable moments, one photo at a time.
         </h1>
         <p className="mx-auto mt-6 max-w-xl text-base text-foreground/80 sm:text-lg">

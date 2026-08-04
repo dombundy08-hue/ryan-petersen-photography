@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
-import { Mountain, Car, Trophy, Gamepad2 } from "lucide-react";
+import Image from "next/image";
+import { Mountain, Car, Trophy, Gamepad2, User } from "lucide-react";
 import { Section } from "@/components/section";
+import { aboutPhoto } from "@/lib/settings";
 
 export const metadata: Metadata = {
   title: "About",
@@ -27,7 +29,39 @@ export default function AboutPage() {
       </Section>
 
       <Section className="border-t border-border pt-0">
-        <div className="mx-auto max-w-2xl space-y-6 text-base leading-relaxed text-foreground/90">
+        <div className="mx-auto grid max-w-2xl gap-8 sm:grid-cols-[220px_1fr] sm:items-start">
+          {aboutPhoto ? (
+            <div className="relative mx-auto aspect-[4/5] w-44 overflow-hidden rounded-xl border border-border sm:mx-0 sm:w-full">
+              <Image
+                src={aboutPhoto}
+                alt="Ryan Petersen"
+                fill
+                sizes="220px"
+                className="object-cover"
+              />
+            </div>
+          ) : (
+            <div
+              role="img"
+              aria-label="Photo of Ryan Petersen — coming soon"
+              className="relative mx-auto flex aspect-[4/5] w-44 items-center justify-center overflow-hidden rounded-xl border border-border bg-gradient-to-br from-[#D3A054]/20 via-[#5C4F3E]/15 to-[#1B1712] sm:mx-0 sm:w-full"
+            >
+              <div className="flex flex-col items-center gap-2 px-4 text-center">
+                <User
+                  className="size-8 text-foreground/40"
+                  strokeWidth={1.5}
+                  aria-hidden="true"
+                />
+                <span className="text-xs text-muted-foreground">
+                  Photo of Ryan
+                  <br />
+                  coming soon
+                </span>
+              </div>
+            </div>
+          )}
+
+          <div className="space-y-6 text-base leading-relaxed text-foreground/90">
           <p>
             Hi, I&apos;m Ryan. Photography has become one of my biggest
             passions because I love capturing moments that people can look
@@ -53,6 +87,7 @@ export default function AboutPage() {
             means a lot, and I&apos;d be honored to help tell your story
             through my lens.
           </p>
+          </div>
         </div>
 
         <div className="mx-auto mt-14 max-w-2xl">

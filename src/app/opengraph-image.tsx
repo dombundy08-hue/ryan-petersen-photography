@@ -15,7 +15,8 @@ export default function Image() {
           flexDirection: "column",
           alignItems: "center",
           justifyContent: "center",
-          background: "linear-gradient(135deg, #FAFAF9 0%, #F5F5F4 60%, #FED7AA 100%)",
+          background:
+            "linear-gradient(135deg, #100D0A 0%, #1B1712 60%, #2A241D 100%)",
         }}
       >
         <div
@@ -26,17 +27,17 @@ export default function Image() {
             width: 96,
             height: 96,
             borderRadius: 24,
-            background: "#C2410C",
+            background: "#D3A054",
             marginBottom: 32,
           }}
         >
           <svg width="52" height="52" viewBox="0 0 24 24" fill="none">
             <path
               d="M4 8h3l2-3h6l2 3h3a1 1 0 0 1 1 1v9a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V9a1 1 0 0 1 1-1Z"
-              stroke="#FFFFFF"
+              stroke="#171310"
               strokeWidth="1.6"
             />
-            <circle cx="12" cy="13" r="3.5" stroke="#FFFFFF" strokeWidth="1.6" />
+            <circle cx="12" cy="13" r="3.5" stroke="#171310" strokeWidth="1.6" />
           </svg>
         </div>
         <div
@@ -44,15 +45,20 @@ export default function Image() {
             display: "flex",
             fontSize: 56,
             fontWeight: 700,
-            color: "#1C1917",
+            color: "#F3EDE3",
           }}
         >
-          RP{" "}
-          <span style={{ color: "#C2410C", marginLeft: 16 }}>
-            Photography
-          </span>
+          Ryan
+          <span style={{ color: "#D3A054" }}>Shutter</span>
         </div>
-        <div style={{ display: "flex", fontSize: 28, color: "#57534E", marginTop: 20 }}>
+        <div
+          style={{
+            display: "flex",
+            fontSize: 28,
+            color: "#B7AA98",
+            marginTop: 20,
+          }}
+        >
           Senior · Family · Nature Photography
         </div>
       </div>

@@ -12,25 +12,53 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { CheckCircle2 } from "lucide-react";
+import { CheckCircle2, AlertCircle } from "lucide-react";
 
 const SESSION_TYPES = [
-  { value: "senior", label: "Senior Photos" },
-  { value: "family", label: "Family Photos" },
-  { value: "nature", label: "Nature Photos" },
-  { value: "other", label: "Something Else" },
+  { value: "Senior Photos", label: "Senior Photos" },
+  { value: "Family Photos", label: "Family Photos" },
+  { value: "Nature Photos", label: "Nature Photos" },
+  { value: "Something Else", label: "Something Else" },
 ];
+
+// Public by design — Web3Forms access keys are meant to be exposed
+// client-side (https://docs.web3forms.com). Set at build time via
+// NEXT_PUBLIC_WEB3FORMS_KEY so it's baked into this static export.
+const WEB3FORMS_ACCESS_KEY = process.env.NEXT_PUBLIC_WEB3FORMS_KEY ?? "";
+
+type Status = "idle" | "sending" | "sent" | "error";
 
 export function ContactForm() {
   const [sessionType, setSessionType] = useState<string | null>(null);
-  const [submitted, setSubmitted] = useState(false);
+  const [status, setStatus] = useState<Status>("idle");
 
-  function handleSubmit(event: FormEvent<HTMLFormElement>) {
+  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    setSubmitted(true);
+    setStatus("sending");
+
+    const form = event.currentTarget;
+    const formData = new FormData(form);
+    formData.append("access_key", WEB3FORMS_ACCESS_KEY);
+    formData.append(
+      "subject",
+      `New inquiry from ${formData.get("name")} — ${formData.get("subject") || "General"}`
+    );
+    formData.append("from_name", "RyanShutter website");
+
+    try {
+      const response = await fetch("https://api.web3forms.com/submit", {
+        method: "POST",
+        headers: { Accept: "application/json" },
+        body: formData,
+      });
+      const result = await response.json();
+      setStatus(result.success ? "sent" : "error");
+    } catch {
+      setStatus("error");
+    }
   }
 
-  if (submitted) {
+  if (status === "sent") {
     return (
       <div className="flex flex-col items-center gap-3 rounded-xl border border-border bg-card p-10 text-center">
         <CheckCircle2 className="size-10 text-primary" aria-hidden="true" />
@@ -47,6 +75,15 @@ export function ContactForm() {
 
   return (
     <form onSubmit={handleSubmit} className="space-y-5">
+      {/* Honeypot — bots fill this, real visitors never see it */}
+      <input
+        type="checkbox"
+        name="botcheck"
+        className="hidden"
+        tabIndex={-1}
+        autoComplete="off"
+      />
+
       <div className="grid gap-5 sm:grid-cols-2">
         <div className="space-y-2">
           <Label htmlFor="name">Name</Label>
@@ -86,7 +123,7 @@ export function ContactForm() {
               ))}
             </SelectContent>
           </Select>
-          <input type="hidden" name="sessionType" value={sessionType ?? ""} />
+          <input type="hidden" name="subject" value={sessionType ?? ""} />
         </div>
       </div>
 
@@ -101,8 +138,26 @@ export function ContactForm() {
         />
       </div>
 
-      <Button type="submit" size="lg" className="w-full sm:w-auto">
-        Send Message
+      {status === "error" && (
+        <div className="flex items-start gap-2 rounded-lg border border-destructive/40 bg-destructive/10 p-3 text-sm text-destructive">
+          <AlertCircle className="mt-0.5 size-4 shrink-0" aria-hidden="true" />
+          <span>
+            Something went wrong sending that — please try again, or email{" "}
+            <a href="mailto:rpetersen2008@gmail.com" className="underline">
+              rpetersen2008@gmail.com
+            </a>{" "}
+            directly.
+          </span>
+        </div>
+      )}
+
+      <Button
+        type="submit"
+        size="lg"
+        className="w-full sm:w-auto"
+        disabled={status === "sending"}
+      >
+        {status === "sending" ? "Sending..." : "Send Message"}
       </Button>
     </form>
   );

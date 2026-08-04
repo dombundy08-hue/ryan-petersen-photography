@@ -29,7 +29,7 @@ export function Navbar() {
           href="/"
           className="font-heading text-lg font-semibold tracking-tight text-foreground"
         >
-          RP <span className="text-primary">Photography</span>
+          Ryan<span className="text-primary">Shutter</span>
         </Link>
 
         <nav className="hidden items-center gap-8 md:flex">
@@ -60,7 +60,7 @@ export function Navbar() {
           </Button>
           <SheetContent side="right">
             <SheetHeader>
-              <SheetTitle>RP Photography</SheetTitle>
+              <SheetTitle>RyanShutter</SheetTitle>
             </SheetHeader>
             <nav className="flex flex-col gap-1 px-4">
               {NAV_LINKS.map((link) => (

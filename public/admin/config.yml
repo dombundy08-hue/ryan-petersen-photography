@@ -1,0 +1,52 @@
+backend:
+  name: git-gateway
+  branch: master
+
+media_folder: "public/images/uploads"
+public_folder: "/images/uploads"
+
+site_url: https://dombundy08-hue.github.io/ryan-petersen-photography
+display_url: https://dombundy08-hue.github.io/ryan-petersen-photography
+
+collections:
+  - name: "shoots"
+    label: "Photo Shoots"
+    label_singular: "Shoot"
+    description: "Each shoot is one session — add photos here and they show up in the matching portfolio category and the homepage."
+    folder: "content/shoots"
+    create: true
+    slug: "{{slug}}"
+    format: "json"
+    fields:
+      - { label: "Title", name: "title", widget: "string", hint: "e.g. \"Golden Hour Senior Session\"" }
+      - { label: "URL slug", name: "slug", widget: "string", hint: "No spaces — e.g. golden-hour-senior-session" }
+      - label: "Category"
+        name: "category"
+        widget: "select"
+        options:
+          - { label: "Senior", value: "senior" }
+          - { label: "Family", value: "family" }
+          - { label: "Nature", value: "nature" }
+      - { label: "Description", name: "description", widget: "text", hint: "One or two sentences shown on the portfolio page" }
+      - label: "Photos"
+        name: "photos"
+        widget: "list"
+        summary: "{{fields.alt}}"
+        fields:
+          - { label: "Photo", name: "src", widget: "image" }
+          - { label: "Description (for accessibility/SEO)", name: "alt", widget: "string" }
+
+  - name: "settings"
+    label: "Site Settings"
+    editor:
+      preview: false
+    files:
+      - name: "about"
+        label: "About Page"
+        file: "content/settings/about.json"
+        fields:
+          - label: "Ryan's Photo"
+            name: "photo"
+            widget: "image"
+            required: false
+            hint: "Shows on the About page. Leave empty to show a placeholder."

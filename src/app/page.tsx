@@ -4,7 +4,7 @@ import { ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Section } from "@/components/section";
 import { HeroCarousel } from "@/components/hero-carousel";
-import { photos, photosByCategory } from "@/lib/photos";
+import { allPhotos, shootsByCategory } from "@/lib/shoots";
 
 const SPECIALTIES = [
   {
@@ -12,21 +12,21 @@ const SPECIALTIES = [
     description:
       "A milestone worth doing right — portraits that actually look like you.",
     href: "/portfolio#senior",
-    photo: photosByCategory("senior")[0],
+    photo: shootsByCategory("senior")[0].photos[0],
   },
   {
     title: "Family Photos",
     description:
       "Relaxed sessions built around your family, not a stiff studio pose.",
     href: "/portfolio#family",
-    photo: photosByCategory("family")[0],
+    photo: shootsByCategory("family")[0].photos[0],
   },
   {
     title: "Nature Photos",
     description:
       "Landscapes and outdoor moments shot with an eye for natural light.",
     href: "/portfolio#nature",
-    photo: photosByCategory("nature")[0],
+    photo: shootsByCategory("nature")[0].photos[0],
   },
 ];
 
@@ -41,7 +41,7 @@ const PROCESS = [
 export default function Home() {
   return (
     <>
-      <HeroCarousel photos={photos} />
+      <HeroCarousel photos={allPhotos} />
 
       <Section className="border-t border-border">
         <div className="mx-auto max-w-2xl text-center">

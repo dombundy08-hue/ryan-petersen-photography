@@ -23,21 +23,21 @@ const SITE_URL =
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
   title: {
-    default: "RP Photography",
-    template: "%s | RP Photography",
+    default: "RyanShutter",
+    template: "%s | RyanShutter",
   },
   description:
     "Senior, family, and nature photography by Ryan Petersen. Honest, local, and focused on capturing moments you'll want to look back on.",
   openGraph: {
-    title: "RP Photography",
+    title: "RyanShutter",
     description:
       "Senior, family, and nature photography by Ryan Petersen. Honest, local, and focused on capturing moments you'll want to look back on.",
-    siteName: "RP Photography",
+    siteName: "RyanShutter",
     type: "website",
   },
   twitter: {
     card: "summary_large_image",
-    title: "RP Photography",
+    title: "RyanShutter",
     description:
       "Senior, family, and nature photography by Ryan Petersen. Honest, local, and focused on capturing moments you'll want to look back on.",
   },
