@@ -64,9 +64,9 @@ Status: ⏳ partial (see Open Items below)
 | Field | Value | Source |
 |---|---|---|
 | Logo | None — not mentioned | ⏳ |
-| Brand colors | Not fixed — neutral tones + one bright accent to catch the eye | 📄 |
-| Fonts | Not fixed — design system to propose | ⏳ |
-| Photography | No real photos available yet — launching with labeled placeholder gallery tiles (senior/family/nature categories), swappable later | 🗣 |
+| Brand colors | Revised 2026-08-04: dark, editorial — near-black warm background + gold accent + cream text (was a light neutral+orange palette originally). Researched against 3 reference sites the client provided. | 🗣 |
+| Fonts | Revised 2026-08-04: Fraunces (headings) + Inter (body) — was Archivo + Space Grotesk originally | 🗣 |
+| Photography | 6 AI-generated demo photos in place (2 each: senior/family/nature, via nano-banana-2, `src/lib/photos.ts`) so the hero carousel and portfolio grid can be previewed — these are stand-ins, not Ryan's real work. Real photos replace them the same way: drop the file in `public/images/<category>/` and add one entry to `src/lib/photos.ts`. | 🗣 |
 | Style guide doc | None | ➖ |
 
 ## G. Technical Preferences
@@ -93,11 +93,16 @@ Status: ⏳ partial (see Open Items below)
 - City/region unknown — site currently uses generic "local" language instead of a
   specific city for local SEO. Update once Ryan provides a location.
 - No social media links provided.
-- No real photography provided — gallery uses placeholder tiles until Ryan sends real
-  work samples.
-- No logo — design system will generate a simple text-based wordmark treatment.
+- Hero carousel and portfolio grid currently show 6 AI-generated demo photos, not
+  Ryan's real work — swap via `src/lib/photos.ts` once real photos are ready (see
+  Visual Assets above for the exact steps).
+- No logo — design system uses a text-based wordmark treatment ("RP Photography").
 
 ## Grow-it history
 - 2026-08-04: Initial build from CSV intake form + user's answers to the
   build-website pre-build questionnaire (stack, GitHub setup, placeholder photos,
   page scope).
+- 2026-08-04: Redesign — dark editorial palette, Fraunces/Inter fonts, full-bleed
+  hero photo carousel, 6 demo images generated via nano-banana-2, per client
+  direction referencing 3 photography sites (Sheila Broderick Photography, Little
+  White Photo Studio, Belle Amour Boudoir).
