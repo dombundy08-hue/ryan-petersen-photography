@@ -1,3 +1,14 @@
 {
-  "photo": "/images/owner/ryan-headshot.jpg"
+  "photo": "/images/owner/ryan-headshot.jpg",
+  "morePhotos": [
+    "/images/owner/ryan-2.jpg",
+    "/images/owner/ryan-3.webp",
+    "/images/owner/ryan-4.jpg",
+    "/images/owner/ryan-5.jpg"
+  ],
+  "personalPhotos": [
+    { "src": "/images/personal/wheel-detail.jpg", "alt": "Close-up of a tire on Ryan's Suzuki Samurai" },
+    { "src": "/images/personal/samurai-badge.jpg", "alt": "Suzuki Samurai badge detail" },
+    { "src": "/images/personal/samurai-sunset.jpg", "alt": "Ryan's Suzuki Samurai on a dirt road at sunset" }
+  ]
 }

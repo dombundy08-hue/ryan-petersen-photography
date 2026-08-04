@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Image from "next/image";
 import { Mountain, Car, Trophy, Gamepad2, User } from "lucide-react";
 import { Section } from "@/components/section";
-import { aboutPhoto } from "@/lib/settings";
+import { aboutPhoto, aboutMorePhotos, aboutPersonalPhotos } from "@/lib/settings";
 
 export const metadata: Metadata = {
   title: "About",
@@ -90,6 +90,27 @@ export default function AboutPage() {
           </div>
         </div>
 
+        {aboutMorePhotos.length > 0 && (
+          <div className="mx-auto mt-10 max-w-2xl">
+            <div className="grid grid-cols-4 gap-3">
+              {aboutMorePhotos.map((src) => (
+                <div
+                  key={src}
+                  className="relative aspect-square overflow-hidden rounded-lg border border-border"
+                >
+                  <Image
+                    src={src}
+                    alt="Ryan Petersen"
+                    fill
+                    sizes="(max-width: 640px) 25vw, 140px"
+                    className="object-cover"
+                  />
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
         <div className="mx-auto mt-14 max-w-2xl">
           <h2 className="text-center font-heading text-lg font-semibold text-foreground">
             When I&apos;m not shooting
@@ -107,6 +128,24 @@ export default function AboutPage() {
               </div>
             ))}
           </div>
+          {aboutPersonalPhotos.length > 0 && (
+            <div className="mt-6 grid grid-cols-3 gap-4">
+              {aboutPersonalPhotos.map((photo) => (
+                <div
+                  key={photo.src}
+                  className="relative aspect-[4/5] overflow-hidden rounded-xl border border-border"
+                >
+                  <Image
+                    src={photo.src}
+                    alt={photo.alt}
+                    fill
+                    sizes="(max-width: 640px) 33vw, 220px"
+                    className="object-cover"
+                  />
+                </div>
+              ))}
+            </div>
+          )}
         </div>
 
         <div className="mx-auto mt-14 max-w-2xl rounded-xl border border-border bg-secondary/50 p-8 text-center">

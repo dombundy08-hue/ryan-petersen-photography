@@ -80,3 +80,34 @@ export const allPhotos: (Photo & { category: PhotoCategory })[] = shoots
     shoot.photos.map((photo) => ({ ...photo, category: shoot.category }))
   )
   .filter((photo) => photo.heroEligible !== false);
+
+/**
+ * Every photo across every shoot, unfiltered — for decorative uses (e.g. a
+ * background marquee) where a profile shot or action shot is perfectly
+ * fine, unlike the hero carousel above.
+ */
+export const everyPhoto: (Photo & { category: PhotoCategory })[] =
+  shoots.flatMap((shoot) =>
+    shoot.photos.map((photo) => ({ ...photo, category: shoot.category }))
+  );
+
+/**
+ * A fixed pseudo-random sample of `count` photos from every shoot, picked
+ * with a seeded shuffle so the selection is stable across a given build
+ * (Math.random() would still work fine here since this is plain app code,
+ * not a Workflow script, but a seed keeps the sample from jittering between
+ * dev-server hot reloads).
+ */
+export function samplePhotos(count: number, seed = 42): Photo[] {
+  const pool = [...everyPhoto];
+  let s = seed;
+  const nextRandom = () => {
+    s = (s * 1103515245 + 12345) & 0x7fffffff;
+    return s / 0x7fffffff;
+  };
+  for (let i = pool.length - 1; i > 0; i--) {
+    const j = Math.floor(nextRandom() * (i + 1));
+    [pool[i], pool[j]] = [pool[j], pool[i]];
+  }
+  return pool.slice(0, count);
+}
