@@ -1,6 +1,6 @@
 ﻿import Image from "next/image";
 import Link from "next/link";
-import { ArrowRight, Camera } from "lucide-react";
+import { ArrowRight, Camera, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Section } from "@/components/section";
 import { HeroCarousel } from "@/components/hero-carousel";
@@ -54,7 +54,7 @@ export default function Home() {
             What I shoot
           </h2>
         </div>
-        <div className="mt-12 grid gap-6 sm:grid-cols-3">
+        <div className="mt-12 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
           {SPECIALTIES.map(({ title, description, href, category }) => {
             const photo = shootsByCategory(category)[0]?.photos[0];
             return (
@@ -102,6 +102,39 @@ export default function Home() {
               </Link>
             );
           })}
+
+          <Link
+            href="/contact"
+            className="group relative flex aspect-[3/4] flex-col justify-end overflow-hidden rounded-xl border border-primary/40 bg-secondary"
+          >
+            <div className="absolute inset-0 flex items-center justify-center">
+              <Sparkles
+                className="size-10 text-primary/40"
+                strokeWidth={1.5}
+                aria-hidden="true"
+              />
+            </div>
+            <div
+              className="absolute inset-0"
+              style={{
+                background:
+                  "linear-gradient(180deg, rgba(16,13,10,0) 40%, rgba(16,13,10,0.9) 100%)",
+              }}
+            />
+            <div className="relative p-6">
+              <h3 className="font-heading text-xl font-medium text-foreground">
+                Requested
+              </h3>
+              <p className="mt-1 text-sm text-foreground/75">
+                Something else in mind? Events, pets, sports, headshots —
+                if you can picture it, I&apos;ll shoot it.
+              </p>
+              <span className="mt-3 inline-flex items-center gap-1 text-sm font-medium text-primary">
+                Tell me about it
+                <ArrowRight className="size-4 transition-transform group-hover:translate-x-0.5" />
+              </span>
+            </div>
+          </Link>
         </div>
       </Section>
 
