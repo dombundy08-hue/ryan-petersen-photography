@@ -1,8 +1,10 @@
 ﻿import type { Metadata } from "next";
+import Image from "next/image";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Section } from "@/components/section";
 import { PlaceholderPhoto } from "@/components/placeholder-photo";
+import { photosByCategory } from "@/lib/photos";
 
 export const metadata: Metadata = {
   title: "Portfolio",
@@ -42,39 +44,61 @@ export default function PortfolioPage() {
     <>
       <Section className="pt-16 pb-12 sm:pt-20">
         <div className="mx-auto max-w-2xl text-center">
-          <h1 className="text-4xl font-semibold tracking-tight text-foreground sm:text-5xl">
+          <h1 className="text-4xl font-medium italic tracking-tight text-foreground sm:text-5xl">
             Portfolio
           </h1>
           <p className="mt-4 text-muted-foreground">
-            This gallery is brand new, so real photos are on their way — for
-            now here&apos;s a look at how sessions are organized.
+            A few sample shots below to show how the gallery works — Ryan&apos;s
+            real sessions will fill this out as they&apos;re delivered.
           </p>
         </div>
       </Section>
 
-      {CATEGORIES.map(({ id, category, title, description, count }) => (
-        <Section key={id} id={id} className="scroll-mt-16 border-t border-border">
-          <div className="mb-8 flex flex-col gap-1 sm:flex-row sm:items-end sm:justify-between">
-            <div>
-              <h2 className="text-2xl font-semibold tracking-tight text-foreground">
-                {title}
-              </h2>
-              <p className="mt-1 text-sm text-muted-foreground">
-                {description}
-              </p>
+      {CATEGORIES.map(({ id, category, title, description, count }) => {
+        const realPhotos = photosByCategory(category);
+        const placeholderCount = Math.max(count - realPhotos.length, 0);
+        return (
+          <Section
+            key={id}
+            id={id}
+            className="scroll-mt-16 border-t border-border"
+          >
+            <div className="mb-8 flex flex-col gap-1 sm:flex-row sm:items-end sm:justify-between">
+              <div>
+                <h2 className="text-2xl font-medium italic tracking-tight text-foreground">
+                  {title}
+                </h2>
+                <p className="mt-1 text-sm text-muted-foreground">
+                  {description}
+                </p>
+              </div>
             </div>
-          </div>
-          <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-6">
-            {Array.from({ length: count }).map((_, i) => (
-              <PlaceholderPhoto
-                key={i}
-                category={category}
-                label={`${title.replace(" Photos", "")} ${i + 1}`}
-              />
-            ))}
-          </div>
-        </Section>
-      ))}
+            <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-6">
+              {realPhotos.map((photo) => (
+                <div
+                  key={photo.src}
+                  className="relative aspect-[4/5] overflow-hidden rounded-xl border border-border"
+                >
+                  <Image
+                    src={photo.src}
+                    alt={photo.alt}
+                    fill
+                    sizes="(max-width: 640px) 50vw, (max-width: 768px) 33vw, 16vw"
+                    className="object-cover transition-transform duration-500 hover:scale-105"
+                  />
+                </div>
+              ))}
+              {Array.from({ length: placeholderCount }).map((_, i) => (
+                <PlaceholderPhoto
+                  key={i}
+                  category={category}
+                  label={`${title.replace(" Photos", "")} ${realPhotos.length + i + 1}`}
+                />
+              ))}
+            </div>
+          </Section>
+        );
+      })}
 
       <Section className="border-t border-border">
         <div className="mx-auto max-w-xl text-center">

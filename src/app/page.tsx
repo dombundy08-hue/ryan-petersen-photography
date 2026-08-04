@@ -1,29 +1,32 @@
-﻿import Link from "next/link";
-import { Aperture, Users, Trees, ArrowRight, Sparkles } from "lucide-react";
+﻿import Image from "next/image";
+import Link from "next/link";
+import { ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Section } from "@/components/section";
+import { HeroCarousel } from "@/components/hero-carousel";
+import { photos, photosByCategory } from "@/lib/photos";
 
 const SPECIALTIES = [
   {
-    icon: Aperture,
     title: "Senior Photos",
     description:
       "A milestone worth doing right — portraits that actually look like you.",
     href: "/portfolio#senior",
+    photo: photosByCategory("senior")[0],
   },
   {
-    icon: Users,
     title: "Family Photos",
     description:
       "Relaxed sessions built around your family, not a stiff studio pose.",
     href: "/portfolio#family",
+    photo: photosByCategory("family")[0],
   },
   {
-    icon: Trees,
     title: "Nature Photos",
     description:
       "Landscapes and outdoor moments shot with an eye for natural light.",
     href: "/portfolio#nature",
+    photo: photosByCategory("nature")[0],
   },
 ];
 
@@ -38,58 +41,47 @@ const PROCESS = [
 export default function Home() {
   return (
     <>
-      <Section className="pt-20 pb-16 sm:pt-28 sm:pb-20">
-        <div className="mx-auto max-w-3xl text-center">
-          <span className="inline-flex items-center gap-1.5 rounded-full border border-border bg-secondary px-3 py-1 text-xs font-medium text-secondary-foreground">
-            <Sparkles className="size-3.5 text-primary" aria-hidden="true" />
-            Now booking sessions
-          </span>
-          <h1 className="mt-6 text-4xl font-semibold tracking-tight text-foreground sm:text-5xl md:text-6xl">
-            Creating memorable moments, one photo at a time.
-          </h1>
-          <p className="mt-6 text-lg text-muted-foreground sm:text-xl">
-            Senior, family, and nature photography — honest, local, and focused
-            on making you feel comfortable in front of the camera.
-          </p>
-          <div className="mt-10 flex flex-col items-center justify-center gap-3 sm:flex-row">
-            <Button size="lg" nativeButton={false} render={<Link href="/portfolio" />}>
-              View My Work
-            </Button>
-            <Button
-              size="lg"
-              variant="outline"
-              nativeButton={false} render={<Link href="/contact" />}
-            >
-              Book a Session
-            </Button>
-          </div>
-        </div>
-      </Section>
+      <HeroCarousel photos={photos} />
 
       <Section className="border-t border-border">
         <div className="mx-auto max-w-2xl text-center">
-          <h2 className="text-3xl font-semibold tracking-tight text-foreground">
+          <h2 className="text-3xl font-medium italic tracking-tight text-foreground">
             What I shoot
           </h2>
         </div>
         <div className="mt-12 grid gap-6 sm:grid-cols-3">
-          {SPECIALTIES.map(({ icon: Icon, title, description, href }) => (
+          {SPECIALTIES.map(({ title, description, href, photo }) => (
             <Link
               key={title}
               href={href}
-              className="group flex flex-col gap-4 rounded-xl border border-border bg-card p-6 transition-colors hover:border-primary/40"
+              className="group relative flex aspect-[3/4] flex-col justify-end overflow-hidden rounded-xl border border-border"
             >
-              <div className="flex size-11 items-center justify-center rounded-lg bg-primary/10 text-primary">
-                <Icon className="size-5" aria-hidden="true" />
+              <Image
+                src={photo.src}
+                alt={photo.alt}
+                fill
+                sizes="(max-width: 640px) 100vw, 33vw"
+                className="object-cover transition-transform duration-500 group-hover:scale-105"
+              />
+              <div
+                className="absolute inset-0"
+                style={{
+                  background:
+                    "linear-gradient(180deg, rgba(16,13,10,0) 40%, rgba(16,13,10,0.9) 100%)",
+                }}
+              />
+              <div className="relative p-6">
+                <h3 className="font-heading text-xl font-medium text-foreground">
+                  {title}
+                </h3>
+                <p className="mt-1 text-sm text-foreground/75">
+                  {description}
+                </p>
+                <span className="mt-3 inline-flex items-center gap-1 text-sm font-medium text-primary">
+                  See the gallery
+                  <ArrowRight className="size-4 transition-transform group-hover:translate-x-0.5" />
+                </span>
               </div>
-              <h3 className="font-heading text-lg font-semibold text-foreground">
-                {title}
-              </h3>
-              <p className="text-sm text-muted-foreground">{description}</p>
-              <span className="mt-auto inline-flex items-center gap-1 text-sm font-medium text-primary">
-                See the gallery
-                <ArrowRight className="size-4 transition-transform group-hover:translate-x-0.5" />
-              </span>
             </Link>
           ))}
         </div>

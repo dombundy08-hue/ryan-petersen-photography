@@ -13,7 +13,7 @@ export default function ContactPage() {
   return (
     <Section className="pt-16 pb-20 sm:pt-20">
       <div className="mx-auto max-w-2xl text-center">
-        <h1 className="text-4xl font-semibold tracking-tight text-foreground sm:text-5xl">
+        <h1 className="text-4xl font-medium italic tracking-tight text-foreground sm:text-5xl">
           Let&apos;s Talk
         </h1>
         <p className="mt-4 text-muted-foreground">

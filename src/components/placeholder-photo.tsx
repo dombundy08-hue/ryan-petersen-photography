@@ -2,9 +2,9 @@ import { Camera } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const CATEGORY_STYLES = {
-  senior: "from-[#C2410C]/25 via-[#EA580C]/10 to-[#FAFAF9]",
-  family: "from-[#78716C]/25 via-[#A8A29E]/10 to-[#FAFAF9]",
-  nature: "from-[#166534]/20 via-[#4D7C0F]/10 to-[#FAFAF9]",
+  senior: "from-[#D3A054]/25 via-[#8A6A3A]/15 to-[#1B1712]",
+  family: "from-[#B7AA98]/20 via-[#5C4F3E]/15 to-[#1B1712]",
+  nature: "from-[#5C7A4E]/25 via-[#3A4D30]/15 to-[#1B1712]",
 } as const;
 
 type Category = keyof typeof CATEGORY_STYLES;

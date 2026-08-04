@@ -20,7 +20,7 @@ export default function AboutPage() {
     <>
       <Section className="pt-16 pb-12 sm:pt-20">
         <div className="mx-auto max-w-2xl text-center">
-          <h1 className="text-4xl font-semibold tracking-tight text-foreground sm:text-5xl">
+          <h1 className="text-4xl font-medium italic tracking-tight text-foreground sm:text-5xl">
             About Me
           </h1>
         </div>

@@ -12,6 +12,8 @@ const eslintConfig = defineConfig([
     "out/**",
     "build/**",
     "next-env.d.ts",
+    // docs/ holds the committed GitHub Pages build output, not source.
+    "docs/**",
   ]),
 ]);
 

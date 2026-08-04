@@ -16,32 +16,42 @@
 
 ### Color Palette
 
-> Overridden from the auto-generated defaults to match the client's explicit
-> brief: neutral tones with one bright accent color to catch the eye. Warm
-> stone-gray neutrals (fits senior/family/nature photography) + a burnt-orange
-> accent for CTAs, chosen for AA contrast against white button text.
+> Revised 2026-08-04 per client request: darker, more editorial — photos
+> should be the star. Researched against 3 reference photography sites
+> (Sheila Broderick Photography, Little White Photo Studio, Belle Amour
+> Boudoir) — all three share a dark/black canvas, a warm accent against it,
+> and a distinctive serif headline paired with a clean readable sans. Near-
+> black warm background (not pure `#000`) + warm gold accent (not the prior
+> burnt-orange, which read too "construction" against black) + warm cream
+> text. Contrast-checked: all pairs exceed 7:1 (AAA).
 
 | Role | Hex | CSS Variable |
 |------|-----|--------------|
-| Primary | `#292524` | `--color-primary` |
-| On Primary | `#FFFFFF` | `--color-on-primary` |
-| Secondary | `#78716C` | `--color-secondary` |
-| Accent/CTA | `#C2410C` | `--color-accent` |
-| Background | `#FAFAF9` | `--color-background` |
-| Foreground | `#1C1917` | `--color-foreground` |
-| Muted | `#F5F5F4` | `--color-muted` |
-| Border | `#E7E5E4` | `--color-border` |
-| Destructive | `#DC2626` | `--color-destructive` |
-| Ring | `#C2410C` | `--color-ring` |
+| Primary/Accent (CTA) | `#D3A054` | `--color-primary` |
+| On Primary | `#171310` | `--color-on-primary` |
+| Secondary (dark surface) | `#2A241D` | `--color-secondary` |
+| Background | `#100D0A` | `--color-background` |
+| Foreground | `#F3EDE3` | `--color-foreground` |
+| Card | `#1B1712` | `--color-card` |
+| Muted | `#221D18` | `--color-muted` |
+| Muted Foreground | `#B7AA98` | `--color-muted-foreground` |
+| Border | `#332C23` | `--color-border` |
+| Destructive | `#E5484D` | `--color-destructive` |
+| Ring | `#D3A054` | `--color-ring` |
 
-**Color Notes:** Warm stone neutrals + burnt-orange accent
+**Color Notes:** Near-black warm canvas + warm gold accent + cream text —
+photos carry the color, the UI stays quiet.
 
 ### Typography
 
-- **Heading Font:** Archivo
-- **Body Font:** Space Grotesk
-- **Mood:** minimal, portfolio, designer, creative, clean, artistic
-- **Google Fonts:** [Archivo + Space Grotesk](https://fonts.googleapis.com/css2?family=Archivo:wght@300;400;500;600;700&family=Space+Grotesk:wght@300;400;500;600;700&display=swap)
+- **Heading Font:** Fraunces (distinctive editorial serif — matches the
+  reference sites' Cormorant Garamond / kepler-std display serifs, unique
+  without sacrificing legibility at large sizes)
+- **Body Font:** Inter (one of the most legible UI sans fonts available —
+  satisfies "unique AND easy to read": the serif carries the personality,
+  Inter keeps body copy effortless)
+- **Mood:** editorial, timeless, warm, intentional, photography-first
+- **Google Fonts:** [Fraunces + Inter](https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=Inter:wght@400;500;600;700&display=swap)
 
 **CSS Import:**
 ```css
@@ -78,8 +88,8 @@
 ```css
 /* Primary Button */
 .btn-primary {
-  background: #C2410C;
-  color: white;
+  background: #D3A054;
+  color: #171310;
   padding: 12px 24px;
   border-radius: 8px;
   font-weight: 600;
@@ -95,8 +105,8 @@
 /* Secondary Button */
 .btn-secondary {
   background: transparent;
-  color: #292524;
-  border: 2px solid #292524;
+  color: #F3EDE3;
+  border: 2px solid #F3EDE3;
   padding: 12px 24px;
   border-radius: 8px;
   font-weight: 600;
@@ -109,7 +119,7 @@
 
 ```css
 .card {
-  background: #FFFFFF;
+  background: #1B1712;
   border-radius: 12px;
   padding: 24px;
   box-shadow: var(--shadow-md);
@@ -128,7 +138,7 @@
 ```css
 .input {
   padding: 12px 16px;
-  border: 1px solid #E7E5E4;
+  border: 1px solid #332C23;
   border-radius: 8px;
   font-size: 16px;
   transition: border-color 200ms ease;

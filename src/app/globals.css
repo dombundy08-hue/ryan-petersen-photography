@@ -49,73 +49,76 @@
 }
 
 :root {
-  /* Ryan Petersen Photography design system — see design-system/ryan-petersen-photography/MASTER.md */
-  --background: #FAFAF9;
-  --foreground: #1C1917;
-  --card: #FFFFFF;
-  --card-foreground: #1C1917;
-  --popover: #FFFFFF;
-  --popover-foreground: #1C1917;
-  --primary: #C2410C;
-  --primary-foreground: #FFFFFF;
-  --secondary: #F5F5F4;
-  --secondary-foreground: #292524;
-  --muted: #F5F5F4;
-  --muted-foreground: #78716C;
-  --accent: #F5F5F4;
-  --accent-foreground: #292524;
-  --destructive: #DC2626;
-  --border: #E7E5E4;
-  --input: #E7E5E4;
-  --ring: #C2410C;
-  --chart-1: #C2410C;
-  --chart-2: #78716C;
-  --chart-3: #A8A29E;
-  --chart-4: #57534E;
-  --chart-5: #292524;
-  --radius: 0.625rem;
-  --sidebar: #FAFAF9;
-  --sidebar-foreground: #1C1917;
-  --sidebar-primary: #C2410C;
-  --sidebar-primary-foreground: #FFFFFF;
-  --sidebar-accent: #F5F5F4;
-  --sidebar-accent-foreground: #292524;
-  --sidebar-border: #E7E5E4;
-  --sidebar-ring: #C2410C;
+  /* Ryan Petersen Photography design system (dark, editorial) — see
+     design-system/ryan-petersen-photography/MASTER.md. Dark is the
+     standing default here, not a toggleable mode — photos carry the
+     color, the UI stays quiet and out of the way. */
+  --background: #100D0A;
+  --foreground: #F3EDE3;
+  --card: #1B1712;
+  --card-foreground: #F3EDE3;
+  --popover: #1B1712;
+  --popover-foreground: #F3EDE3;
+  --primary: #D3A054;
+  --primary-foreground: #171310;
+  --secondary: #2A241D;
+  --secondary-foreground: #F3EDE3;
+  --muted: #221D18;
+  --muted-foreground: #B7AA98;
+  --accent: #2A241D;
+  --accent-foreground: #F3EDE3;
+  --destructive: #E5484D;
+  --border: #332C23;
+  --input: #332C23;
+  --ring: #D3A054;
+  --chart-1: #D3A054;
+  --chart-2: #B7AA98;
+  --chart-3: #8A7A63;
+  --chart-4: #5C4F3E;
+  --chart-5: #F3EDE3;
+  --radius: 0.5rem;
+  --sidebar: #100D0A;
+  --sidebar-foreground: #F3EDE3;
+  --sidebar-primary: #D3A054;
+  --sidebar-primary-foreground: #171310;
+  --sidebar-accent: #2A241D;
+  --sidebar-accent-foreground: #F3EDE3;
+  --sidebar-border: #332C23;
+  --sidebar-ring: #D3A054;
 }
 
 .dark {
-  --background: #1C1917;
-  --foreground: #FAFAF9;
-  --card: #292524;
-  --card-foreground: #FAFAF9;
-  --popover: #292524;
-  --popover-foreground: #FAFAF9;
-  --primary: #C2410C;
-  --primary-foreground: #FFFFFF;
-  --secondary: #292524;
-  --secondary-foreground: #FAFAF9;
-  --muted: #292524;
-  --muted-foreground: #A8A29E;
-  --accent: #292524;
-  --accent-foreground: #FAFAF9;
-  --destructive: #EF4444;
-  --border: #44403C;
-  --input: #44403C;
-  --ring: #C2410C;
-  --chart-1: #C2410C;
-  --chart-2: #A8A29E;
-  --chart-3: #78716C;
-  --chart-4: #D6D3D1;
-  --chart-5: #E7E5E4;
-  --sidebar: #292524;
-  --sidebar-foreground: #FAFAF9;
-  --sidebar-primary: #C2410C;
-  --sidebar-primary-foreground: #FFFFFF;
-  --sidebar-accent: #1C1917;
-  --sidebar-accent-foreground: #FAFAF9;
-  --sidebar-border: #44403C;
-  --sidebar-ring: #C2410C;
+  --background: #100D0A;
+  --foreground: #F3EDE3;
+  --card: #1B1712;
+  --card-foreground: #F3EDE3;
+  --popover: #1B1712;
+  --popover-foreground: #F3EDE3;
+  --primary: #D3A054;
+  --primary-foreground: #171310;
+  --secondary: #2A241D;
+  --secondary-foreground: #F3EDE3;
+  --muted: #221D18;
+  --muted-foreground: #B7AA98;
+  --accent: #2A241D;
+  --accent-foreground: #F3EDE3;
+  --destructive: #E5484D;
+  --border: #332C23;
+  --input: #332C23;
+  --ring: #D3A054;
+  --chart-1: #D3A054;
+  --chart-2: #B7AA98;
+  --chart-3: #8A7A63;
+  --chart-4: #5C4F3E;
+  --chart-5: #F3EDE3;
+  --sidebar: #100D0A;
+  --sidebar-foreground: #F3EDE3;
+  --sidebar-primary: #D3A054;
+  --sidebar-primary-foreground: #171310;
+  --sidebar-accent: #2A241D;
+  --sidebar-accent-foreground: #F3EDE3;
+  --sidebar-border: #332C23;
+  --sidebar-ring: #D3A054;
 }
 
 @layer base {
@@ -133,5 +136,14 @@
   h3,
   h4 {
     @apply font-heading;
+  }
+}
+
+@keyframes kenburns {
+  from {
+    transform: scale(1);
+  }
+  to {
+    transform: scale(1.08);
   }
 }
