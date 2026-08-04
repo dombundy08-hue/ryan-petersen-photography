@@ -1,3 +1,5 @@
+import { withBasePath } from "@/lib/base-path";
+
 export type PhotoCategory = "senior" | "family" | "nature";
 
 export interface Photo {
@@ -13,8 +15,11 @@ export interface Photo {
  * To add a real photo later: drop the file in public/images/<category>/
  * and add one entry below (path, category, a short descriptive alt). Every
  * page that shows photos (home hero, portfolio) reads from this one list.
+ * Paths here are root-relative to public/ — withBasePath() below handles
+ * the GitHub Pages /ryan-petersen-photography/ prefix automatically, don't
+ * add it by hand.
  */
-export const photos: Photo[] = [
+const PHOTO_SOURCES: Photo[] = [
   {
     src: "/images/senior/senior-1.jpg",
     alt: "Senior portrait in warm golden-hour light",
@@ -46,6 +51,11 @@ export const photos: Photo[] = [
     category: "nature",
   },
 ];
+
+export const photos: Photo[] = PHOTO_SOURCES.map((photo) => ({
+  ...photo,
+  src: withBasePath(photo.src),
+}));
 
 export function photosByCategory(category: PhotoCategory): Photo[] {
   return photos.filter((photo) => photo.category === category);

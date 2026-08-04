@@ -1,4 +1,4 @@
 User-Agent: *
 Allow: /
 
-Sitemap: https://ryanpetersenphotography.com/sitemap.xml
+Sitemap: https://dombundy08-hue.github.io/ryan-petersen-photography/sitemap.xml
