@@ -5,8 +5,18 @@ import Image from "next/image";
 import MarqueeAlongSvgPath from "@/components/ui/marquee-along-svg-path";
 import type { Photo } from "@/lib/shoots";
 
+// A wide wave with an actual loop-the-loop dropped into the middle —
+// two 90-radius arcs from (700,420) back to (520,420) and back again
+// trace a full circle, so the path visibly loops before continuing.
 const PATH =
-  "M -100 380 C 150 100, 350 620, 600 380 S 1050 100, 1300 380 S 1750 660, 2000 380";
+  "M -100 450 " +
+  "C 150 250, 350 650, 600 450 " +
+  "C 650 420, 680 420, 700 420 " +
+  "A 90 90 0 1 1 520 420 " +
+  "A 90 90 0 1 1 700 420 " +
+  "C 750 460, 850 500, 900 450 " +
+  "C 1100 250, 1300 650, 1550 450 " +
+  "C 1700 380, 1850 420, 2000 450";
 
 export function ContactPhotoMarquee({ photos }: { photos: Photo[] }) {
   const [reducedMotion, setReducedMotion] = useState(
@@ -26,14 +36,14 @@ export function ContactPhotoMarquee({ photos }: { photos: Photo[] }) {
 
   return (
     <div
-      className="pointer-events-none absolute inset-0 overflow-hidden opacity-25"
+      className="pointer-events-none absolute inset-0 overflow-hidden opacity-50"
       aria-hidden="true"
     >
       <MarqueeAlongSvgPath
         path={PATH}
-        viewBox="0 0 1900 760"
+        viewBox="0 0 1900 900"
         baseVelocity={reducedMotion ? 0 : 4}
-        repeat={2}
+        repeat={1}
         responsive
         className="h-full w-full scale-110"
       >
@@ -47,7 +57,7 @@ export function ContactPhotoMarquee({ photos }: { photos: Photo[] }) {
               alt=""
               width={160}
               height={200}
-              className="h-full w-full object-cover grayscale"
+              className="h-full w-full object-cover brightness-110 saturate-110"
             />
           </div>
         ))}
