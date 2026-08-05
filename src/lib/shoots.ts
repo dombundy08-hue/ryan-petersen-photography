@@ -17,6 +17,14 @@ export interface Photo {
    * face isn't clearly visible/forward-facing.
    */
   heroEligible?: boolean;
+  /**
+   * CSS object-position value (e.g. "50% 25%") for this photo when shown
+   * in a crop that doesn't match its native aspect ratio — e.g. the
+   * portfolio's aspect-[21/9] featured tile. Defaults to center ("50%
+   * 50%") when omitted. Only set this where the default crop genuinely
+   * cuts off the subject; most photos don't need it.
+   */
+  objectPosition?: string;
 }
 
 export interface Shoot {

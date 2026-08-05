@@ -83,7 +83,7 @@ export function PhotoCarousel({
               fill
               priority={priorityFirst && i === 0}
               sizes={sizes}
-              className="object-cover"
+              className="object-cover object-[50%_25%]"
             />
           </div>
         );

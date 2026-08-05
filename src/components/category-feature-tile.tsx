@@ -92,6 +92,7 @@ export function CategoryFeatureTile({
               alt={photo.alt}
               fill
               sizes="100vw"
+              style={{ objectPosition: photo.objectPosition ?? "50% 50%" }}
               className="object-cover transition-transform duration-500 group-hover:scale-105"
             />
           </div>

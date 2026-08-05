@@ -6,11 +6,13 @@
   "photos": [
     {
       "src": "/images/family/dsc02141.jpg",
-      "alt": "Young man with his three younger siblings by a lake at sunset"
+      "alt": "Young man with his three younger siblings by a lake at sunset",
+      "objectPosition": "50% 65%"
     },
     {
       "src": "/images/family/dsc02157.jpg",
-      "alt": "Young man and his mother posing together by a lake at sunset"
+      "alt": "Young man and his mother posing together by a lake at sunset",
+      "objectPosition": "50% 25%"
     }
   ]
 }
