@@ -3,11 +3,15 @@ import type { Photo } from "@/lib/shoots";
 
 // Simple straight horizontal rows of photos drifting across the
 // background at different speeds — no rotation, no path, no loop shape.
+// Spread evenly across the full page height, not just the top portion.
 const ROW_CONFIG = [
-  { duration: 46, reverse: false, rotate: 0, top: "4%" },
-  { duration: 60, reverse: true, rotate: 0, top: "28%" },
-  { duration: 40, reverse: false, rotate: 0, top: "52%" },
-  { duration: 52, reverse: true, rotate: 0, top: "76%" },
+  { duration: 46, reverse: false, rotate: 0, top: "0%" },
+  { duration: 60, reverse: true, rotate: 0, top: "14%" },
+  { duration: 40, reverse: false, rotate: 0, top: "28%" },
+  { duration: 52, reverse: true, rotate: 0, top: "42%" },
+  { duration: 44, reverse: false, rotate: 0, top: "56%" },
+  { duration: 58, reverse: true, rotate: 0, top: "70%" },
+  { duration: 42, reverse: false, rotate: 0, top: "84%" },
 ];
 
 function chunk<T>(items: T[], parts: number): T[][] {
