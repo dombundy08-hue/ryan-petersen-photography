@@ -56,8 +56,15 @@ Stack: Next.js (App Router) + Tailwind v4 + shadcn/ui, static export to GitHub P
 
 ### Contact (`src/app/contact/page.tsx`)
 - Contact form: name, email, phone (optional), session type (select: Senior/Family/
-  Nature/Other), message. Client-side only for now (no backend wired — note this at
-  handoff; a real submit endpoint is a follow-up, not invented here).
+  Nature/Other), message. Submits via Netlify Forms (`data-netlify="true"`, AJAX
+  POST to `/`) — no API key or third-party account, but requires the site to
+  actually be deployed on Netlify with a notification email configured before
+  submissions reach an inbox (see intake.md Open Items).
+- Background: a photo marquee (4 rows, spread across the full page height) that
+  shuffles client-side from the entire site-wide photo library on every visit.
+- Bold gold visual treatment (solid gold intro panel, gold circle-badge info
+  cards, gold-bordered glow on the form card) — intentionally more saturated
+  than the rest of the site's quiet near-black/gold-accent balance.
 - Direct contact info: rpetersen2008@gmail.com, (720) 600-8854.
 - Short note reflecting his journey answer: "I respond personally to every inquiry."
 

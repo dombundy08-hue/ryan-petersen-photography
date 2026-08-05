@@ -94,9 +94,12 @@ Status: ⏳ partial (see Open Items below)
   specific city for local SEO. Update once Ryan provides a location.
 - No social media links provided.
 - No logo — design system uses a text-based wordmark treatment ("RyanShutter").
-- Contact form (`src/components/contact-form.tsx`) posts to Web3Forms but
-  `NEXT_PUBLIC_WEB3FORMS_KEY` was never obtained — user needs a free key from
-  web3forms.com before submissions actually deliver email.
+- Contact form (`src/components/contact-form.tsx`) now posts via Netlify Forms
+  (no API key needed) instead of Web3Forms. But per the hosting row below, no
+  host is connected yet, so submissions won't be received until the site is
+  actually deployed on Netlify — and once it is, the user still needs to add
+  an email notification in Site settings → Forms → Form notifications so a
+  submission actually reaches an inbox.
 - Admin panel (Decap CMS, `public/admin/`) is scaffolded but not functional yet —
   needs Netlify account setup (connect repo, enable Identity + Git Gateway, invite
   Ryan's email). See `references/content-management.md` in the build-website skill.
@@ -136,4 +139,14 @@ Status: ⏳ partial (see Open Items below)
   anchoring crops toward faces (a new per-photo `objectPosition` field was needed
   for the Family tile, whose two photos require different crop anchors in the wide
   21:9 box). Shared a `PhotoCarousel` component between Home/About/Portfolio instead
-  of duplicating the crossfade logic a third time.
+  of duplicating the crossfade logic a third time. Continued the same pass onto
+  Contact: switched the form from Web3Forms (dead — key never obtained) to
+  Netlify Forms (no key/account needed, just needs the site actually deployed
+  on Netlify, see Open Items); reworked the background marquee from 6 tightly
+  spaced rows to 4 rows spread across the full page height with much more
+  breathing room, and it now shuffles client-side from the entire site-wide
+  photo library (`everyPhoto`) for a fresh random arrangement on every visit
+  instead of one fixed 63-photo sample; pushed a bold gold treatment (solid
+  gold intro panel, gold circle-badge info cards, gold-bordered glow on the
+  form card) so Contact reads as bold and distinct while staying inside the
+  existing design tokens.
