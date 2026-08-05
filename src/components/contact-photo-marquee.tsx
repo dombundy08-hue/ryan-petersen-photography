@@ -20,6 +20,13 @@ function chunk<T>(items: T[], parts: number): T[][] {
   return rows;
 }
 
+// How many times a row's unique photo set repeats before the loop-closing
+// duplicate — needs to be wide enough that one copy alone spans past the
+// widest expected viewport, or the track runs out of photos before it
+// reaches the right edge and the animation just loops within a narrow
+// band on the left.
+const REPEAT = 4;
+
 export function ContactPhotoMarquee({ photos }: { photos: Photo[] }) {
   if (photos.length === 0) return null;
 
@@ -33,12 +40,13 @@ export function ContactPhotoMarquee({ photos }: { photos: Photo[] }) {
       {rows.map((rowPhotos, i) => {
         if (rowPhotos.length === 0) return null;
         const config = ROW_CONFIG[i];
-        const track = [...rowPhotos, ...rowPhotos];
+        const half = Array.from({ length: REPEAT }, () => rowPhotos).flat();
+        const track = [...half, ...half];
 
         return (
           <div
             key={i}
-            className="absolute left-1/2 w-[200%] -translate-x-1/2"
+            className="absolute inset-x-0"
             style={{ top: config.top, transform: `rotate(${config.rotate}deg)` }}
           >
             <div
