@@ -6,9 +6,13 @@
 # site at its own domain root, so basePath should stay empty (the default
 # in next.config.ts). Only the GitHub Pages deploy needs that variable.
 #
-# Set NEXT_PUBLIC_WEB3FORMS_KEY (contact form) and, once you know this
-# site's Netlify URL, NEXT_PUBLIC_SITE_URL, in Site settings > Environment
-# variables — not here, so they're not committed to the repo.
+# The contact form uses Netlify Forms (no API key/env var needed) — Netlify
+# auto-detects the data-netlify="true" form in the built HTML. After the
+# first deploy with it, go to Site settings > Forms > Form notifications
+# and add an email notification so submissions actually reach an inbox.
+#
+# Once you know this site's Netlify URL, set NEXT_PUBLIC_SITE_URL in Site
+# settings > Environment variables — not here, so it's not committed.
 
 # No SPA fallback redirect needed — every route (including shoot detail
 # pages) is pre-rendered to a real HTML file via generateStaticParams, and

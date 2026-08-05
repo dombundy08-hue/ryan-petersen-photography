@@ -3,7 +3,7 @@ import { Mail, Phone, Clock } from "lucide-react";
 import { Section } from "@/components/section";
 import { ContactForm } from "@/components/contact-form";
 import { ContactPhotoMarquee } from "@/components/contact-photo-marquee";
-import { samplePhotos } from "@/lib/shoots";
+import { everyPhoto } from "@/lib/shoots";
 
 export const metadata: Metadata = {
   title: "Contact",
@@ -12,16 +12,14 @@ export const metadata: Metadata = {
 };
 
 export default function ContactPage() {
-  const marqueePhotos = samplePhotos(63);
-
   return (
     <Section className="relative overflow-hidden pt-16 pb-20 sm:pt-20">
-      <ContactPhotoMarquee photos={marqueePhotos} />
-      <div className="relative mx-auto max-w-2xl text-center">
-        <h1 className="text-4xl font-medium italic tracking-tight text-foreground sm:text-5xl">
+      <ContactPhotoMarquee photos={everyPhoto} />
+      <div className="relative mx-auto max-w-2xl rounded-2xl border-2 border-primary bg-primary px-8 py-10 text-center shadow-[0_0_60px_-15px_var(--color-primary)]">
+        <h1 className="text-4xl font-medium italic tracking-tight text-primary-foreground sm:text-5xl">
           Let&apos;s Talk
         </h1>
-        <p className="mt-4 text-muted-foreground">
+        <p className="mt-4 text-primary-foreground/80">
           Send a message with what you have in mind, and I&apos;ll respond
           personally to work out the details.
         </p>
@@ -31,9 +29,11 @@ export default function ContactPage() {
         <div className="space-y-6">
           <a
             href="mailto:rpetersen2008@gmail.com"
-            className="flex items-start gap-3 rounded-xl border border-border bg-card p-5 transition-colors hover:border-primary/40"
+            className="flex items-start gap-3 rounded-xl border-2 border-primary/60 bg-card p-5 transition-colors hover:border-primary"
           >
-            <Mail className="mt-0.5 size-5 text-primary" aria-hidden="true" />
+            <span className="flex size-9 shrink-0 items-center justify-center rounded-full bg-primary text-primary-foreground">
+              <Mail className="size-4" aria-hidden="true" />
+            </span>
             <div>
               <p className="text-sm font-medium text-foreground">Email</p>
               <p className="text-sm text-muted-foreground">
@@ -43,9 +43,11 @@ export default function ContactPage() {
           </a>
           <a
             href="tel:+17206008854"
-            className="flex items-start gap-3 rounded-xl border border-border bg-card p-5 transition-colors hover:border-primary/40"
+            className="flex items-start gap-3 rounded-xl border-2 border-primary/60 bg-card p-5 transition-colors hover:border-primary"
           >
-            <Phone className="mt-0.5 size-5 text-primary" aria-hidden="true" />
+            <span className="flex size-9 shrink-0 items-center justify-center rounded-full bg-primary text-primary-foreground">
+              <Phone className="size-4" aria-hidden="true" />
+            </span>
             <div>
               <p className="text-sm font-medium text-foreground">Phone</p>
               <p className="text-sm text-muted-foreground">
@@ -53,8 +55,10 @@ export default function ContactPage() {
               </p>
             </div>
           </a>
-          <div className="flex items-start gap-3 rounded-xl border border-border bg-secondary/40 p-5">
-            <Clock className="mt-0.5 size-5 text-primary" aria-hidden="true" />
+          <div className="flex items-start gap-3 rounded-xl border-2 border-primary/60 bg-secondary/40 p-5">
+            <span className="flex size-9 shrink-0 items-center justify-center rounded-full bg-primary text-primary-foreground">
+              <Clock className="size-4" aria-hidden="true" />
+            </span>
             <div>
               <p className="text-sm font-medium text-foreground">
                 Response time
@@ -67,7 +71,7 @@ export default function ContactPage() {
           </div>
         </div>
 
-        <div className="rounded-xl border border-border bg-card p-6 sm:p-8">
+        <div className="rounded-xl border-2 border-primary/50 bg-card p-6 shadow-[0_0_40px_-20px_var(--color-primary)] sm:p-8">
           <ContactForm />
         </div>
       </div>

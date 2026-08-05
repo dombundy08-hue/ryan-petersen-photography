@@ -1,17 +1,21 @@
+"use client";
+
+import { useEffect, useState } from "react";
 import Image from "next/image";
 import type { Photo } from "@/lib/shoots";
 
 // Simple straight horizontal rows of photos drifting across the
 // background at different speeds — no rotation, no path, no loop shape.
-// Spread evenly across the full page height, not just the top portion.
+// Spread far apart across the full page height so rows read as calm,
+// independent bands instead of a dense, disorienting wall of motion.
 const ROW_CONFIG = [
   { duration: 46, reverse: false, rotate: 0, top: "0%" },
-  { duration: 60, reverse: true, rotate: 0, top: "19%" },
-  { duration: 40, reverse: false, rotate: 0, top: "38%" },
-  { duration: 52, reverse: true, rotate: 0, top: "57%" },
-  { duration: 44, reverse: false, rotate: 0, top: "76%" },
-  { duration: 58, reverse: true, rotate: 0, top: "95%" },
+  { duration: 60, reverse: true, rotate: 0, top: "33%" },
+  { duration: 40, reverse: false, rotate: 0, top: "66%" },
+  { duration: 52, reverse: true, rotate: 0, top: "92%" },
 ];
+
+const POOL_SIZE = 48;
 
 function chunk<T>(items: T[], parts: number): T[][] {
   const rows: T[][] = Array.from({ length: parts }, () => []);
@@ -27,15 +31,34 @@ function chunk<T>(items: T[], parts: number): T[][] {
 const REPEAT = 4;
 
 export function ContactPhotoMarquee({ photos }: { photos: Photo[] }) {
-  if (photos.length === 0) return null;
+  // `pool` starts as the first POOL_SIZE photos in their original order so
+  // SSR and the first client paint match exactly (avoids hydration
+  // mismatches), then a one-time effect reshuffles the full photo library
+  // client-side after mount for a fresh random selection on every visit —
+  // same idiom as `HeroCarousel`.
+  const [pool, setPool] = useState(() => photos.slice(0, POOL_SIZE));
 
-  const rows = chunk(photos, ROW_CONFIG.length);
+  useEffect(() => {
+    if (photos.length === 0) return;
+    const shuffled = [...photos];
+    for (let i = shuffled.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+    }
+    setPool(shuffled.slice(0, POOL_SIZE));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [photos.length]);
+
+  if (pool.length === 0) return null;
+
+  const rows = chunk(pool, ROW_CONFIG.length);
 
   return (
     <div
-      className="pointer-events-none absolute inset-0 overflow-hidden opacity-40"
+      className="pointer-events-none absolute inset-0 overflow-hidden opacity-50"
       aria-hidden="true"
     >
+      <div className="absolute inset-0 z-10 bg-gradient-to-b from-primary/10 via-transparent to-primary/10" />
       {rows.map((rowPhotos, i) => {
         if (rowPhotos.length === 0) return null;
         const config = ROW_CONFIG[i];
@@ -49,7 +72,7 @@ export function ContactPhotoMarquee({ photos }: { photos: Photo[] }) {
             style={{ top: config.top, transform: `rotate(${config.rotate}deg)` }}
           >
             <div
-              className="animate-marquee-flow flex w-max gap-4"
+              className="animate-marquee-flow flex w-max gap-8"
               style={
                 {
                   "--marquee-duration": `${config.duration}s`,
@@ -60,7 +83,7 @@ export function ContactPhotoMarquee({ photos }: { photos: Photo[] }) {
               {track.map((photo, j) => (
                 <div
                   key={photo.src + j}
-                  className="h-20 w-20 shrink-0 overflow-hidden rounded-md sm:h-24 sm:w-24"
+                  className="h-24 w-24 shrink-0 overflow-hidden rounded-md sm:h-28 sm:w-28"
                 >
                   <Image
                     src={photo.src}

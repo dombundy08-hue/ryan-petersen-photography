@@ -21,12 +21,25 @@ const SESSION_TYPES = [
   { value: "Something Else", label: "Something Else" },
 ];
 
-// Public by design — Web3Forms access keys are meant to be exposed
-// client-side (https://docs.web3forms.com). Set at build time via
-// NEXT_PUBLIC_WEB3FORMS_KEY so it's baked into this static export.
-const WEB3FORMS_ACCESS_KEY = process.env.NEXT_PUBLIC_WEB3FORMS_KEY ?? "";
-
 type Status = "idle" | "sending" | "sent" | "error";
+
+// Netlify Forms — no API key or third-party account needed. Netlify's
+// build bot detects the `data-netlify="true"` form below directly in this
+// page's static HTML output and handles submissions for free; the AJAX
+// submit pattern here follows Netlify's documented approach
+// (https://docs.netlify.com/manage/forms/setup/#submit-html-forms-with-ajax).
+async function submitToNetlify(form: HTMLFormElement) {
+  const formData = new FormData(form);
+  const body = new URLSearchParams();
+  formData.forEach((value, key) => body.append(key, value.toString()));
+
+  const response = await fetch("/", {
+    method: "POST",
+    headers: { "Content-Type": "application/x-www-form-urlencoded" },
+    body: body.toString(),
+  });
+  if (!response.ok) throw new Error("Form submission failed");
+}
 
 export function ContactForm() {
   const [sessionType, setSessionType] = useState<string | null>(null);
@@ -36,23 +49,9 @@ export function ContactForm() {
     event.preventDefault();
     setStatus("sending");
 
-    const form = event.currentTarget;
-    const formData = new FormData(form);
-    formData.append("access_key", WEB3FORMS_ACCESS_KEY);
-    formData.append(
-      "subject",
-      `New inquiry from ${formData.get("name")} — ${formData.get("subject") || "General"}`
-    );
-    formData.append("from_name", "RyanShutter website");
-
     try {
-      const response = await fetch("https://api.web3forms.com/submit", {
-        method: "POST",
-        headers: { Accept: "application/json" },
-        body: formData,
-      });
-      const result = await response.json();
-      setStatus(result.success ? "sent" : "error");
+      await submitToNetlify(event.currentTarget);
+      setStatus("sent");
     } catch {
       setStatus("error");
     }
@@ -74,7 +73,15 @@ export function ContactForm() {
   }
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-5">
+    <form
+      name="contact"
+      method="POST"
+      data-netlify="true"
+      netlify-honeypot="botcheck"
+      onSubmit={handleSubmit}
+      className="space-y-5"
+    >
+      <input type="hidden" name="form-name" value="contact" />
       {/* Honeypot — bots fill this, real visitors never see it */}
       <input
         type="checkbox"
@@ -154,7 +161,7 @@ export function ContactForm() {
       <Button
         type="submit"
         size="lg"
-        className="w-full sm:w-auto"
+        className="w-full shadow-lg shadow-primary/30 sm:w-auto"
         disabled={status === "sending"}
       >
         {status === "sending" ? "Sending..." : "Send Message"}
