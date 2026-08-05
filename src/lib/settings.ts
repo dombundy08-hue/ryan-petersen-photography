@@ -2,15 +2,9 @@ import fs from "node:fs";
 import path from "node:path";
 import { withBasePath } from "@/lib/base-path";
 
-interface PersonalPhoto {
-  src: string;
-  alt: string;
-}
-
 interface AboutSettingsFile {
   photo: string;
   morePhotos?: string[];
-  personalPhotos?: PersonalPhoto[];
 }
 
 /**
@@ -34,7 +28,3 @@ const aboutSettings = loadAboutSettings();
 export const aboutPhoto: string | null = aboutSettings.photo
   ? withBasePath(aboutSettings.photo)
   : null;
-
-export const aboutPersonalPhotos: PersonalPhoto[] = (
-  aboutSettings.personalPhotos ?? []
-).map((photo) => ({ ...photo, src: withBasePath(photo.src) }));
