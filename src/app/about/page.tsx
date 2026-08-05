@@ -1,8 +1,8 @@
 import type { Metadata } from "next";
-import Image from "next/image";
 import { Mountain, Car, Trophy, Gamepad2, User } from "lucide-react";
 import { Section } from "@/components/section";
-import { aboutPhoto } from "@/lib/settings";
+import { AboutPhotoCarousel } from "@/components/about-photo-carousel";
+import { aboutPhoto, aboutMorePhotos } from "@/lib/settings";
 
 export const metadata: Metadata = {
   title: "About",
@@ -18,6 +18,13 @@ const HOBBIES = [
 ];
 
 export default function AboutPage() {
+  const aboutPhotos = aboutPhoto
+    ? [aboutPhoto, ...aboutMorePhotos].map((src) => ({
+        src,
+        alt: "Ryan Petersen",
+      }))
+    : [];
+
   return (
     <>
       <Section className="pt-16 pb-12 sm:pt-20">
@@ -28,20 +35,11 @@ export default function AboutPage() {
         </div>
       </Section>
 
-      <Section className="border-t border-border pt-0">
+      <Section className="border-t border-border bg-muted pt-0">
         <div className="mx-auto grid max-w-4xl gap-10 md:grid-cols-[1.1fr_1fr] md:items-start">
           <div className="mx-auto w-full max-w-sm md:max-w-none">
             {aboutPhoto ? (
-              <div className="relative aspect-[3/4] overflow-hidden rounded-xl border border-border">
-                <Image
-                  src={aboutPhoto}
-                  alt="Ryan Petersen"
-                  fill
-                  sizes="(max-width: 768px) 90vw, 480px"
-                  className="object-cover"
-                  priority
-                />
-              </div>
+              <AboutPhotoCarousel photos={aboutPhotos} />
             ) : (
               <div
                 role="img"
@@ -92,8 +90,10 @@ export default function AboutPage() {
           </p>
           </div>
         </div>
+      </Section>
 
-        <div className="mx-auto mt-14 max-w-2xl">
+      <Section className="border-t border-border bg-secondary">
+        <div className="mx-auto max-w-2xl">
           <h2 className="text-center font-heading text-lg font-semibold text-foreground">
             When I&apos;m not shooting
           </h2>

@@ -28,3 +28,7 @@ const aboutSettings = loadAboutSettings();
 export const aboutPhoto: string | null = aboutSettings.photo
   ? withBasePath(aboutSettings.photo)
   : null;
+
+export const aboutMorePhotos: string[] = (aboutSettings.morePhotos ?? []).map(
+  withBasePath
+);
