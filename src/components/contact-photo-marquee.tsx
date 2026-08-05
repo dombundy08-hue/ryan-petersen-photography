@@ -6,12 +6,11 @@ import type { Photo } from "@/lib/shoots";
 // Spread evenly across the full page height, not just the top portion.
 const ROW_CONFIG = [
   { duration: 46, reverse: false, rotate: 0, top: "0%" },
-  { duration: 60, reverse: true, rotate: 0, top: "16%" },
-  { duration: 40, reverse: false, rotate: 0, top: "32%" },
-  { duration: 52, reverse: true, rotate: 0, top: "48%" },
-  { duration: 44, reverse: false, rotate: 0, top: "64%" },
-  { duration: 58, reverse: true, rotate: 0, top: "80%" },
-  { duration: 42, reverse: false, rotate: 0, top: "96%" },
+  { duration: 60, reverse: true, rotate: 0, top: "19%" },
+  { duration: 40, reverse: false, rotate: 0, top: "38%" },
+  { duration: 52, reverse: true, rotate: 0, top: "57%" },
+  { duration: 44, reverse: false, rotate: 0, top: "76%" },
+  { duration: 58, reverse: true, rotate: 0, top: "95%" },
 ];
 
 function chunk<T>(items: T[], parts: number): T[][] {
