@@ -12,7 +12,7 @@ export const metadata: Metadata = {
 };
 
 export default function ContactPage() {
-  const marqueePhotos = samplePhotos(8);
+  const marqueePhotos = samplePhotos(12);
 
   return (
     <Section className="relative overflow-hidden pt-16 pb-20 sm:pt-20">
