@@ -120,3 +120,20 @@ Status: ⏳ partial (see Open Items below)
   settled on a single owner photo (no collage, no car-photo strip, no "Behind the
   camera" block). Contact page background got a photo marquee (several iterations —
   landed on straight horizontal rows drifting across the full page, not a spiral).
+- 2026-08-05: Adopted a "one page at a time" review pass (now the build-website
+  skill's default mode for grow-it work) and went through Home, About, and Portfolio
+  in turn. Home: hero now shuffles photos client-side per visit instead of a fixed
+  order, expanded the hero-eligible photo pool from 9 to 75 site-wide (visually
+  reviewed all 108 Dominic photos), added a progressive section-brightening
+  background ramp (bg-muted -> bg-secondary -> bg-border -> bg-[#5C4F3E]). About:
+  owner photo is now a small carousel cycling through all 5 stored owner photos
+  (same fixed size as before), same background ramp technique (2 steps). Portfolio:
+  restructured Senior into a 5-tile randomized teaser linking to a new
+  /portfolio/senior directory page (real subjects "Dominic" and "Avian" + generic
+  "Coming Soon" placeholders, never fake identities); Family/Nature featured tiles
+  now cycle through every photo in the category instead of one static image; same
+  background ramp. Fixed face-cropping across all cycling photo components by
+  anchoring crops toward faces (a new per-photo `objectPosition` field was needed
+  for the Family tile, whose two photos require different crop anchors in the wide
+  21:9 box). Shared a `PhotoCarousel` component between Home/About/Portfolio instead
+  of duplicating the crossfade logic a third time.
