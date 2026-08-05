@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Image from "next/image";
 import { Mountain, Car, Trophy, Gamepad2, User } from "lucide-react";
 import { Section } from "@/components/section";
-import { aboutPhoto, aboutMorePhotos, aboutPersonalPhotos } from "@/lib/settings";
+import { aboutPhoto, aboutPersonalPhotos } from "@/lib/settings";
 
 export const metadata: Metadata = {
   title: "About",
@@ -31,58 +31,37 @@ export default function AboutPage() {
       <Section className="border-t border-border pt-0">
         <div className="mx-auto grid max-w-4xl gap-10 md:grid-cols-[1.1fr_1fr] md:items-start">
           <div className="mx-auto w-full max-w-sm md:max-w-none">
-            <div className="grid grid-cols-[3fr_2fr] gap-3">
-              {aboutPhoto ? (
-                <div className="relative aspect-[3/4] overflow-hidden rounded-xl border border-border">
-                  <Image
-                    src={aboutPhoto}
-                    alt="Ryan Petersen"
-                    fill
-                    sizes="(max-width: 768px) 60vw, 320px"
-                    className="object-cover"
-                    priority
+            {aboutPhoto ? (
+              <div className="relative aspect-[3/4] overflow-hidden rounded-xl border border-border">
+                <Image
+                  src={aboutPhoto}
+                  alt="Ryan Petersen"
+                  fill
+                  sizes="(max-width: 768px) 90vw, 480px"
+                  className="object-cover"
+                  priority
+                />
+              </div>
+            ) : (
+              <div
+                role="img"
+                aria-label="Photo of Ryan Petersen — coming soon"
+                className="relative flex aspect-[3/4] items-center justify-center overflow-hidden rounded-xl border border-border bg-gradient-to-br from-[#D3A054]/20 via-[#5C4F3E]/15 to-[#1B1712]"
+              >
+                <div className="flex flex-col items-center gap-2 px-4 text-center">
+                  <User
+                    className="size-8 text-foreground/40"
+                    strokeWidth={1.5}
+                    aria-hidden="true"
                   />
+                  <span className="text-xs text-muted-foreground">
+                    Photo of Ryan
+                    <br />
+                    coming soon
+                  </span>
                 </div>
-              ) : (
-                <div
-                  role="img"
-                  aria-label="Photo of Ryan Petersen — coming soon"
-                  className="relative flex aspect-[3/4] items-center justify-center overflow-hidden rounded-xl border border-border bg-gradient-to-br from-[#D3A054]/20 via-[#5C4F3E]/15 to-[#1B1712]"
-                >
-                  <div className="flex flex-col items-center gap-2 px-4 text-center">
-                    <User
-                      className="size-8 text-foreground/40"
-                      strokeWidth={1.5}
-                      aria-hidden="true"
-                    />
-                    <span className="text-xs text-muted-foreground">
-                      Photo of Ryan
-                      <br />
-                      coming soon
-                    </span>
-                  </div>
-                </div>
-              )}
-
-              {aboutMorePhotos.length > 0 && (
-                <div className="grid grid-cols-2 gap-3">
-                  {aboutMorePhotos.slice(0, 4).map((src) => (
-                    <div
-                      key={src}
-                      className="relative aspect-square overflow-hidden rounded-lg border border-border"
-                    >
-                      <Image
-                        src={src}
-                        alt="Ryan Petersen"
-                        fill
-                        sizes="(max-width: 768px) 15vw, 100px"
-                        className="object-cover"
-                      />
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
+              </div>
+            )}
           </div>
 
           <div className="space-y-6 text-base leading-relaxed text-foreground/90">

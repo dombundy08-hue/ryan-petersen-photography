@@ -35,10 +35,6 @@ export const aboutPhoto: string | null = aboutSettings.photo
   ? withBasePath(aboutSettings.photo)
   : null;
 
-export const aboutMorePhotos: string[] = (aboutSettings.morePhotos ?? []).map(
-  withBasePath
-);
-
 export const aboutPersonalPhotos: PersonalPhoto[] = (
   aboutSettings.personalPhotos ?? []
 ).map((photo) => ({ ...photo, src: withBasePath(photo.src) }));

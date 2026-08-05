@@ -147,3 +147,24 @@
     transform: scale(1.08);
   }
 }
+
+@keyframes marquee-flow {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-50%);
+  }
+}
+
+.animate-marquee-flow {
+  animation: marquee-flow linear infinite;
+  animation-duration: var(--marquee-duration, 40s);
+  animation-direction: var(--marquee-direction, normal);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-marquee-flow {
+    animation: none;
+  }
+}
