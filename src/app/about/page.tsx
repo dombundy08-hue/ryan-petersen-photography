@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { Mountain, Car, Trophy, Gamepad2, User } from "lucide-react";
 import { Section } from "@/components/section";
-import { AboutPhotoCarousel } from "@/components/about-photo-carousel";
+import { PhotoCarousel } from "@/components/photo-carousel";
 import { aboutPhoto, aboutMorePhotos } from "@/lib/settings";
 
 export const metadata: Metadata = {
@@ -39,7 +39,11 @@ export default function AboutPage() {
         <div className="mx-auto grid max-w-4xl gap-10 md:grid-cols-[1.1fr_1fr] md:items-start">
           <div className="mx-auto w-full max-w-sm md:max-w-none">
             {aboutPhoto ? (
-              <AboutPhotoCarousel photos={aboutPhotos} />
+              <PhotoCarousel
+                photos={aboutPhotos}
+                className="relative aspect-[3/4] overflow-hidden rounded-xl border border-border"
+                sizes="(max-width: 768px) 90vw, 480px"
+              />
             ) : (
               <div
                 role="img"

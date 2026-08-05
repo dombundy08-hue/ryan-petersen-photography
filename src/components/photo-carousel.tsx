@@ -6,12 +6,22 @@ import type { Photo } from "@/lib/shoots";
 
 const INTERVAL_MS = 5000;
 
-export function AboutPhotoCarousel({ photos }: { photos: Photo[] }) {
-  // Same hydration-safe shuffle as HeroCarousel: `order` starts as the
-  // identity permutation so SSR and first client paint match exactly, then
-  // reshuffles positions 1+ after mount for a fresh rotation per visit.
-  // Position 0 stays pinned so the already-painted/priority-loaded photo
-  // never swaps out right after mount.
+export function PhotoCarousel({
+  photos,
+  className,
+  sizes,
+  priorityFirst = true,
+}: {
+  photos: Photo[];
+  className: string;
+  sizes: string;
+  priorityFirst?: boolean;
+}) {
+  // Hydration-safe shuffle (same pattern as HeroCarousel): `order` starts
+  // as the identity permutation so SSR and first client paint match
+  // exactly, then reshuffles positions 1+ after mount for a fresh
+  // rotation per visit. Position 0 stays pinned so the already-painted/
+  // priority-loaded photo never swaps out right after mount.
   const [index, setIndex] = useState(0);
   const [order, setOrder] = useState<number[]>(() =>
     photos.map((_, i) => i)
@@ -50,7 +60,7 @@ export function AboutPhotoCarousel({ photos }: { photos: Photo[] }) {
   }, [photos.length]);
 
   return (
-    <div className="relative aspect-[3/4] overflow-hidden rounded-xl border border-border">
+    <div className={className}>
       {photos.map((photo, i) => {
         const isActive = order[index] === i;
         return (
@@ -71,8 +81,8 @@ export function AboutPhotoCarousel({ photos }: { photos: Photo[] }) {
               src={photo.src}
               alt={photo.alt}
               fill
-              priority={i === 0}
-              sizes="(max-width: 768px) 90vw, 480px"
+              priority={priorityFirst && i === 0}
+              sizes={sizes}
               className="object-cover"
             />
           </div>

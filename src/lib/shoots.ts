@@ -24,6 +24,8 @@ export interface Shoot {
   category: PhotoCategory;
   title: string;
   description: string;
+  /** e.g. "Dominic" — shown on the senior teaser/directory/detail pages. */
+  subjectName?: string;
   photos: Photo[];
 }
 

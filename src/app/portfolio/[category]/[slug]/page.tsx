@@ -42,7 +42,7 @@ export default async function ShootPage({
   if (!shoot) notFound();
 
   return (
-    <Section className="pt-16 pb-20 sm:pt-20">
+    <Section className="border-t border-border bg-muted pt-16 pb-20 sm:pt-20">
       <Link
         href={`/portfolio#${shoot.category}`}
         className="inline-flex items-center gap-1.5 text-sm text-muted-foreground transition-colors hover:text-foreground"
@@ -55,6 +55,11 @@ export default async function ShootPage({
         <h1 className="font-heading text-3xl font-medium italic tracking-tight text-foreground sm:text-4xl">
           {shoot.title}
         </h1>
+        {shoot.subjectName && (
+          <p className="mt-1 text-sm font-medium text-primary">
+            {shoot.subjectName}
+          </p>
+        )}
         <p className="mt-2 text-muted-foreground">{shoot.description}</p>
       </div>
 

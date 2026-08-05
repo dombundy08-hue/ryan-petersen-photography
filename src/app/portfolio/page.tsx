@@ -1,9 +1,11 @@
 import type { Metadata } from "next";
-import Image from "next/image";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Section } from "@/components/section";
-import { shootsByCategory, type Shoot } from "@/lib/shoots";
+import { SeniorTeaserGrid } from "@/components/senior-teaser-grid";
+import { CategoryFeatureTile } from "@/components/category-feature-tile";
+import { shootsByCategory } from "@/lib/shoots";
+import { seniorTeaserPool } from "@/lib/senior-teaser";
 
 export const metadata: Metadata = {
   title: "Portfolio",
@@ -35,42 +37,14 @@ const CATEGORIES = [
   },
 ];
 
-// Column count scales to how many real shoots exist, so the row always
-// reads as intentionally full instead of a grid with empty trailing
-// cells or "coming soon" filler tiles.
-function gridColsClass(count: number): string {
-  if (count === 2) return "sm:grid-cols-2";
-  if (count === 3) return "sm:grid-cols-3";
-  return "sm:grid-cols-2 lg:grid-cols-4";
-}
-
-function ShootTile({ shoot }: { shoot: Shoot }) {
-  return (
-    <Link
-      href={`/portfolio/${shoot.category}/${shoot.slug}`}
-      className="group relative flex aspect-[4/5] flex-col justify-end overflow-hidden rounded-xl border border-border"
-    >
-      <Image
-        src={shoot.photos[0].src}
-        alt={shoot.photos[0].alt}
-        fill
-        sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
-        className="object-cover transition-transform duration-500 group-hover:scale-105"
-      />
-      <div
-        className="absolute inset-0"
-        style={{
-          background:
-            "linear-gradient(180deg, rgba(16,13,10,0) 55%, rgba(16,13,10,0.85) 100%)",
-        }}
-      />
-      <div className="relative p-3">
-        <p className="text-sm font-medium text-foreground">{shoot.title}</p>
-        <p className="text-xs text-foreground/70">View shoot &rarr;</p>
-      </div>
-    </Link>
-  );
-}
+// Progressive brightening ramp down the page, same technique/tokens as
+// Home and About — each category section reads a little lighter than the
+// last instead of one flat background throughout.
+const SECTION_BG: Record<string, string> = {
+  senior: "bg-muted",
+  family: "bg-secondary",
+  nature: "bg-border",
+};
 
 export default function PortfolioPage() {
   return (
@@ -87,14 +61,49 @@ export default function PortfolioPage() {
       </Section>
 
       {CATEGORIES.map(({ id, category, title, description }) => {
+        if (category === "senior") {
+          return (
+            <Section
+              key={id}
+              id={id}
+              className={`scroll-mt-16 border-t border-border ${SECTION_BG[id]}`}
+            >
+              <div className="mb-8 flex flex-col gap-1 sm:flex-row sm:items-end sm:justify-between">
+                <div>
+                  <h2 className="text-2xl font-medium italic tracking-tight text-foreground">
+                    {title}
+                  </h2>
+                  <p className="mt-1 text-sm text-muted-foreground">
+                    {description}
+                  </p>
+                </div>
+              </div>
+              <SeniorTeaserGrid entries={seniorTeaserPool()} />
+            </Section>
+          );
+        }
+
         const categoryShoots = shootsByCategory(category);
         if (categoryShoots.length === 0) return null;
+
+        const allCategoryPhotos = categoryShoots.flatMap((shoot) =>
+          shoot.photos.map((photo) => ({
+            ...photo,
+            shootSlug: shoot.slug,
+            shootTitle: shoot.title,
+          }))
+        );
+        const heroSafePhotos = allCategoryPhotos.filter(
+          (photo) => photo.heroEligible !== false
+        );
+        const featurePhotos =
+          heroSafePhotos.length > 0 ? heroSafePhotos : allCategoryPhotos;
 
         return (
           <Section
             key={id}
             id={id}
-            className="scroll-mt-16 border-t border-border"
+            className={`scroll-mt-16 border-t border-border ${SECTION_BG[id]}`}
           >
             <div className="mb-8 flex flex-col gap-1 sm:flex-row sm:items-end sm:justify-between">
               <div>
@@ -106,52 +115,17 @@ export default function PortfolioPage() {
                 </p>
               </div>
             </div>
-
-            {categoryShoots.length === 1 ? (
-              <Link
-                href={`/portfolio/${categoryShoots[0].category}/${categoryShoots[0].slug}`}
-                className="group relative flex aspect-[21/9] flex-col justify-end overflow-hidden rounded-xl border border-border"
-              >
-                <Image
-                  src={categoryShoots[0].photos[0].src}
-                  alt={categoryShoots[0].photos[0].alt}
-                  fill
-                  sizes="100vw"
-                  className="object-cover transition-transform duration-500 group-hover:scale-105"
-                />
-                <div
-                  className="absolute inset-0"
-                  style={{
-                    background:
-                      "linear-gradient(180deg, rgba(16,13,10,0) 50%, rgba(16,13,10,0.85) 100%)",
-                  }}
-                />
-                <div className="relative p-5">
-                  <p className="font-medium text-foreground">
-                    {categoryShoots[0].title}
-                  </p>
-                  <p className="text-sm text-foreground/70">
-                    View shoot &rarr;
-                  </p>
-                </div>
-              </Link>
-            ) : (
-              <div className={`grid grid-cols-2 gap-4 ${gridColsClass(categoryShoots.length)}`}>
-                {categoryShoots.map((shoot) => (
-                  <ShootTile key={shoot.slug} shoot={shoot} />
-                ))}
-              </div>
-            )}
+            <CategoryFeatureTile category={category} photos={featurePhotos} />
           </Section>
         );
       })}
 
-      <Section className="border-t border-border">
+      <Section className="border-t border-border bg-[#5C4F3E]">
         <div className="mx-auto max-w-xl text-center">
           <h2 className="text-2xl font-semibold tracking-tight text-foreground">
             Want to be featured in this gallery?
           </h2>
-          <p className="mt-3 text-muted-foreground">
+          <p className="mt-3 text-foreground/80">
             Book a session now while it&apos;s free — your photos could be
             some of the first ones shown here.
           </p>
