@@ -7,6 +7,14 @@ import { Button } from "@/components/ui/button";
 import { Section } from "@/components/section";
 import { shoots, getShoot } from "@/lib/shoots";
 
+// Column count scales to the shoot's real photo count, so a small
+// gallery (even a single photo) always reads as intentionally full
+// instead of leaving empty grid cells.
+function gridColsClass(count: number): string {
+  if (count === 2) return "sm:grid-cols-2";
+  return "sm:grid-cols-2 lg:grid-cols-3";
+}
+
 export function generateStaticParams() {
   return shoots.map((shoot) => ({
     category: shoot.category,
@@ -50,22 +58,37 @@ export default async function ShootPage({
         <p className="mt-2 text-muted-foreground">{shoot.description}</p>
       </div>
 
-      <div className="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-        {shoot.photos.map((photo) => (
-          <div
-            key={photo.src}
-            className="relative aspect-[4/5] overflow-hidden rounded-xl border border-border"
-          >
-            <Image
-              src={photo.src}
-              alt={photo.alt}
-              fill
-              sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
-              className="object-cover"
-            />
-          </div>
-        ))}
-      </div>
+      {shoot.photos.length === 1 ? (
+        <div className="relative mt-10 aspect-[21/9] overflow-hidden rounded-xl border border-border">
+          <Image
+            src={shoot.photos[0].src}
+            alt={shoot.photos[0].alt}
+            fill
+            sizes="100vw"
+            className="object-cover"
+            priority
+          />
+        </div>
+      ) : (
+        <div
+          className={`mt-10 grid grid-cols-2 gap-4 ${gridColsClass(shoot.photos.length)}`}
+        >
+          {shoot.photos.map((photo) => (
+            <div
+              key={photo.src}
+              className="relative aspect-[4/5] overflow-hidden rounded-xl border border-border"
+            >
+              <Image
+                src={photo.src}
+                alt={photo.alt}
+                fill
+                sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+                className="object-cover"
+              />
+            </div>
+          ))}
+        </div>
+      )}
 
       <div className="mt-14 text-center">
         <p className="text-muted-foreground">

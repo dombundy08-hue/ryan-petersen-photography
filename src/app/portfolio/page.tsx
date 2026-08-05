@@ -3,8 +3,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Section } from "@/components/section";
-import { PlaceholderPhoto } from "@/components/placeholder-photo";
-import { shootsByCategory } from "@/lib/shoots";
+import { shootsByCategory, type Shoot } from "@/lib/shoots";
 
 export const metadata: Metadata = {
   title: "Portfolio",
@@ -19,7 +18,6 @@ const CATEGORIES = [
     title: "Senior Photos",
     description:
       "A milestone worth doing right — portraits that actually look like you.",
-    slotCount: 4,
   },
   {
     id: "family",
@@ -27,7 +25,6 @@ const CATEGORIES = [
     title: "Family Photos",
     description:
       "Relaxed sessions built around your family, not a stiff studio pose.",
-    slotCount: 4,
   },
   {
     id: "nature",
@@ -35,9 +32,45 @@ const CATEGORIES = [
     title: "Nature Photos",
     description:
       "Landscapes and outdoor moments shot with an eye for natural light.",
-    slotCount: 4,
   },
 ];
+
+// Column count scales to how many real shoots exist, so the row always
+// reads as intentionally full instead of a grid with empty trailing
+// cells or "coming soon" filler tiles.
+function gridColsClass(count: number): string {
+  if (count === 2) return "sm:grid-cols-2";
+  if (count === 3) return "sm:grid-cols-3";
+  return "sm:grid-cols-2 lg:grid-cols-4";
+}
+
+function ShootTile({ shoot }: { shoot: Shoot }) {
+  return (
+    <Link
+      href={`/portfolio/${shoot.category}/${shoot.slug}`}
+      className="group relative flex aspect-[4/5] flex-col justify-end overflow-hidden rounded-xl border border-border"
+    >
+      <Image
+        src={shoot.photos[0].src}
+        alt={shoot.photos[0].alt}
+        fill
+        sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
+        className="object-cover transition-transform duration-500 group-hover:scale-105"
+      />
+      <div
+        className="absolute inset-0"
+        style={{
+          background:
+            "linear-gradient(180deg, rgba(16,13,10,0) 55%, rgba(16,13,10,0.85) 100%)",
+        }}
+      />
+      <div className="relative p-3">
+        <p className="text-sm font-medium text-foreground">{shoot.title}</p>
+        <p className="text-xs text-foreground/70">View shoot &rarr;</p>
+      </div>
+    </Link>
+  );
+}
 
 export default function PortfolioPage() {
   return (
@@ -48,19 +81,15 @@ export default function PortfolioPage() {
             Portfolio
           </h1>
           <p className="mt-4 text-muted-foreground">
-            A few sample sessions below to show how the gallery works — click
-            one to see the full shoot. Ryan&apos;s real sessions will fill
-            this out as they&apos;re delivered.
+            Click a session below to see the full shoot.
           </p>
         </div>
       </Section>
 
-      {CATEGORIES.map(({ id, category, title, description, slotCount }) => {
+      {CATEGORIES.map(({ id, category, title, description }) => {
         const categoryShoots = shootsByCategory(category);
-        const placeholderCount = Math.max(
-          slotCount - categoryShoots.length,
-          0
-        );
+        if (categoryShoots.length === 0) return null;
+
         return (
           <Section
             key={id}
@@ -77,45 +106,42 @@ export default function PortfolioPage() {
                 </p>
               </div>
             </div>
-            <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
-              {categoryShoots.map((shoot) => (
-                <Link
-                  key={shoot.slug}
-                  href={`/portfolio/${shoot.category}/${shoot.slug}`}
-                  className="group relative flex aspect-[4/5] flex-col justify-end overflow-hidden rounded-xl border border-border"
-                >
-                  <Image
-                    src={shoot.photos[0].src}
-                    alt={shoot.photos[0].alt}
-                    fill
-                    sizes="(max-width: 640px) 50vw, 25vw"
-                    className="object-cover transition-transform duration-500 group-hover:scale-105"
-                  />
-                  <div
-                    className="absolute inset-0"
-                    style={{
-                      background:
-                        "linear-gradient(180deg, rgba(16,13,10,0) 55%, rgba(16,13,10,0.85) 100%)",
-                    }}
-                  />
-                  <div className="relative p-3">
-                    <p className="text-sm font-medium text-foreground">
-                      {shoot.title}
-                    </p>
-                    <p className="text-xs text-foreground/70">
-                      View shoot &rarr;
-                    </p>
-                  </div>
-                </Link>
-              ))}
-              {Array.from({ length: placeholderCount }).map((_, i) => (
-                <PlaceholderPhoto
-                  key={i}
-                  category={category}
-                  label={`${title.replace(" Photos", "")} session ${categoryShoots.length + i + 1}`}
+
+            {categoryShoots.length === 1 ? (
+              <Link
+                href={`/portfolio/${categoryShoots[0].category}/${categoryShoots[0].slug}`}
+                className="group relative flex aspect-[21/9] flex-col justify-end overflow-hidden rounded-xl border border-border"
+              >
+                <Image
+                  src={categoryShoots[0].photos[0].src}
+                  alt={categoryShoots[0].photos[0].alt}
+                  fill
+                  sizes="100vw"
+                  className="object-cover transition-transform duration-500 group-hover:scale-105"
                 />
-              ))}
-            </div>
+                <div
+                  className="absolute inset-0"
+                  style={{
+                    background:
+                      "linear-gradient(180deg, rgba(16,13,10,0) 50%, rgba(16,13,10,0.85) 100%)",
+                  }}
+                />
+                <div className="relative p-5">
+                  <p className="font-medium text-foreground">
+                    {categoryShoots[0].title}
+                  </p>
+                  <p className="text-sm text-foreground/70">
+                    View shoot &rarr;
+                  </p>
+                </div>
+              </Link>
+            ) : (
+              <div className={`grid grid-cols-2 gap-4 ${gridColsClass(categoryShoots.length)}`}>
+                {categoryShoots.map((shoot) => (
+                  <ShootTile key={shoot.slug} shoot={shoot} />
+                ))}
+              </div>
+            )}
           </Section>
         );
       })}
