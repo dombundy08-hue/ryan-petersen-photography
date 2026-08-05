@@ -1,13 +1,13 @@
 import Image from "next/image";
 import type { Photo } from "@/lib/shoots";
 
-// Simple horizontal rows of photos drifting across the background at
-// different speeds/directions — no path or loop shape, just a flow.
+// Simple straight horizontal rows of photos drifting across the
+// background at different speeds — no rotation, no path, no loop shape.
 const ROW_CONFIG = [
-  { duration: 46, reverse: false, rotate: -2, top: "2%" },
-  { duration: 60, reverse: true, rotate: 1, top: "27%" },
-  { duration: 40, reverse: false, rotate: -1, top: "52%" },
-  { duration: 52, reverse: true, rotate: 2, top: "77%" },
+  { duration: 46, reverse: false, rotate: 0, top: "4%" },
+  { duration: 60, reverse: true, rotate: 0, top: "28%" },
+  { duration: 40, reverse: false, rotate: 0, top: "52%" },
+  { duration: 52, reverse: true, rotate: 0, top: "76%" },
 ];
 
 function chunk<T>(items: T[], parts: number): T[][] {
