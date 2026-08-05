@@ -6,7 +6,8 @@
   "photos": [
     {
       "src": "/images/nature/sunset-ballfield.jpg",
-      "alt": "Sunset through a chain-link fence at a baseball field"
+      "alt": "Sunset through a chain-link fence at a baseball field",
+      "heroEligible": false
     }
   ]
 }

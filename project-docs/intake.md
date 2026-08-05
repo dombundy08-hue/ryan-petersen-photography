@@ -1,4 +1,4 @@
-# Intake — Ryan Petersen Photography
+# Intake — RyanShutter (formerly RP Photography)
 
 Completed: 2026-08-04 · Last updated: 2026-08-04
 Status: ⏳ partial (see Open Items below)
@@ -14,7 +14,7 @@ Status: ⏳ partial (see Open Items below)
 
 | Field | Value | Source |
 |---|---|---|
-| Name | RP Photography (brand) — photographer is Ryan Petersen | 🗣 |
+| Name | RyanShutter (brand, renamed from RP Photography) — photographer is Ryan Petersen | 🗣 |
 | What it does | Senior, family, and nature photography. New business, no formal history yet. | 📄 |
 | Industry/category | Photography — local service / portfolio | 📄 |
 | Target audience | Families, couples, seniors, people marking a special milestone | 📄 |
@@ -66,7 +66,7 @@ Status: ⏳ partial (see Open Items below)
 | Logo | None — not mentioned | ⏳ |
 | Brand colors | Revised 2026-08-04: dark, editorial — near-black warm background + gold accent + cream text (was a light neutral+orange palette originally). Researched against 3 reference sites the client provided. | 🗣 |
 | Fonts | Revised 2026-08-04: Fraunces (headings) + Inter (body) — was Archivo + Space Grotesk originally | 🗣 |
-| Photography | 6 AI-generated demo photos in place (2 each: senior/family/nature, via nano-banana-2, `src/lib/photos.ts`) so the hero carousel and portfolio grid can be previewed — these are stand-ins, not Ryan's real work. Real photos replace them the same way: drop the file in `public/images/<category>/` and add one entry to `src/lib/photos.ts`. | 🗣 |
+| Photography | All AI-generated demo photos replaced with Ryan's real photos (108-photo senior session, family session, nature, owner headshots). Managed via `content/shoots/*.json` (read by `src/lib/shoots.ts`), one file per shoot — not hardcoded in `src/lib/photos.ts` anymore. | 🗣 |
 | Style guide doc | None | ➖ |
 
 ## G. Technical Preferences
@@ -93,10 +93,13 @@ Status: ⏳ partial (see Open Items below)
 - City/region unknown — site currently uses generic "local" language instead of a
   specific city for local SEO. Update once Ryan provides a location.
 - No social media links provided.
-- Hero carousel and portfolio grid currently show 6 AI-generated demo photos, not
-  Ryan's real work — swap via `src/lib/photos.ts` once real photos are ready (see
-  Visual Assets above for the exact steps).
-- No logo — design system uses a text-based wordmark treatment ("RP Photography").
+- No logo — design system uses a text-based wordmark treatment ("RyanShutter").
+- Contact form (`src/components/contact-form.tsx`) posts to Web3Forms but
+  `NEXT_PUBLIC_WEB3FORMS_KEY` was never obtained — user needs a free key from
+  web3forms.com before submissions actually deliver email.
+- Admin panel (Decap CMS, `public/admin/`) is scaffolded but not functional yet —
+  needs Netlify account setup (connect repo, enable Identity + Git Gateway, invite
+  Ryan's email). See `references/content-management.md` in the build-website skill.
 
 ## Grow-it history
 - 2026-08-04: Initial build from CSV intake form + user's answers to the
@@ -106,3 +109,14 @@ Status: ⏳ partial (see Open Items below)
   hero photo carousel, 6 demo images generated via nano-banana-2, per client
   direction referencing 3 photography sites (Sheila Broderick Photography, Little
   White Photo Studio, Belle Amour Boudoir).
+- 2026-08-04: Rebranded RP Photography → RyanShutter. Replaced all AI-generated
+  demo photos with Ryan's real photos (moved to a content-file model,
+  `content/shoots/*.json` + `content/settings/about.json`, so a future Decap CMS
+  admin panel can manage them directly). Added a "Requested" tile to Home's What I
+  Shoot section. Wired the contact form to Web3Forms (key still pending). Scaffolded
+  a Decap CMS admin panel for Ryan (Netlify Identity/Git Gateway setup still
+  pending). Portfolio pages now size dynamically to however many real photos exist
+  per shoot instead of placeholder filler tiles. About page redesigned twice —
+  settled on a single owner photo (no collage, no car-photo strip, no "Behind the
+  camera" block). Contact page background got a photo marquee (several iterations —
+  landed on straight horizontal rows drifting across the full page, not a spiral).

@@ -9,7 +9,18 @@ import type { Photo } from "@/lib/shoots";
 const INTERVAL_MS = 5000;
 
 export function HeroCarousel({ photos }: { photos: Photo[] }) {
+  // `index` is a position within `order`, not within `photos` — the
+  // rendered photos/DOM keys never change (no image remounts), only which
+  // one is currently visible does. `order` starts as the identity
+  // permutation so SSR and the first client paint match exactly, then a
+  // one-time effect reshuffles positions 1+ after mount for a fresh random
+  // rotation on every visit. Position 0 stays pinned so the photo already
+  // painted (and already priority-loaded) never swaps out right after
+  // mount.
   const [index, setIndex] = useState(0);
+  const [order, setOrder] = useState<number[]>(() =>
+    photos.map((_, i) => i)
+  );
   const [reducedMotion, setReducedMotion] = useState(
     () =>
       typeof window !== "undefined" &&
@@ -24,6 +35,18 @@ export function HeroCarousel({ photos }: { photos: Photo[] }) {
   }, []);
 
   useEffect(() => {
+    if (photos.length <= 2) return;
+    setOrder((prev) => {
+      const [first, ...rest] = prev;
+      for (let i = rest.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [rest[i], rest[j]] = [rest[j], rest[i]];
+      }
+      return [first, ...rest];
+    });
+  }, [photos.length]);
+
+  useEffect(() => {
     if (photos.length <= 1) return;
     const id = setInterval(() => {
       setIndex((i) => (i + 1) % photos.length);
@@ -33,30 +56,33 @@ export function HeroCarousel({ photos }: { photos: Photo[] }) {
 
   return (
     <div className="relative flex h-[85vh] min-h-[560px] w-full items-center justify-center overflow-hidden bg-background">
-      {photos.map((photo, i) => (
-        <div
-          key={photo.src}
-          className={
-            "absolute inset-0 " +
-            (reducedMotion
-              ? i === index
-                ? "opacity-100"
-                : "opacity-0"
-              : "transition-opacity duration-1000 ease-in-out " +
-                (i === index ? "opacity-100" : "opacity-0"))
-          }
-          aria-hidden={i !== index}
-        >
-          <Image
-            src={photo.src}
-            alt={photo.alt}
-            fill
-            priority={i === 0}
-            sizes="100vw"
-            className="object-cover motion-safe:animate-[kenburns_9s_ease-out_forwards]"
-          />
-        </div>
-      ))}
+      {photos.map((photo, i) => {
+        const isActive = order[index] === i;
+        return (
+          <div
+            key={photo.src}
+            className={
+              "absolute inset-0 " +
+              (reducedMotion
+                ? isActive
+                  ? "opacity-100"
+                  : "opacity-0"
+                : "transition-opacity duration-1000 ease-in-out " +
+                  (isActive ? "opacity-100" : "opacity-0"))
+            }
+            aria-hidden={!isActive}
+          >
+            <Image
+              src={photo.src}
+              alt={photo.alt}
+              fill
+              priority={i === 0}
+              sizes="100vw"
+              className="object-cover object-[50%_25%] motion-safe:animate-[kenburns_9s_ease-out_forwards]"
+            />
+          </div>
+        );
+      })}
 
       <div
         className="absolute inset-0"
@@ -97,7 +123,7 @@ export function HeroCarousel({ photos }: { photos: Photo[] }) {
               key={photo.src}
               className={
                 "h-1 rounded-full transition-all duration-500 " +
-                (i === index ? "w-6 bg-primary" : "w-2 bg-foreground/40")
+                (order[index] === i ? "w-6 bg-primary" : "w-2 bg-foreground/40")
               }
               aria-hidden="true"
             />

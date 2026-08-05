@@ -1,7 +1,13 @@
-# Build Plan — Ryan Petersen Photography
+# Build Plan — RyanShutter
 
-Source: `docs/intake.md`. Design tokens: `design-system/ryan-petersen-photography/MASTER.md`.
-Stack: Next.js (App Router) + Tailwind v4 + shadcn/ui.
+Source: `project-docs/intake.md`. Design tokens: `design-system/ryan-petersen-photography/MASTER.md`.
+Stack: Next.js (App Router) + Tailwind v4 + shadcn/ui, static export to GitHub Pages.
+
+> Original plan below is from the first build (placeholder photos, no real
+> content). The site has since been rebuilt with Ryan's real photos and
+> content — see intake.md's Grow-it history for what actually shipped. This
+> doc is being used going forward as the per-page work log for one-page-at-a-
+> time edits (current skill default).
 
 ## Shared shell (Phase 5)
 - `src/components/navbar.tsx` — logo/wordmark ("Ryan Petersen Photography"), links to
