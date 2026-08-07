@@ -110,3 +110,24 @@ it fixed from reading the diff — re-fetch the live URL and confirm.
   share previews would have 404'd. Fixed by setting
   `NEXT_PUBLIC_SITE_URL` explicitly in the deploy build (Step 1) — update it
   again once a real domain exists.
+- **2026-08-05 — mounting every photo in a carousel's pool crashed mobile
+  browsers (page flashes then goes blank/white).** `HeroCarousel`,
+  `PhotoCarousel`, and `CategoryFeatureTile` each rendered one `<Image>` per
+  photo in their entire pool, toggling opacity to show/hide — none ever
+  unmounted. Combined with `images.unoptimized: true` (every `<Image>`
+  decodes its full-resolution source regardless of display size, since
+  static export has no server-side resize pipeline), Home's hero alone
+  (`allPhotos`, ~75 photos at ~2400x1600px, ~15MB decoded each) could hold
+  over 1GB of decoded bitmap data resident simultaneously — well past
+  mobile Safari/Chrome's per-tab memory budget, so the tab's process gets
+  killed by the OS and the page goes blank. This only reproduces on the
+  live deployed URL on an actual mobile device or under real memory
+  pressure — desktop dev and the Browser pane tool both have far more
+  headroom and won't show it. Fixed by only ever mounting the current +
+  outgoing photo (two-layer bounded crossfade) in all three components,
+  and capping `ContactPhotoMarquee`'s unique-photo pool (48 → 16) since it
+  can't use that trick — it shows many photos at once by design. **General
+  pattern**: any crossfade/carousel over a large photo pool with
+  `images.unoptimized: true` must bound how many `<Image>` elements are
+  mounted at once, not just how many are *visible* — opacity-0 still
+  decodes and holds full memory.
