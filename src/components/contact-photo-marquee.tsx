@@ -15,7 +15,16 @@ const ROW_CONFIG = [
   { duration: 52, reverse: true, rotate: 0, top: "92%" },
 ];
 
-const POOL_SIZE = 48;
+// Capped well below the full photo library on purpose: with
+// `images.unoptimized: true` (required for static export) every <Image>
+// decodes its full-resolution source (these run ~2400x1600px, ~15MB
+// decoded each) regardless of the tiny thumbnail size it's displayed at,
+// and every unique photo here stays mounted (never unmounted) for as long
+// as the marquee keeps animating. A larger pool decodes and holds that
+// many photos in memory simultaneously — enough to crash the tab on
+// mobile Safari/Chrome. 16 keeps worst-case decoded memory in a safe
+// range while still reading as a varied background.
+const POOL_SIZE = 16;
 
 function chunk<T>(items: T[], parts: number): T[][] {
   const rows: T[][] = Array.from({ length: parts }, () => []);

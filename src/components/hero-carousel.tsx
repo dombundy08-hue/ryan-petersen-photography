@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
@@ -9,15 +9,27 @@ import type { Photo } from "@/lib/shoots";
 const INTERVAL_MS = 5000;
 
 export function HeroCarousel({ photos }: { photos: Photo[] }) {
-  // `index` is a position within `order`, not within `photos` — the
-  // rendered photos/DOM keys never change (no image remounts), only which
-  // one is currently visible does. `order` starts as the identity
-  // permutation so SSR and the first client paint match exactly, then a
-  // one-time effect reshuffles positions 1+ after mount for a fresh random
-  // rotation on every visit. Position 0 stays pinned so the photo already
-  // painted (and already priority-loaded) never swaps out right after
-  // mount.
+  // `index` is a position within `order`, not within `photos` — the dot
+  // indicators below track every position, but only the current photo and
+  // the one it's fading out from are ever mounted as an <Image> (see the
+  // memory note below). `order` starts as the identity permutation so SSR
+  // and the first client paint match exactly, then a one-time effect
+  // reshuffles positions 1+ after mount for a fresh random rotation on
+  // every visit. Position 0 stays pinned so the photo already painted (and
+  // already priority-loaded) never swaps out right after mount.
   const [index, setIndex] = useState(0);
+  // Position (in `order`) of the photo fading out, or null before the
+  // first transition. Deliberately NOT one <Image> per photo — with
+  // `images.unoptimized: true` (required for static export) every <Image>
+  // decodes its full-resolution source regardless of display size, and a
+  // site-wide pool this size can run 1GB+ of simultaneous decoded bitmap
+  // data if every photo stays mounted — enough to crash the tab on mobile
+  // Safari/Chrome (page flashes in, then goes blank). Only ever mounting
+  // the current + outgoing photo bounds that to ~2 photos regardless of
+  // pool size.
+  const [prevIndex, setPrevIndex] = useState<number | null>(null);
+  const [fadingOut, setFadingOut] = useState(false);
+  const indexRef = useRef(0);
   const [order, setOrder] = useState<number[]>(() =>
     photos.map((_, i) => i)
   );
@@ -47,42 +59,69 @@ export function HeroCarousel({ photos }: { photos: Photo[] }) {
   }, [photos.length]);
 
   useEffect(() => {
+    indexRef.current = index;
+  }, [index]);
+
+  useEffect(() => {
     if (photos.length <= 1) return;
     const id = setInterval(() => {
+      setPrevIndex(indexRef.current);
+      setFadingOut(false);
       setIndex((i) => (i + 1) % photos.length);
     }, INTERVAL_MS);
     return () => clearInterval(id);
   }, [photos.length]);
 
+  // The outgoing layer needs to mount at full opacity first, then flip to
+  // 0 a frame later — a freshly mounted element can't CSS-transition from
+  // a state it was never rendered at.
+  useEffect(() => {
+    if (prevIndex === null) return;
+    const raf1 = requestAnimationFrame(() => {
+      const raf2 = requestAnimationFrame(() => setFadingOut(true));
+      return () => cancelAnimationFrame(raf2);
+    });
+    return () => cancelAnimationFrame(raf1);
+  }, [prevIndex]);
+
+  const currentPhoto = photos.length > 0 ? photos[order[index]] : null;
+  const previousPhoto = prevIndex !== null ? photos[order[prevIndex]] : null;
+
   return (
     <div className="relative flex h-[85vh] min-h-[560px] w-full items-center justify-center overflow-hidden bg-background">
-      {photos.map((photo, i) => {
-        const isActive = order[index] === i;
-        return (
-          <div
-            key={photo.src}
-            className={
-              "absolute inset-0 " +
-              (reducedMotion
-                ? isActive
-                  ? "opacity-100"
-                  : "opacity-0"
-                : "transition-opacity duration-1000 ease-in-out " +
-                  (isActive ? "opacity-100" : "opacity-0"))
-            }
-            aria-hidden={!isActive}
-          >
-            <Image
-              src={photo.src}
-              alt={photo.alt}
-              fill
-              priority={i === 0}
-              sizes="100vw"
-              className="object-cover object-[50%_25%] motion-safe:animate-[kenburns_9s_ease-out_forwards]"
-            />
-          </div>
-        );
-      })}
+      {currentPhoto && (
+        <div key={currentPhoto.src} className="absolute inset-0">
+          <Image
+            src={currentPhoto.src}
+            alt={currentPhoto.alt}
+            fill
+            priority={prevIndex === null}
+            sizes="100vw"
+            className="object-cover object-[50%_25%] motion-safe:animate-[kenburns_9s_ease-out_forwards]"
+          />
+        </div>
+      )}
+      {previousPhoto && (
+        <div
+          key={previousPhoto.src + "-out"}
+          className={
+            "absolute inset-0 " +
+            (reducedMotion
+              ? "opacity-0"
+              : "transition-opacity duration-1000 ease-in-out " +
+                (fadingOut ? "opacity-0" : "opacity-100"))
+          }
+          aria-hidden="true"
+        >
+          <Image
+            src={previousPhoto.src}
+            alt=""
+            fill
+            sizes="100vw"
+            className="object-cover object-[50%_25%]"
+          />
+        </div>
+      )}
 
       <div
         className="absolute inset-0"
