@@ -2,8 +2,6 @@ import type { Metadata } from "next";
 import { Mail, Phone, Clock } from "lucide-react";
 import { Section } from "@/components/section";
 import { ContactForm } from "@/components/contact-form";
-import { ContactPhotoMarquee } from "@/components/contact-photo-marquee";
-import { everyPhoto } from "@/lib/shoots";
 
 export const metadata: Metadata = {
   title: "Contact",
@@ -13,9 +11,8 @@ export const metadata: Metadata = {
 
 export default function ContactPage() {
   return (
-    <Section className="relative overflow-hidden pt-16 pb-20 sm:pt-20">
-      <ContactPhotoMarquee photos={everyPhoto} />
-      <div className="relative mx-auto max-w-2xl rounded-2xl border-2 border-primary bg-primary px-8 py-10 text-center shadow-[0_0_60px_-15px_var(--color-primary)]">
+    <Section className="pt-16 pb-20 sm:pt-20">
+      <div className="mx-auto max-w-2xl rounded-2xl border-2 border-primary bg-primary px-8 py-10 text-center shadow-[0_0_60px_-15px_var(--color-primary)]">
         <h1 className="text-4xl font-medium italic tracking-tight text-primary-foreground sm:text-5xl">
           Let&apos;s Talk
         </h1>
@@ -25,7 +22,7 @@ export default function ContactPage() {
         </p>
       </div>
 
-      <div className="relative mx-auto mt-12 grid max-w-4xl gap-10 md:grid-cols-[1fr_1.3fr]">
+      <div className="mx-auto mt-12 grid max-w-4xl gap-10 md:grid-cols-[1fr_1.3fr]">
         <div className="space-y-6">
           <a
             href="mailto:rpetersen2008@gmail.com"
