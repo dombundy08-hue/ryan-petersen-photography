@@ -7,6 +7,16 @@ import type { Photo, PhotoCategory } from "@/lib/shoots";
 
 const INTERVAL_MS = 5000;
 
+/**
+ * Default crop for the 21:9 featured tile.
+ *
+ * This is an extremely wide letterbox, so a centred crop of a portrait
+ * photo keeps the torso and loses the head. 30% pulls the visible band up
+ * to where faces actually sit. Any photo that still crops badly can set
+ * its own `objectPosition` in the admin, which overrides this.
+ */
+const FEATURE_CROP = "50% 30%";
+
 export interface CategoryFeaturePhoto extends Photo {
   shootSlug: string;
   shootTitle: string;
@@ -100,8 +110,13 @@ export function CategoryFeatureTile({
           alt={active.alt}
           fill
           sizes="100vw"
-          style={{ objectPosition: active.objectPosition ?? "50% 50%" }}
-          className="object-cover transition-transform duration-500 group-hover:scale-105"
+          style={{ objectPosition: active.objectPosition ?? FEATURE_CROP }}
+          /* No hover scale here. Each cycle mounts a NEW element for the
+             incoming photo, so with the cursor over the tile it mounted
+             already-scaled while the outgoing one sat at 1.0 — a visible
+             jump on every swap, which read as random zooming in and out.
+             The crossfade is the effect; it doesn't need a second one. */
+          className="object-cover"
         />
       </div>
       {previous && (
@@ -121,7 +136,7 @@ export function CategoryFeatureTile({
             alt=""
             fill
             sizes="100vw"
-            style={{ objectPosition: previous.objectPosition ?? "50% 50%" }}
+            style={{ objectPosition: previous.objectPosition ?? FEATURE_CROP }}
             className="object-cover"
           />
         </div>
