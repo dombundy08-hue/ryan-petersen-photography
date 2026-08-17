@@ -1,10 +1,12 @@
 import type { Metadata } from "next";
+import { Fragment } from "react";
 import { canonical } from "@/lib/site";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Section } from "@/components/section";
 import { CategoryFeatureTile } from "@/components/category-feature-tile";
 import { CATEGORIES, categoryFeaturePhotos } from "@/lib/categories";
+import { Bridge } from "@/components/bridge";
 
 export const metadata: Metadata = {
   title: "Portfolio",
@@ -18,10 +20,11 @@ export const metadata: Metadata = {
 // last instead of one flat background throughout.
 /* One theme per category so the three sections read as different rooms
    rather than three shades of the same brown. Nature gets moss. */
-const SECTION_THEME: Record<string, string> = {
-  senior: "ember",
-  family: "dusk",
-  nature: "moss",
+/* The page descends: golden hour at the top, night at the CTA. */
+const SECTION_THEME: Record<string, "sun" | "clay" | "dusk"> = {
+  senior: "sun",
+  family: "clay",
+  nature: "dusk",
 };
 
 /**
@@ -70,16 +73,18 @@ export default function PortfolioPage() {
         </div>
       </Section>
 
-      {CATEGORIES.map(({ slug, title, description, noun, nounPlural }) => {
+      {CATEGORIES.map(({ slug, title, description, noun, nounPlural }, i) => {
         const photos = categoryFeaturePhotos(slug);
         if (photos.length === 0) return null;
+        const prev = i === 0 ? "night" : SECTION_THEME[CATEGORIES[i - 1].slug];
 
         return (
+          <Fragment key={slug}>
+          <Bridge from={prev} to={SECTION_THEME[slug]} />
           <Section
-            key={slug}
             id={slug}
             data-theme={SECTION_THEME[slug]}
-            className="scroll-mt-16 border-t border-border"
+            className="scroll-mt-16"
           >
             <div className="mb-8 flex flex-col gap-1 sm:flex-row sm:items-end sm:justify-between">
               <div>
@@ -104,6 +109,7 @@ export default function PortfolioPage() {
               nounPlural={nounPlural}
             />
           </Section>
+          </Fragment>
         );
       })}
 
@@ -111,11 +117,8 @@ export default function PortfolioPage() {
           Without this, someone wanting couples or event photos assumes he
           doesn't do it and leaves — and there's no page for those searches
           to land on either. */}
-      <Section
-        id="requested"
-        data-theme="sand"
-        className="scroll-mt-16 border-t border-border"
-      >
+      <Bridge from="dusk" to="slate" />
+      <Section id="requested" data-theme="slate" className="scroll-mt-16">
         <div className="mb-8">
           <h2 className="text-2xl font-medium italic tracking-tight text-foreground">
             By Request
@@ -149,7 +152,8 @@ export default function PortfolioPage() {
         </div>
       </Section>
 
-      <Section data-theme="night" className="border-t border-border">
+      <Bridge from="slate" to="night" />
+      <Section data-theme="night">
         <div className="mx-auto max-w-xl text-center">
           <h2 className="text-2xl font-semibold tracking-tight text-foreground">
             Want to be featured in this gallery?

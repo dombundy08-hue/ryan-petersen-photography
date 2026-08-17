@@ -8,6 +8,7 @@ import { JsonLd } from "@/components/json-ld";
 import { canonical } from "@/lib/site";
 import { breadcrumbSchema } from "@/lib/schema";
 import { CATEGORIES, getCategory, categoryEntries } from "@/lib/categories";
+import { Bridge } from "@/components/bridge";
 
 /**
  * The directory for one category — one profile card per person, family or
@@ -52,7 +53,7 @@ export default async function CategoryDirectoryPage({
         ])}
       />
 
-      <Section data-theme="night" className="pt-16 pb-12 sm:pt-20">
+      <Section data-theme="sun" className="pt-16 pb-12 sm:pt-20">
         <Link
           href={`/portfolio#${meta.slug}`}
           className="inline-flex items-center gap-1.5 text-sm text-muted-foreground transition-colors hover:text-foreground"
@@ -73,7 +74,9 @@ export default async function CategoryDirectoryPage({
       </Section>
 
       {entries.length > 0 && (
-        <Section data-theme="ember" className="border-t border-border">
+        <>
+          <Bridge from="sun" to="clay" />
+        <Section data-theme="clay">
           <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
             {entries.map((entry) => (
               <Link
@@ -111,7 +114,8 @@ export default async function CategoryDirectoryPage({
               </Link>
             ))}
           </div>
-        </Section>
+          </Section>
+        </>
       )}
     </>
   );

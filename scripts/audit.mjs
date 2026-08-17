@@ -85,15 +85,31 @@ function contrast(a, b) {
 
 /* ---------- 1. theme contrast, from the declared tokens ---------- */
 
+/**
+ * Resolve one level of var(--x) against :root.
+ *
+ * Grounds are declared once as --flow-* so a Bridge gradient can name two
+ * of them without either theme being mounted, which means a theme's
+ * --background is `var(--flow-dusk)`, not a literal. Without this the
+ * audit fell back to the :root value and measured every dusk pairing
+ * against the wrong colour — seven failures that were not real.
+ */
+function resolve(value, root) {
+  const m = value.match(/^var\(\s*--([\w-]+)\s*\)$/);
+  return m ? (root[m[1]] ?? value) : value;
+}
+
 function auditThemes() {
   const css = readFileSync("src/app/globals.css", "utf8");
 
+  // EVERY :root block, not just the first. The ground values live in a
+  // separate :root from the base palette, and reading only the first one
+  // left --flow-* undefined — so var(--flow-slate) failed to resolve and
+  // the audit reported it as an unparseable token.
   const root = {};
-  const rootBlock = css.match(/:root\s*\{([\s\S]*?)\}/);
-  for (const [, k, v] of (rootBlock?.[1] ?? "").matchAll(
-    /--([\w-]+):\s*(#[0-9a-fA-F]{3,8})/g
-  ))
-    root[k] = v;
+  for (const [, block] of css.matchAll(/:root\s*\{([\s\S]*?)\}/g))
+    for (const [, k, v] of block.matchAll(/--([\w-]+):\s*(#[0-9a-fA-F]{3,8})/g))
+      root[k] = v;
 
   const themes = [...css.matchAll(/\[data-theme="(\w[\w-]*)"\]\s*\{([\s\S]*?)\}/g)];
   if (themes.length === 0) fail("themes", "no [data-theme] blocks found");
@@ -117,12 +133,12 @@ function auditThemes() {
     // or var() would otherwise keep the :root value and the audit would
     // measure a colour the page never renders — passing a failing theme.
     for (const [, k, v] of body.matchAll(/--([\w-]+):\s*([^;]+);/g)) {
-      const val = v.trim();
+      const val = resolve(v.trim(), root);
       if (/^#[0-9a-fA-F]{3,8}$/.test(val)) t[k] = val;
       else
         fail(
           "themes",
-          `theme "${name}": --${k} is "${val}", not hex — this audit can only verify hex`
+          `theme "${name}": --${k} resolves to "${val}", not hex — this audit can only verify hex`
         );
     }
 

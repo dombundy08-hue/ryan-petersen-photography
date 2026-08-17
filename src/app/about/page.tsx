@@ -4,6 +4,7 @@ import { Mountain, Car, Trophy, Gamepad2, User } from "lucide-react";
 import { Section } from "@/components/section";
 import { PhotoCarousel } from "@/components/photo-carousel";
 import { aboutPhoto, aboutMorePhotos } from "@/lib/settings";
+import { Bridge } from "@/components/bridge";
 
 export const metadata: Metadata = {
   title: "About Ryan",
@@ -29,7 +30,7 @@ export default function AboutPage() {
 
   return (
     <>
-      <Section data-theme="night" className="pt-16 pb-12 sm:pt-20">
+      <Section data-theme="sun" className="pt-16 pb-12 sm:pt-20">
         <div className="mx-auto max-w-2xl text-center">
           <h1 className="text-4xl font-medium italic tracking-tight text-foreground sm:text-5xl">
             About Me
@@ -37,7 +38,8 @@ export default function AboutPage() {
         </div>
       </Section>
 
-      <Section data-theme="sand" className="border-t border-border pt-0">
+      <Bridge from="sun" to="clay" />
+      <Section data-theme="clay" className="pt-0">
         <div className="mx-auto grid max-w-4xl gap-10 md:grid-cols-[1.1fr_1fr] md:items-start">
           <div className="mx-auto w-full max-w-sm md:max-w-none">
             {aboutPhoto ? (
@@ -98,7 +100,8 @@ export default function AboutPage() {
         </div>
       </Section>
 
-      <Section data-theme="ember" className="border-t border-border">
+      <Bridge from="clay" to="night" />
+      <Section data-theme="night">
         <div className="mx-auto max-w-2xl">
           <h2 className="text-center font-heading text-lg font-semibold text-foreground">
             When I&apos;m not shooting
