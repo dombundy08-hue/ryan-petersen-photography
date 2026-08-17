@@ -70,7 +70,7 @@ export default function PortfolioPage() {
         </div>
       </Section>
 
-      {CATEGORIES.map(({ slug, title, description, noun }) => {
+      {CATEGORIES.map(({ slug, title, description, noun, nounPlural }) => {
         const photos = categoryFeaturePhotos(slug);
         if (photos.length === 0) return null;
 
@@ -101,7 +101,7 @@ export default function PortfolioPage() {
               category={slug}
               photos={photos}
               noun={noun}
-              nounPlural={noun === "family" ? "families" : `${noun}s`}
+              nounPlural={nounPlural}
             />
           </Section>
         );

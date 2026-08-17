@@ -16,6 +16,8 @@ export interface CategoryMeta {
   description: string;
   /** What one entry in this category is called. */
   noun: string;
+  /** Explicit plural — deriving it with +"s" gives "seriess". */
+  nounPlural: string;
   metaTitle: string;
   metaDescription: string;
 }
@@ -28,6 +30,7 @@ export const CATEGORIES: CategoryMeta[] = [
     description:
       "A milestone worth doing right — portraits that actually look like you.",
     noun: "senior",
+    nounPlural: "seniors",
     metaTitle: "Senior Portraits",
     metaDescription:
       "Senior portrait sessions in Frederick, Firestone, Longmont and across northern Colorado — shot fully manual by Ryan Petersen.",
@@ -39,6 +42,7 @@ export const CATEGORIES: CategoryMeta[] = [
     description:
       "Relaxed sessions built around your family, not a stiff studio pose.",
     noun: "family",
+    nounPlural: "families",
     metaTitle: "Family Photography",
     metaDescription:
       "Family photography sessions in Frederick, Firestone, Longmont and across northern Colorado — relaxed, natural, and built around your family.",
@@ -50,6 +54,7 @@ export const CATEGORIES: CategoryMeta[] = [
     description:
       "Landscapes and outdoor moments shot with an eye for natural light.",
     noun: "series",
+    nounPlural: "series",
     metaTitle: "Nature & Landscape Photography",
     metaDescription:
       "Landscape and outdoor photography across the Colorado Front Range — shot fully manual by Ryan Petersen.",

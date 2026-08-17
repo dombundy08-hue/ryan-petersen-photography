@@ -69,6 +69,9 @@ export function CategoryFeatureTile({
 
   useEffect(() => {
     if (photos.length <= 2) return;
+    // The server must render the unshuffled order and the client reorder
+    // after mount; randomising during render is a hydration mismatch.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setOrder((prev) => {
       const [first, ...rest] = prev;
       for (let i = rest.length - 1; i > 0; i--) {

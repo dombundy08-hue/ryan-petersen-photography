@@ -107,12 +107,24 @@ function auditThemes() {
     ["primary", "background", 3.0], // used for links/accents, not body copy
     ["primary-foreground", "primary", 4.5],
     ["secondary-foreground", "secondary", 4.5],
+    ["accent-foreground", "accent", 4.5],
+    ["destructive", "background", 4.5],
   ];
 
   for (const [, name, body] of themes) {
     const t = { ...root };
-    for (const [, k, v] of body.matchAll(/--([\w-]+):\s*(#[0-9a-fA-F]{3,8})/g))
-      t[k] = v;
+    // Every declaration, then check it parsed. A token written as oklch()
+    // or var() would otherwise keep the :root value and the audit would
+    // measure a colour the page never renders — passing a failing theme.
+    for (const [, k, v] of body.matchAll(/--([\w-]+):\s*([^;]+);/g)) {
+      const val = v.trim();
+      if (/^#[0-9a-fA-F]{3,8}$/.test(val)) t[k] = val;
+      else
+        fail(
+          "themes",
+          `theme "${name}": --${k} is "${val}", not hex — this audit can only verify hex`
+        );
+    }
 
     for (const [fg, bg, min] of PAIRS) {
       if (!t[fg] || !t[bg]) continue;
@@ -123,6 +135,16 @@ function auditThemes() {
           `theme "${name}": --${fg} ${t[fg]} on --${bg} ${t[bg]} = ${r.toFixed(2)}:1 (needs ${min})`
         );
     }
+    // --border and --input must move together. A theme that restyles its
+    // borders but leaves --input inherits the root hue, which is how the
+    // contact page ended up with brown field borders in a slate section.
+    const sets = (tok) => new RegExp(`--${tok}\s*:`).test(body);
+    if (sets("border") && !sets("input"))
+      fail(
+        "themes",
+        `theme "${name}" overrides --border but not --input — form fields will keep the root hue`
+      );
+
     notes.push(
       `theme "${name}": fg/bg ${contrast(t.foreground, t.background).toFixed(1)}:1`
     );
@@ -133,7 +155,7 @@ function auditThemes() {
 
 function auditCanonicals(pages) {
   const seen = new Map();
-  for (const { route, html, file } of pages) {
+  for (const { route, html } of pages) {
     if (!isContent(route)) continue;
     const m = html.match(/<link rel="canonical" href="([^"]+)"/);
     if (!m) {
@@ -147,6 +169,15 @@ function auditCanonicals(pages) {
         `${route} and ${seen.get(url)} share a canonical (${url}) — one is declaring itself a duplicate of the other`
       );
     else seen.set(url, route);
+
+    // Unique and slash-terminated is not enough: a typo'd canonical
+    // pointing at a page that doesn't exist passes both of those.
+    const declared = new URL(url).pathname;
+    if (declared !== route)
+      fail(
+        "canonical",
+        `${route} declares its canonical as ${declared} — they must match`
+      );
 
     if (!url.endsWith("/"))
       warn("canonical", `${route} canonical lacks a trailing slash: ${url}`);
@@ -210,7 +241,10 @@ function auditImages(pages) {
     for (const [tag] of html.matchAll(/<img\b[^>]*>/g)) {
       if (!/\salt=/.test(tag)) {
         missingAlt++;
-        warn("alt", `${route}: an <img> has no alt attribute`);
+        fail("alt", `${route}: an <img> has no alt attribute`);
+      } else if (/\salt=""/.test(tag) && !/aria-hidden="true"/.test(tag)) {
+        // Empty alt is correct only for decoration, which must say so.
+        warn("alt", `${route}: <img alt=""> that is not aria-hidden`);
       }
     }
   }
@@ -221,8 +255,15 @@ function auditImages(pages) {
 
 function auditLinks(pages) {
   const routes = new Set(pages.map((p) => p.route));
+  // next.config.ts supports a GH Pages basePath, which prefixes every
+  // internal href. Without stripping it, every link on every page reads
+  // as broken — a false failure across the whole site.
+  const base = process.env.GH_PAGES_BASE_PATH ?? "";
+  const strip = (h) => (base && h.startsWith(base) ? h.slice(base.length) || "/" : h);
+
   for (const { route, html } of pages) {
-    for (const [, href] of html.matchAll(/href="(\/[^"#?]*)"/g)) {
+    for (const [, raw] of html.matchAll(/href="(\/[^"#?]*)"/g)) {
+      const href = strip(raw);
       const target = href.endsWith("/") ? href : `${href}/`;
       if (
         routes.has(target) ||
@@ -243,10 +284,19 @@ function auditIndexing(pages) {
     ? readFileSync(join(OUT, "robots.txt"), "utf8")
     : "";
   const disallowed = /Disallow:\s*\/\s*$/m.test(robots);
-  const home = pages.find((p) => p.route === "/");
-  const noindex = /<meta name="robots" content="[^"]*noindex/.test(
-    home?.html ?? ""
+  // Every content page, not just home — one page with a stray
+  // page-level noindex while robots.txt allows crawling is exactly the
+  // drift this check exists to catch.
+  const content = pages.filter((p) => isContent(p.route));
+  const flagged = content.filter((p) =>
+    /<meta name="robots" content="[^"]*noindex/.test(p.html)
   );
+  if (flagged.length && flagged.length !== content.length)
+    fail(
+      "indexing",
+      `${flagged.length} of ${content.length} pages carry noindex — it should be all or none`
+    );
+  const noindex = flagged.length === content.length && content.length > 0;
 
   // These two must agree. A disallowed page can still be indexed if
   // something links to it, so robots.txt alone is not the guard.

@@ -119,6 +119,7 @@
   --muted: #17130E;
   --muted-foreground: #B4A794; /* 9.5:1 */
   --border: #2C251C;
+  --input: #2C251C;
   --accent: #201A13;
 }
 
@@ -130,7 +131,9 @@
   --muted: #2F231A;
   --muted-foreground: #C4B4A0; /* 8.4:1 */
   --border: #443426;
+  --input: #443426;
   --accent: #3A2C20;
+  --destructive: #EE7A72; /* 5.9:1 — the root red is 4.36:1 here */
 }
 
 /* DUSK — cool slate. Reads unmistakably apart from the browns. */
@@ -141,6 +144,7 @@
   --muted: #1D212A;
   --muted-foreground: #A9B3C4; /* 9.1:1 */
   --border: #2E3542;
+  --input: #2E3542;
   --accent: #262B36;
 }
 
@@ -152,6 +156,7 @@
   --muted: #1C2117;
   --muted-foreground: #B2BCA3; /* 9.3:1 */
   --border: #2E3625;
+  --input: #2E3625;
   --accent: #262C1F;
 }
 
@@ -173,6 +178,7 @@
   --accent: #E8E0D2;
   --accent-foreground: #1A1510;
   --ring: #7A5A1E;
+  --destructive: #9B2C22; /* 6.6:1 — the root red is 3.4:1 here */
 }
 
 .dark {

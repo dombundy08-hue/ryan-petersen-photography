@@ -4,7 +4,7 @@ import "./globals.css";
 import { Navbar } from "@/components/navbar";
 import { Footer } from "@/components/footer";
 import { JsonLd } from "@/components/json-ld";
-import { SITE_URL, SITE_DESCRIPTION, IS_LIVE_DOMAIN, canonical } from "@/lib/site";
+import { SITE_URL, SITE_DESCRIPTION, IS_LIVE_DOMAIN } from "@/lib/site";
 import { businessSchema, personSchema } from "@/lib/schema";
 
 const fraunces = Fraunces({
