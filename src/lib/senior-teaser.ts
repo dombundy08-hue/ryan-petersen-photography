@@ -3,33 +3,51 @@ import { shootsByCategory, type Photo } from "./shoots";
 const SLOT_COUNT = 5;
 
 export interface SeniorTeaserEntry {
-  kind: "real" | "placeholder";
+  kind: "real";
   name: string;
-  slug?: string;
+  slug: string;
   photo?: Photo;
 }
 
 /**
- * The pool of senior "people" tiles shown on the portfolio overview's
- * teaser grid and the /portfolio/senior directory — real shoots first,
- * padded out to SLOT_COUNT with generic "coming soon" placeholders (never
- * fabricated photos/identities) so the section reads as intentionally
- * full even with few real sessions on file.
+ * The senior sessions Ryan has actually shot, one entry per person.
+ *
+ * Previously this padded the list out to SLOT_COUNT with "Coming Soon"
+ * tiles so the grid looked full. Those are gone: empty placeholders
+ * advertise that there is barely any work here, which is the opposite of
+ * what the section is for. A short row of real people reads better than a
+ * long row that is mostly nothing.
  */
 export function seniorTeaserPool(): SeniorTeaserEntry[] {
-  const real: SeniorTeaserEntry[] = shootsByCategory("senior")
+  return shootsByCategory("senior")
     .slice(0, SLOT_COUNT)
     .map((shoot) => ({
-      kind: "real",
+      kind: "real" as const,
       name: shoot.subjectName ?? shoot.title,
       slug: shoot.slug,
-      photo: shoot.photos.find((p) => p.heroEligible !== false) ?? shoot.photos[0],
+      photo:
+        shoot.photos.find((p) => p.heroEligible !== false) ?? shoot.photos[0],
     }));
+}
 
-  const placeholders: SeniorTeaserEntry[] = Array.from(
-    { length: Math.max(0, SLOT_COUNT - real.length) },
-    () => ({ kind: "placeholder", name: "Coming Soon" })
-  );
-
-  return [...real, ...placeholders];
+/**
+ * One representative photo per senior, for the portfolio's featured tile.
+ *
+ * The tile cycles across *people* rather than across every photo, so two
+ * shots of the same person never follow each other — each fade shows a
+ * different senior.
+ */
+export function seniorFeaturePhotos() {
+  return shootsByCategory("senior")
+    .map((shoot) => {
+      const photo =
+        shoot.photos.find((p) => p.heroEligible !== false) ?? shoot.photos[0];
+      if (!photo) return null;
+      return {
+        ...photo,
+        shootSlug: shoot.slug,
+        shootTitle: shoot.subjectName ?? shoot.title,
+      };
+    })
+    .filter((p): p is NonNullable<typeof p> => p !== null);
 }

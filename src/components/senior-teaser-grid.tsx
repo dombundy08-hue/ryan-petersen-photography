@@ -3,7 +3,6 @@
 import { useLayoutEffect, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { User } from "lucide-react";
 import type { SeniorTeaserEntry } from "@/lib/senior-teaser";
 
 const TILE_SIZES = "(max-width: 640px) 45vw, (max-width: 1024px) 30vw, 18vw";
@@ -39,31 +38,6 @@ function RealSlot({ entry }: { entry: SeniorTeaserEntry }) {
   );
 }
 
-function PlaceholderSlot() {
-  return (
-    // Same destination as RealSlot — the directory, not a direct booking
-    // link (that's what the directory's own placeholder cards are for).
-    <Link
-      href="/portfolio/senior"
-      role="img"
-      aria-label="Future senior session — coming soon"
-      className="group relative flex aspect-square flex-col items-center justify-center gap-2 overflow-hidden rounded-xl border border-border bg-gradient-to-br from-[#D3A054]/20 via-[#5C4F3E]/15 to-[#1B1712] text-center"
-    >
-      <User
-        className="size-7 text-foreground/40"
-        strokeWidth={1.5}
-        aria-hidden="true"
-      />
-      <span className="text-xs font-medium text-muted-foreground">
-        Coming Soon
-      </span>
-      <span className="text-[11px] text-primary opacity-0 transition-opacity group-hover:opacity-100">
-        View sessions &rarr;
-      </span>
-    </Link>
-  );
-}
-
 export function SeniorTeaserGrid({
   entries,
 }: {
@@ -95,11 +69,7 @@ export function SeniorTeaserGrid({
     <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-5">
       {order.map((entryIndex) => {
         const entry = entries[entryIndex];
-        return entry.kind === "real" ? (
-          <RealSlot key={entry.slug} entry={entry} />
-        ) : (
-          <PlaceholderSlot key={`placeholder-${entryIndex}`} />
-        );
+        return <RealSlot key={entry.slug} entry={entry} />;
       })}
     </div>
   );

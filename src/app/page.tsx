@@ -5,6 +5,15 @@ import { Button } from "@/components/ui/button";
 import { Section } from "@/components/section";
 import { HeroCarousel } from "@/components/hero-carousel";
 import { allPhotos, shootsByCategory, type PhotoCategory } from "@/lib/shoots";
+import type { Metadata } from "next";
+import { canonical } from "@/lib/site";
+
+// The home page inherits its title and description from the root layout,
+// but the canonical must be declared here — the layout deliberately sets
+// none, so that an unset page can never silently inherit the wrong one.
+export const metadata: Metadata = {
+  alternates: { canonical: canonical() },
+};
 
 const SPECIALTIES: {
   title: string;
@@ -34,6 +43,9 @@ const SPECIALTIES: {
     category: "nature",
   },
 ];
+
+/** Deep-links the fourth home tile straight to the By Request section. */
+const REQUESTED_HREF = "/portfolio#requested";
 
 const PROCESS = [
   { step: "1", title: "Reach Out", description: "Send a message with what you're looking for." },
@@ -108,7 +120,7 @@ export default function Home() {
           })}
 
           <Link
-            href="/contact"
+            href={REQUESTED_HREF}
             className="group relative flex aspect-[3/4] flex-col justify-end overflow-hidden rounded-xl border border-primary/40 bg-secondary"
           >
             <div className="absolute inset-0 flex items-center justify-center">
@@ -134,7 +146,7 @@ export default function Home() {
                 if you can picture it, I&apos;ll shoot it.
               </p>
               <span className="mt-3 inline-flex items-center gap-1 text-sm font-medium text-primary">
-                Tell me about it
+                See what I&apos;ll shoot
                 <ArrowRight className="size-4 transition-transform group-hover:translate-x-0.5" />
               </span>
             </div>

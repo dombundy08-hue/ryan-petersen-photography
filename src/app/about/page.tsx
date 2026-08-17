@@ -1,13 +1,15 @@
 import type { Metadata } from "next";
+import { canonical } from "@/lib/site";
 import { Mountain, Car, Trophy, Gamepad2, User } from "lucide-react";
 import { Section } from "@/components/section";
 import { PhotoCarousel } from "@/components/photo-carousel";
 import { aboutPhoto, aboutMorePhotos } from "@/lib/settings";
 
 export const metadata: Metadata = {
-  title: "About",
+  title: "About Ryan",
   description:
-    "Meet Ryan Petersen — a local photographer focused on senior, family, and nature photography.",
+    "Meet Ryan Petersen, a senior, family and nature photographer based in Frederick, Colorado. Fully manual, honest, and focused on making you comfortable on the day.",
+  alternates: { canonical: canonical("about") },
 };
 
 const HOBBIES = [

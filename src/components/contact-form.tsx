@@ -136,12 +136,19 @@ export function ContactForm() {
 
       <div className="space-y-2">
         <Label htmlFor="message">Message</Label>
+        {/* Guidance sits here, not in a placeholder. Grey text inside the
+            box reads as content that's already there, and it disappears
+            the moment you start typing — so it's gone exactly when you
+            need it. */}
+        <p id="message-hint" className="text-sm text-muted-foreground">
+          Roughly when, where, how many people — whatever you have so far.
+        </p>
         <Textarea
           id="message"
           name="message"
           required
           rows={5}
-          placeholder="Tell me a bit about what you're looking for — date, location, anything you have in mind."
+          aria-describedby="message-hint"
         />
       </div>
 

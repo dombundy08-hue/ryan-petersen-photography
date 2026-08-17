@@ -6,6 +6,9 @@ import { ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Section } from "@/components/section";
 import { shoots, getShoot } from "@/lib/shoots";
+import { JsonLd } from "@/components/json-ld";
+import { canonical } from "@/lib/site";
+import { shootSchema, breadcrumbSchema } from "@/lib/schema";
 
 // Column count scales to the shoot's real photo count, so a small
 // gallery (even a single photo) always reads as intentionally full
@@ -31,6 +34,15 @@ export async function generateMetadata({
   return {
     title: shoot.title,
     description: shoot.description,
+    alternates: {
+      canonical: canonical(`portfolio/${shoot.category}/${shoot.slug}`),
+    },
+    openGraph: {
+      title: shoot.title,
+      description: shoot.description,
+      type: "article",
+      images: shoot.photos.slice(0, 1).map((p) => ({ url: p.src })),
+    },
   };
 }
 
@@ -43,6 +55,14 @@ export default async function ShootPage({
 
   return (
     <Section className="border-t border-border bg-muted pt-16 pb-20 sm:pt-20">
+      <JsonLd data={shootSchema(shoot)} />
+      <JsonLd
+        data={breadcrumbSchema([
+          { name: "Home", route: "" },
+          { name: "Portfolio", route: "portfolio" },
+          { name: shoot.title, route: `portfolio/${shoot.category}/${shoot.slug}` },
+        ])}
+      />
       <Link
         href={`/portfolio#${shoot.category}`}
         className="inline-flex items-center gap-1.5 text-sm text-muted-foreground transition-colors hover:text-foreground"

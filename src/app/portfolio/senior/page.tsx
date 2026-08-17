@@ -1,13 +1,14 @@
 import type { Metadata } from "next";
+import { canonical } from "@/lib/site";
 import Image from "next/image";
 import Link from "next/link";
-import { User } from "lucide-react";
 import { Section } from "@/components/section";
 import { seniorTeaserPool } from "@/lib/senior-teaser";
 
 export const metadata: Metadata = {
-  title: "Senior Sessions",
-  description: "Every senior portrait session by Ryan Petersen.",
+  title: "Senior Portraits",
+  description: "Senior portrait sessions in Frederick, Firestone, Longmont and across northern Colorado — shot fully manual by Ryan Petersen.",
+  alternates: { canonical: canonical("portfolio/senior") },
 };
 
 export default function SeniorDirectoryPage() {
@@ -28,8 +29,8 @@ export default function SeniorDirectoryPage() {
 
       <Section className="border-t border-border bg-muted">
         <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
-          {entries.map((entry, i) =>
-            entry.kind === "real" && entry.photo && entry.slug ? (
+          {entries.map((entry) =>
+            entry.photo ? (
               <Link
                 key={entry.slug}
                 href={`/portfolio/senior/${entry.slug}`}
@@ -58,27 +59,7 @@ export default function SeniorDirectoryPage() {
                   </p>
                 </div>
               </Link>
-            ) : (
-              <Link
-                key={`placeholder-${i}`}
-                href="/contact"
-                role="img"
-                aria-label="Future senior session — coming soon, click to book"
-                className="group relative flex aspect-[4/5] flex-col items-center justify-center gap-2 overflow-hidden rounded-xl border border-border bg-gradient-to-br from-[#D3A054]/20 via-[#5C4F3E]/15 to-[#1B1712] text-center"
-              >
-                <User
-                  className="size-8 text-foreground/40"
-                  strokeWidth={1.5}
-                  aria-hidden="true"
-                />
-                <span className="text-sm font-medium text-muted-foreground">
-                  Coming Soon
-                </span>
-                <span className="text-xs text-primary opacity-0 transition-opacity group-hover:opacity-100">
-                  Book a session &rarr;
-                </span>
-              </Link>
-            )
+            ) : null
           )}
         </div>
       </Section>

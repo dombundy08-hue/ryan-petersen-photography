@@ -1,0 +1,26 @@
+{
+  "name": "RyanShutter",
+  "legalName": "RyanShutter Photography",
+  "photographer": "Ryan Petersen",
+  "email": "rpetersen2008@gmail.com",
+  "telephone": "+1-720-600-8854",
+  "city": "Frederick",
+  "region": "CO",
+  "country": "US",
+  "serviceArea": [
+    "Frederick",
+    "Firestone",
+    "Dacono",
+    "Erie",
+    "Mead",
+    "Longmont",
+    "Berthoud",
+    "Loveland",
+    "Greeley",
+    "Boulder",
+    "Broomfield"
+  ],
+  "serviceAreaState": "Colorado",
+  "priceRange": "Free",
+  "sameAs": ["https://www.instagram.com/photography_ryn18_/"]
+}
