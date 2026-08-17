@@ -13,10 +13,33 @@ import path from "node:path";
  */
 const FALLBACK_URL = "https://ryanshutter.com";
 
-/** Never a trailing slash — callers append their own path. */
+/** The real domain. Anything else is a preview and must not be indexed. */
+const PRODUCTION_HOST = "ryanshutter.com";
+
+/**
+ * Never a trailing slash — callers append their own path.
+ *
+ * `process.env.URL` is set by Netlify to the deploy's own address, so a
+ * build on ryanshutter.netlify.app reports that rather than pretending to
+ * be the production domain it isn't yet.
+ */
 export const SITE_URL = (
-  process.env.NEXT_PUBLIC_SITE_URL ?? FALLBACK_URL
+  process.env.NEXT_PUBLIC_SITE_URL ??
+  process.env.URL ??
+  FALLBACK_URL
 ).replace(/\/$/, "");
+
+/**
+ * True only on the real domain.
+ *
+ * Until ryanshutter.com is bought and connected, the site lives on a
+ * netlify.app subdomain. Left alone it would be crawlable while every
+ * canonical pointed at a domain that doesn't resolve — the fastest way to
+ * confuse Google about which URL is real, and to get the temporary address
+ * indexed under the client's name. Everything is served with noindex until
+ * the domain is live, and it switches itself on the moment it is.
+ */
+export const IS_LIVE_DOMAIN = SITE_URL.includes(PRODUCTION_HOST);
 
 /**
  * next.config.ts sets trailingSlash: true, so the page that actually
