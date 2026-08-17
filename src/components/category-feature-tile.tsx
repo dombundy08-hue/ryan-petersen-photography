@@ -23,11 +23,12 @@ export interface CategoryFeaturePhoto extends Photo {
 }
 
 /**
- * The single full-width featured tile for a category with only one (or a
- * few) shoots — e.g. Family/Nature. Cycles through every photo across the
- * category (not just one shoot), each linking to its own parent shoot.
- * Separate from PhotoCarousel because the caption + href change per photo
- * as it cycles, which that component's fixed-box design doesn't support.
+ * The single full-width featured tile that heads each portfolio category.
+ * Cycles one representative photo per shoot, so consecutive fades show
+ * different people rather than two shots of the same one.
+ *
+ * The whole tile links to the category directory, not to the shoot
+ * currently on screen — see the note on the <Link>.
  *
  * Only the current + outgoing photo are ever mounted — see the note in
  * HeroCarousel for why mounting one <Image> per pool photo (even at
@@ -36,10 +37,16 @@ export interface CategoryFeaturePhoto extends Photo {
 export function CategoryFeatureTile({
   category,
   photos,
+  noun,
+  nounPlural,
 }: {
   category: PhotoCategory;
   photos: CategoryFeaturePhoto[];
+  /** What one entry is called, e.g. "senior", "family", "series". */
+  noun: string;
+  nounPlural: string;
 }) {
+  const count = photos.length;
   const [index, setIndex] = useState(0);
   const [prevIndex, setPrevIndex] = useState<number | null>(null);
   const [fadingOut, setFadingOut] = useState(false);
@@ -100,8 +107,13 @@ export function CategoryFeatureTile({
   const previous = prevIndex !== null ? photos[order[prevIndex]] : null;
 
   return (
+    /* Links to the category directory, NOT to whichever shoot happens to
+       be on screen. Linking to the active photo meant that picking a
+       specific person required waiting for their photo to cycle round —
+       the destination changed under the cursor. The tile advertises the
+       category; the directory is where you choose. */
     <Link
-      href={`/portfolio/${category}/${active.shootSlug}`}
+      href={`/portfolio/${category}`}
       className="group relative flex aspect-[21/9] flex-col justify-end overflow-hidden rounded-xl border border-border"
     >
       <div key={active.src} className="absolute inset-0">
@@ -148,9 +160,14 @@ export function CategoryFeatureTile({
             "linear-gradient(180deg, rgba(16,13,10,0) 50%, rgba(16,13,10,0.85) 100%)",
         }}
       />
+      {/* The name still labels whoever is on screen, but the call to
+          action says where the click actually goes, so the label changing
+          mid-cycle never implies the destination changed with it. */}
       <div className="relative p-5">
         <p className="font-medium text-foreground">{active.shootTitle}</p>
-        <p className="text-sm text-foreground/70">View shoot &rarr;</p>
+        <p className="text-sm text-foreground/70">
+          See all {count} {count === 1 ? noun : nounPlural} &rarr;
+        </p>
       </div>
     </Link>
   );

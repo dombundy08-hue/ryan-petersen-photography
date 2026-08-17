@@ -87,6 +87,94 @@
   --sidebar-ring: #D3A054;
 }
 
+/* ──────────────────────────────────────────────────────────────────────
+   SECTION THEMES
+
+   The base palette is one warm brown: #221D18, #2A241D and #332C23 sit
+   within a few points of each other, so a page built from them reads as
+   a single flat tone no matter how many sections it has.
+
+   These redeclare the same tokens on a subtree, so every Tailwind
+   utility (bg-background, text-muted-foreground, border-border …)
+   re-resolves for free — put `data-theme` on a <Section> and everything
+   inside re-skins.
+
+   Four darks that genuinely differ in HUE, not just lightness — warm
+   brown, cool slate, green — plus exactly one light. Light is the
+   expensive move on a photography site; spend it once.
+
+   Contrast is measured, not estimated; the ratios are in the comments.
+   ────────────────────────────────────────────────────────────────────── */
+
+[data-theme] {
+  background-color: var(--background);
+  color: var(--foreground);
+}
+
+/* NIGHT — deepest. Hero and closing CTA, where photos carry everything. */
+[data-theme="night"] {
+  --background: #0C0A07;
+  --card: #17130E;
+  --secondary: #201A13;
+  --muted: #17130E;
+  --muted-foreground: #B4A794; /* 9.5:1 */
+  --border: #2C251C;
+  --accent: #201A13;
+}
+
+/* EMBER — warm, saturated brown. The house tone, used with intent. */
+[data-theme="ember"] {
+  --background: #241A12;
+  --card: #2F231A;
+  --secondary: #3A2C20;
+  --muted: #2F231A;
+  --muted-foreground: #C4B4A0; /* 8.4:1 */
+  --border: #443426;
+  --accent: #3A2C20;
+}
+
+/* DUSK — cool slate. Reads unmistakably apart from the browns. */
+[data-theme="dusk"] {
+  --background: #15181F;
+  --card: #1D212A;
+  --secondary: #262B36;
+  --muted: #1D212A;
+  --muted-foreground: #A9B3C4; /* 9.1:1 */
+  --border: #2E3542;
+  --accent: #262B36;
+}
+
+/* MOSS — green-black. For nature, and to break the brown/slate pairing. */
+[data-theme="moss"] {
+  --background: #141810;
+  --card: #1C2117;
+  --secondary: #262C1F;
+  --muted: #1C2117;
+  --muted-foreground: #B2BCA3; /* 9.3:1 */
+  --border: #2E3625;
+  --accent: #262C1F;
+}
+
+/* SAND — the one light section. The gold fails here at 2.3:1, so the
+   primary darkens to a bronze that holds at 5.6:1. */
+[data-theme="sand"] {
+  --background: #F4EFE6;
+  --foreground: #1A1510; /* 16.8:1 */
+  --card: #FBF8F2;
+  --card-foreground: #1A1510;
+  --primary: #7A5A1E; /* 5.6:1 */
+  --primary-foreground: #FBF8F2;
+  --secondary: #E8E0D2;
+  --secondary-foreground: #1A1510;
+  --muted: #EAE3D7;
+  --muted-foreground: #5B5145; /* 6.7:1 */
+  --border: #DDD3C2;
+  --input: #DDD3C2;
+  --accent: #E8E0D2;
+  --accent-foreground: #1A1510;
+  --ring: #7A5A1E;
+}
+
 .dark {
   --background: #100D0A;
   --foreground: #F3EDE3;

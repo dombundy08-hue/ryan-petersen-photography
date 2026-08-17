@@ -4,8 +4,7 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Section } from "@/components/section";
 import { CategoryFeatureTile } from "@/components/category-feature-tile";
-import { shootsByCategory } from "@/lib/shoots";
-import { seniorFeaturePhotos } from "@/lib/senior-teaser";
+import { CATEGORIES, categoryFeaturePhotos } from "@/lib/categories";
 
 export const metadata: Metadata = {
   title: "Portfolio",
@@ -14,37 +13,15 @@ export const metadata: Metadata = {
   alternates: { canonical: canonical("portfolio") },
 };
 
-const CATEGORIES = [
-  {
-    id: "senior",
-    category: "senior" as const,
-    title: "Senior Photos",
-    description:
-      "A milestone worth doing right — portraits that actually look like you.",
-  },
-  {
-    id: "family",
-    category: "family" as const,
-    title: "Family Photos",
-    description:
-      "Relaxed sessions built around your family, not a stiff studio pose.",
-  },
-  {
-    id: "nature",
-    category: "nature" as const,
-    title: "Nature Photos",
-    description:
-      "Landscapes and outdoor moments shot with an eye for natural light.",
-  },
-];
-
 // Progressive brightening ramp down the page, same technique/tokens as
 // Home and About — each category section reads a little lighter than the
 // last instead of one flat background throughout.
-const SECTION_BG: Record<string, string> = {
-  senior: "bg-muted",
-  family: "bg-secondary",
-  nature: "bg-border",
+/* One theme per category so the three sections read as different rooms
+   rather than three shades of the same brown. Nature gets moss. */
+const SECTION_THEME: Record<string, string> = {
+  senior: "ember",
+  family: "dusk",
+  nature: "moss",
 };
 
 /**
@@ -93,63 +70,16 @@ export default function PortfolioPage() {
         </div>
       </Section>
 
-      {CATEGORIES.map(({ id, category, title, description }) => {
-        if (category === "senior") {
-          return (
-            <Section
-              key={id}
-              id={id}
-              className={`scroll-mt-16 border-t border-border ${SECTION_BG[id]}`}
-            >
-              <div className="mb-8 flex flex-col gap-1 sm:flex-row sm:items-end sm:justify-between">
-                <div>
-                  <h2 className="text-2xl font-medium italic tracking-tight text-foreground">
-                    {title}
-                  </h2>
-                  <p className="mt-1 text-sm text-muted-foreground">
-                    {description}
-                  </p>
-                </div>
-                <Link
-                  href="/portfolio/senior"
-                  className="text-sm font-medium text-primary hover:underline"
-                >
-                  See every senior session
-                </Link>
-              </div>
-              {/* Same single fading tile as Family and Nature, so all three
-                  sections read alike. It cycles one photo per person, so
-                  each fade lands on a different senior, and clicking goes
-                  to that person's own gallery. */}
-              <CategoryFeatureTile
-                category="senior"
-                photos={seniorFeaturePhotos()}
-              />
-            </Section>
-          );
-        }
-
-        const categoryShoots = shootsByCategory(category);
-        if (categoryShoots.length === 0) return null;
-
-        const allCategoryPhotos = categoryShoots.flatMap((shoot) =>
-          shoot.photos.map((photo) => ({
-            ...photo,
-            shootSlug: shoot.slug,
-            shootTitle: shoot.title,
-          }))
-        );
-        const heroSafePhotos = allCategoryPhotos.filter(
-          (photo) => photo.heroEligible !== false
-        );
-        const featurePhotos =
-          heroSafePhotos.length > 0 ? heroSafePhotos : allCategoryPhotos;
+      {CATEGORIES.map(({ slug, title, description, noun }) => {
+        const photos = categoryFeaturePhotos(slug);
+        if (photos.length === 0) return null;
 
         return (
           <Section
-            key={id}
-            id={id}
-            className={`scroll-mt-16 border-t border-border ${SECTION_BG[id]}`}
+            key={slug}
+            id={slug}
+            data-theme={SECTION_THEME[slug]}
+            className="scroll-mt-16 border-t border-border"
           >
             <div className="mb-8 flex flex-col gap-1 sm:flex-row sm:items-end sm:justify-between">
               <div>
@@ -160,8 +90,19 @@ export default function PortfolioPage() {
                   {description}
                 </p>
               </div>
+              <Link
+                href={`/portfolio/${slug}`}
+                className="text-sm font-medium text-primary hover:underline"
+              >
+                See every session
+              </Link>
             </div>
-            <CategoryFeatureTile category={category} photos={featurePhotos} />
+            <CategoryFeatureTile
+              category={slug}
+              photos={photos}
+              noun={noun}
+              nounPlural={noun === "family" ? "families" : `${noun}s`}
+            />
           </Section>
         );
       })}
@@ -172,7 +113,8 @@ export default function PortfolioPage() {
           to land on either. */}
       <Section
         id="requested"
-        className="scroll-mt-16 border-t border-border bg-secondary"
+        data-theme="sand"
+        className="scroll-mt-16 border-t border-border"
       >
         <div className="mb-8">
           <h2 className="text-2xl font-medium italic tracking-tight text-foreground">
@@ -207,7 +149,7 @@ export default function PortfolioPage() {
         </div>
       </Section>
 
-      <Section className="border-t border-border bg-[#5C4F3E]">
+      <Section data-theme="night" className="border-t border-border">
         <div className="mx-auto max-w-xl text-center">
           <h2 className="text-2xl font-semibold tracking-tight text-foreground">
             Want to be featured in this gallery?

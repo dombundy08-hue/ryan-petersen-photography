@@ -1,6 +1,7 @@
 import type { MetadataRoute } from "next";
 import { canonical } from "@/lib/site";
 import { shoots } from "@/lib/shoots";
+import { CATEGORIES } from "@/lib/categories";
 
 export const dynamic = "force-static";
 
@@ -17,10 +18,15 @@ export default function sitemap(): MetadataRoute.Sitemap {
   const staticRoutes = [
     { route: "", priority: 1 },
     { route: "/portfolio", priority: 0.9 },
-    { route: "/portfolio/senior", priority: 0.8 },
     { route: "/about", priority: 0.7 },
     { route: "/contact", priority: 0.7 },
   ];
+
+  // One directory per category, from the same list that generates them.
+  const categoryRoutes = CATEGORIES.map((c) => ({
+    route: `/portfolio/${c.slug}`,
+    priority: 0.8,
+  }));
 
   const shootRoutes = shoots.map((shoot) => ({
     route: `/portfolio/${shoot.category}/${shoot.slug}`,
@@ -30,7 +36,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
 
   const lastModified = new Date();
 
-  return [...staticRoutes, ...shootRoutes].map(({ route, priority }) => ({
+  return [...staticRoutes, ...categoryRoutes, ...shootRoutes].map(({ route, priority }) => ({
     url: canonical(route),
     lastModified,
     changeFrequency: route === "" ? "weekly" : "monthly",
