@@ -29,7 +29,7 @@ export default function AboutPage() {
 
   return (
     <>
-      <Section className="pt-16 pb-12 sm:pt-20">
+      <Section data-theme="night" className="pt-16 pb-12 sm:pt-20">
         <div className="mx-auto max-w-2xl text-center">
           <h1 className="text-4xl font-medium italic tracking-tight text-foreground sm:text-5xl">
             About Me
@@ -37,7 +37,7 @@ export default function AboutPage() {
         </div>
       </Section>
 
-      <Section className="border-t border-border bg-muted pt-0">
+      <Section data-theme="sand" className="border-t border-border pt-0">
         <div className="mx-auto grid max-w-4xl gap-10 md:grid-cols-[1.1fr_1fr] md:items-start">
           <div className="mx-auto w-full max-w-sm md:max-w-none">
             {aboutPhoto ? (
@@ -98,7 +98,7 @@ export default function AboutPage() {
         </div>
       </Section>
 
-      <Section className="border-t border-border bg-secondary">
+      <Section data-theme="ember" className="border-t border-border">
         <div className="mx-auto max-w-2xl">
           <h2 className="text-center font-heading text-lg font-semibold text-foreground">
             When I&apos;m not shooting

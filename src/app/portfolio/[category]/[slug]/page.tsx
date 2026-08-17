@@ -54,7 +54,7 @@ export default async function ShootPage({
   if (!shoot) notFound();
 
   return (
-    <Section className="border-t border-border bg-muted pt-16 pb-20 sm:pt-20">
+    <Section data-theme="night" className="border-t border-border pt-16 pb-20 sm:pt-20">
       <JsonLd data={shootSchema(shoot)} />
       <JsonLd
         data={breadcrumbSchema([
