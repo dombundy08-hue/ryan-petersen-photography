@@ -5,6 +5,15 @@ import { Button } from "@/components/ui/button";
 import { Section } from "@/components/section";
 import { HeroCarousel } from "@/components/hero-carousel";
 import { allPhotos, shootsByCategory, type PhotoCategory } from "@/lib/shoots";
+import type { Metadata } from "next";
+import { canonical } from "@/lib/site";
+
+// The home page inherits its title and description from the root layout,
+// but the canonical must be declared here — the layout deliberately sets
+// none, so that an unset page can never silently inherit the wrong one.
+export const metadata: Metadata = {
+  alternates: { canonical: canonical() },
+};
 
 const SPECIALTIES: {
   title: string;

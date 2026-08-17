@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { canonical } from "@/lib/site";
 import { Mail, Phone, Clock } from "lucide-react";
 import { Section } from "@/components/section";
 import { ContactForm } from "@/components/contact-form";
@@ -7,6 +8,7 @@ export const metadata: Metadata = {
   title: "Contact",
   description:
     "Get in touch to book a senior, family, or nature photography session with Ryan Petersen.",
+  alternates: { canonical: canonical("contact") },
 };
 
 export default function ContactPage() {

@@ -3,6 +3,9 @@ import { Fraunces, Inter } from "next/font/google";
 import "./globals.css";
 import { Navbar } from "@/components/navbar";
 import { Footer } from "@/components/footer";
+import { JsonLd } from "@/components/json-ld";
+import { SITE_URL, canonical } from "@/lib/site";
+import { businessSchema, personSchema } from "@/lib/schema";
 
 const fraunces = Fraunces({
   variable: "--font-heading",
@@ -17,11 +20,12 @@ const inter = Inter({
   weight: ["400", "500", "600", "700"],
 });
 
-const SITE_URL =
-  process.env.NEXT_PUBLIC_SITE_URL ?? "https://ryanpetersenphotography.com";
-
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
+  // NO `alternates.canonical` here. Metadata is inherited, so a canonical
+  // set on the root layout is applied to every page that doesn't override
+  // it — which made /about, /contact and /portfolio all declare themselves
+  // duplicates of the home page. Each page sets its own.
   title: {
     default: "RyanShutter",
     template: "%s | RyanShutter",
@@ -50,6 +54,11 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
       className={`${fraunces.variable} ${inter.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col">
+        {/* Site-wide structured data. Rendered once here rather than per
+            page so the business and photographer entities have a single
+            @id everything else can reference. */}
+        <JsonLd data={businessSchema()} />
+        <JsonLd data={personSchema()} />
         <Navbar />
         <main className="flex-1">{children}</main>
         <Footer />

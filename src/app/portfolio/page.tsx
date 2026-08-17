@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { canonical } from "@/lib/site";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Section } from "@/components/section";
@@ -11,6 +12,7 @@ export const metadata: Metadata = {
   title: "Portfolio",
   description:
     "Senior, family, and nature photography portfolio by Ryan Petersen.",
+  alternates: { canonical: canonical("portfolio") },
 };
 
 const CATEGORIES = [

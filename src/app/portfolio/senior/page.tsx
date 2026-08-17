@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { canonical } from "@/lib/site";
 import Image from "next/image";
 import Link from "next/link";
 import { User } from "lucide-react";
@@ -8,6 +9,7 @@ import { seniorTeaserPool } from "@/lib/senior-teaser";
 export const metadata: Metadata = {
   title: "Senior Sessions",
   description: "Every senior portrait session by Ryan Petersen.",
+  alternates: { canonical: canonical("portfolio/senior") },
 };
 
 export default function SeniorDirectoryPage() {
