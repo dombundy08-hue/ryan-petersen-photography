@@ -3,10 +3,9 @@ import { canonical } from "@/lib/site";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Section } from "@/components/section";
-import { SeniorTeaserGrid } from "@/components/senior-teaser-grid";
 import { CategoryFeatureTile } from "@/components/category-feature-tile";
 import { shootsByCategory } from "@/lib/shoots";
-import { seniorTeaserPool } from "@/lib/senior-teaser";
+import { seniorFeaturePhotos } from "@/lib/senior-teaser";
 
 export const metadata: Metadata = {
   title: "Portfolio",
@@ -111,8 +110,21 @@ export default function PortfolioPage() {
                     {description}
                   </p>
                 </div>
+                <Link
+                  href="/portfolio/senior"
+                  className="text-sm font-medium text-primary hover:underline"
+                >
+                  See every senior session
+                </Link>
               </div>
-              <SeniorTeaserGrid entries={seniorTeaserPool()} />
+              {/* Same single fading tile as Family and Nature, so all three
+                  sections read alike. It cycles one photo per person, so
+                  each fade lands on a different senior, and clicking goes
+                  to that person's own gallery. */}
+              <CategoryFeatureTile
+                category="senior"
+                photos={seniorFeaturePhotos()}
+              />
             </Section>
           );
         }

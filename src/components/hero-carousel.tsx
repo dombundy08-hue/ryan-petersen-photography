@@ -10,6 +10,17 @@ import { TEL_HREF } from "@/lib/contact";
 
 const INTERVAL_MS = 5000;
 
+/**
+ * Default crop for the hero's wide banner.
+ *
+ * A centred crop of a portrait photo cuts the head off, because the subject
+ * sits in the upper third of the frame. 30% biases toward faces without
+ * needing every photo tagged by hand — and any photo where that still
+ * misses can set its own `objectPosition` in the admin, which this now
+ * honours (it previously hardcoded the crop and ignored the field).
+ */
+const HERO_CROP = "50% 30%";
+
 export function HeroCarousel({ photos }: { photos: Photo[] }) {
   // `index` is a position within `order`, not within `photos` — the dot
   // indicators below track every position, but only the current photo and
@@ -99,7 +110,8 @@ export function HeroCarousel({ photos }: { photos: Photo[] }) {
             fill
             priority={prevIndex === null}
             sizes="100vw"
-            className="object-cover object-[50%_25%] motion-safe:animate-[kenburns_9s_ease-out_forwards]"
+            className="object-cover motion-safe:animate-[kenburns_9s_ease-out_forwards]"
+            style={{ objectPosition: currentPhoto.objectPosition ?? HERO_CROP }}
           />
         </div>
       )}
@@ -120,7 +132,10 @@ export function HeroCarousel({ photos }: { photos: Photo[] }) {
             alt=""
             fill
             sizes="100vw"
-            className="object-cover object-[50%_25%]"
+            className="object-cover"
+            style={{
+              objectPosition: previousPhoto.objectPosition ?? HERO_CROP,
+            }}
           />
         </div>
       )}

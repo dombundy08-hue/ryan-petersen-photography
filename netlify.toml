@@ -3,17 +3,43 @@
   publish = "out"
 
 # GH_PAGES_BASE_PATH is intentionally NOT set here — Netlify serves this
-# site at its own domain root, so basePath should stay empty (the default
-# in next.config.ts). Only the GitHub Pages deploy needs that variable.
+# site at its own domain root, so basePath must stay empty (the default in
+# next.config.ts). Only a GitHub Pages deploy needs that variable.
 #
-# The contact form uses Netlify Forms (no API key/env var needed) — Netlify
-# auto-detects the data-netlify="true" form in the built HTML. After the
-# first deploy with it, go to Site settings > Forms > Form notifications
-# and add an email notification so submissions actually reach an inbox.
+# NEXT_PUBLIC_SITE_URL should be set in Site settings > Environment
+# variables, not here, so the value isn't committed. Until it is, the site
+# falls back to https://ryanshutter.com (see src/lib/site.ts) — which is
+# the intended production domain, so canonicals and the sitemap are correct
+# either way.
+
+# Forms: Netlify's build bot detects the data-netlify="true" form in the
+# built HTML automatically. No API key, no env var. After the first deploy,
+# go to Site settings > Forms > Form notifications and add an email
+# notification, or submissions are collected but never reach an inbox.
 #
-# Once you know this site's Netlify URL, set NEXT_PUBLIC_SITE_URL in Site
-# settings > Environment variables — not here, so it's not committed.
+# This is the fix for the real bug: the form POSTs to "/" which GitHub
+# Pages answers with 405, so every enquiry currently fails. On Netlify the
+# same POST is accepted.
 
 # No SPA fallback redirect needed — every route (including shoot detail
 # pages) is pre-rendered to a real HTML file via generateStaticParams, and
 # Netlify serves out/404.html automatically for genuinely missing paths.
+
+[[headers]]
+  for = "/images/*"
+  [headers.values]
+    # Photographs are content-addressed by filename and never edited in
+    # place — a changed photo gets a new file. Long cache is safe and is
+    # most of the repeat-visit performance win on an image-heavy site.
+    Cache-Control = "public, max-age=31536000, immutable"
+
+[[headers]]
+  for = "/_next/static/*"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
+
+[[headers]]
+  for = "/*"
+  [headers.values]
+    X-Content-Type-Options = "nosniff"
+    Referrer-Policy = "strict-origin-when-cross-origin"
