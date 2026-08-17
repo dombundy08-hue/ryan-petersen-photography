@@ -88,142 +88,97 @@
 }
 
 /* ──────────────────────────────────────────────────────────────────────
-   THE DESCENT
+   SECTION THEMES
 
-   Five grounds that run golden hour -> dusk -> night, top of page to
-   bottom, and never cut. Between any two sections sits a <Bridge>: an
-   element whose only job is linear-gradient(above, below). Because both
-   ends are the exact neighbouring ground, the seam disappears.
+   The base palette is one warm brown: #221D18, #2A241D and #332C23 sit
+   within a few points of each other, so a page built from them reads as
+   a single flat tone no matter how many sections it has.
 
-   Saturation is deliberately low. Rivian's grounds sit around 12-20%
-   saturation (#8BA8BD, #9FA1B8, #BC9C8A) and that restraint is why the
-   photography stays the loudest thing on the page. A vivid ground would
-   compete with the work.
+   These redeclare the same tokens on a subtree, so every Tailwind
+   utility (bg-background, text-muted-foreground, border-border …)
+   re-resolves for free — put `data-theme` on a <Section> and everything
+   inside re-skins.
 
-   Mid-tone grounds (sun, clay, dusk) take DARK text; the two dark grounds
-   take light. Every pairing is measured — ratios in the comments.
+   Four darks that genuinely differ in HUE, not just lightness — warm
+   brown, cool slate, green — plus exactly one light. Light is the
+   expensive move on a photography site; spend it once.
+
+   Contrast is measured, not estimated; the ratios are in the comments.
    ────────────────────────────────────────────────────────────────────── */
-
-:root {
-  /* Raw ground values. Bridges read these directly so a gradient can
-     name two grounds without either theme being mounted. */
-  --flow-sun: #F2E8D5;
-  --flow-clay: #C4A47C;
-  --flow-dusk: #8A8296;
-  --flow-slate: #46525F;
-  --flow-night: #101319;
-}
 
 [data-theme] {
   background-color: var(--background);
   color: var(--foreground);
 }
 
-/* SUN — golden-hour haze. The light one. */
-[data-theme="sun"] {
-  --background: var(--flow-sun);
-  --foreground: #1A1610; /* 15.7:1 */
-  --card: #FAF4E8;
-  --card-foreground: #1A1610;
-  --primary: #7A5A1E; /* 5.4:1 */
-  --primary-foreground: #FAF4E8;
-  --secondary: #E6D9C0;
-  --secondary-foreground: #1A1610;
-  --muted: #E9DDC7;
-  --muted-foreground: #5C513C; /* 6.5:1 */
-  --accent: #E6D9C0;
-  --accent-foreground: #1A1610;
-  --border: #DCCDB0;
-  --input: #DCCDB0;
-  --ring: #7A5A1E;
-  --destructive: #97281D; /* 6.9:1 */
-}
-
-/* CLAY — warm earth. Still light enough for dark text. */
-[data-theme="clay"] {
-  --background: var(--flow-clay);
-  --foreground: #1F1811; /* 7.5:1 */
-  --card: #D2B693;
-  --card-foreground: #1F1811;
-  --primary: #3A2810; /* 6.1:1 */
-  --primary-foreground: #F2E8D5;
-  --secondary: #B4906A;
-  --secondary-foreground: #1F1811;
-  --muted: #B99A72;
-  --muted-foreground: #3C2F20; /* 5.9:1 */
-  --accent: #B4906A;
-  --accent-foreground: #1F1811;
-  --border: #AB8A64;
-  --input: #AB8A64;
-  --ring: #3A2810;
-  --destructive: #6B1C13; /* 5.2:1 */
-}
-
-/* DUSK — the light going blue. Muted mauve, not purple. */
-[data-theme="dusk"] {
-  --background: var(--flow-dusk);
-  --foreground: #14111A; /* 5.0:1 */
-  --card: #9A93A4;
-  --card-foreground: #14111A;
-  --primary: #221C2C; /* 4.6:1 */
-  --primary-foreground: #F2F0F4;
-  --secondary: #948CA0;
-  --secondary-foreground: #14111A; /* 5.8:1 */
-  --muted: #9A93A4;
-  --muted-foreground: #14111A; /* 6.3:1 */
-  --accent: #948CA0;
-  --accent-foreground: #14111A; /* 5.8:1 */
-  --border: #756D83;
-  --input: #756D83;
-  --ring: #221C2C;
-  --destructive: #3D0A06; /* 4.6:1 */
-}
-
-/* SLATE — last light. Flips to light text. */
-[data-theme="slate"] {
-  --background: var(--flow-slate);
-  --foreground: #F0F3F6; /* 7.0:1 */
-  --card: #515E6C;
-  --card-foreground: #F0F3F6;
-  --primary: #E8C88A; /* 4.9:1 */
-  --primary-foreground: #1B222A;
-  --secondary: #56626F;
-  --secondary-foreground: #F0F3F6;
-  --muted: #515E6C;
-  --muted-foreground: #D2DAE2; /* 4.7:1 */
-  --accent: #56626F;
-  --accent-foreground: #F0F3F6;
-  --border: #5C6874;
-  --input: #5C6874;
-  --ring: #E8C88A;
-  --destructive: #FFC0B8; /* 5.1:1 */
-}
-
-/* NIGHT — the bottom of every page. */
+/* NIGHT — deepest. Hero and closing CTA, where photos carry everything. */
 [data-theme="night"] {
-  --background: var(--flow-night);
-  --foreground: #F0EFEC; /* 16.7:1 */
-  --card: #191D24;
-  --card-foreground: #F0EFEC;
-  --primary: #E5C078; /* 10.4:1 */
-  --primary-foreground: #14110A;
-  --secondary: #1E232B;
-  --secondary-foreground: #F0EFEC;
-  --muted: #191D24;
-  --muted-foreground: #A8AEB8; /* 8.0:1 */
-  --accent: #1E232B;
-  --accent-foreground: #F0EFEC;
-  --border: #2A303A;
-  --input: #2A303A;
-  --ring: #E5C078;
-  --destructive: #EE8279; /* 6.3:1 */
+  --background: #0C0A07;
+  --card: #17130E;
+  --secondary: #201A13;
+  --muted: #17130E;
+  --muted-foreground: #B4A794; /* 9.5:1 */
+  --border: #2C251C;
+  --input: #2C251C;
+  --accent: #201A13;
 }
 
-/* The seam-killer. Both stops are neighbouring grounds, so the join is
-   mathematically invisible rather than merely close. */
-.bridge {
-  height: clamp(5rem, 11vw, 10rem);
-  width: 100%;
+/* EMBER — warm, saturated brown. The house tone, used with intent. */
+[data-theme="ember"] {
+  --background: #241A12;
+  --card: #2F231A;
+  --secondary: #3A2C20;
+  --muted: #2F231A;
+  --muted-foreground: #C4B4A0; /* 8.4:1 */
+  --border: #443426;
+  --input: #443426;
+  --accent: #3A2C20;
+  --destructive: #EE7A72; /* 5.9:1 — the root red is 4.36:1 here */
+}
+
+/* DUSK — cool slate. Reads unmistakably apart from the browns. */
+[data-theme="dusk"] {
+  --background: #15181F;
+  --card: #1D212A;
+  --secondary: #262B36;
+  --muted: #1D212A;
+  --muted-foreground: #A9B3C4; /* 9.1:1 */
+  --border: #2E3542;
+  --input: #2E3542;
+  --accent: #262B36;
+}
+
+/* MOSS — green-black. For nature, and to break the brown/slate pairing. */
+[data-theme="moss"] {
+  --background: #141810;
+  --card: #1C2117;
+  --secondary: #262C1F;
+  --muted: #1C2117;
+  --muted-foreground: #B2BCA3; /* 9.3:1 */
+  --border: #2E3625;
+  --input: #2E3625;
+  --accent: #262C1F;
+}
+
+/* SAND — the one light section. The gold fails here at 2.3:1, so the
+   primary darkens to a bronze that holds at 5.6:1. */
+[data-theme="sand"] {
+  --background: #F4EFE6;
+  --foreground: #1A1510; /* 16.8:1 */
+  --card: #FBF8F2;
+  --card-foreground: #1A1510;
+  --primary: #7A5A1E; /* 5.6:1 */
+  --primary-foreground: #FBF8F2;
+  --secondary: #E8E0D2;
+  --secondary-foreground: #1A1510;
+  --muted: #EAE3D7;
+  --muted-foreground: #5B5145; /* 6.7:1 */
+  --border: #DDD3C2;
+  --input: #DDD3C2;
+  --accent: #E8E0D2;
+  --accent-foreground: #1A1510;
+  --ring: #7A5A1E;
+  --destructive: #9B2C22; /* 6.6:1 — the root red is 3.4:1 here */
 }
 
 .dark {

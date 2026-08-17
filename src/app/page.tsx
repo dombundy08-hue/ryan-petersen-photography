@@ -7,7 +7,6 @@ import { HeroCarousel } from "@/components/hero-carousel";
 import { allPhotos, shootsByCategory, type PhotoCategory } from "@/lib/shoots";
 import type { Metadata } from "next";
 import { canonical } from "@/lib/site";
-import { Bridge } from "@/components/bridge";
 
 // The home page inherits its title and description from the root layout,
 // but the canonical must be declared here — the layout deliberately sets
@@ -61,8 +60,7 @@ export default function Home() {
     <>
       <HeroCarousel photos={allPhotos} />
 
-      <Bridge from="night" to="sun" />
-      <Section data-theme="sun">
+      <Section data-theme="ember" className="border-t border-border">
         <div className="mx-auto max-w-2xl text-center">
           <h2 className="text-3xl font-medium italic tracking-tight text-foreground">
             What I shoot
@@ -156,8 +154,7 @@ export default function Home() {
         </div>
       </Section>
 
-      <Bridge from="sun" to="clay" />
-      <Section data-theme="clay">
+      <Section data-theme="dusk" className="border-t border-border">
         <div className="grid items-center gap-10 md:grid-cols-2">
           <div>
             <h2 className="text-3xl font-semibold tracking-tight text-foreground">
@@ -193,8 +190,7 @@ export default function Home() {
         </div>
       </Section>
 
-      <Bridge from="clay" to="dusk" />
-      <Section data-theme="dusk">
+      <Section data-theme="sand" className="border-t border-border">
         <div className="grid gap-6 sm:grid-cols-2">
           <div className="rounded-xl border border-border bg-card p-8">
             <h3 className="font-heading text-xl font-semibold text-foreground">
@@ -219,8 +215,7 @@ export default function Home() {
         </div>
       </Section>
 
-      <Bridge from="dusk" to="night" />
-      <Section data-theme="night">
+      <Section data-theme="night" className="border-t border-border">
         <div className="mx-auto max-w-xl text-center">
           <h2 className="text-3xl font-semibold tracking-tight text-foreground">
             Let&apos;s build something to look back on.
