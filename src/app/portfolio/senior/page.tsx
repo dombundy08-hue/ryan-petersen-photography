@@ -7,8 +7,8 @@ import { Section } from "@/components/section";
 import { seniorTeaserPool } from "@/lib/senior-teaser";
 
 export const metadata: Metadata = {
-  title: "Senior Sessions",
-  description: "Every senior portrait session by Ryan Petersen.",
+  title: "Senior Portraits",
+  description: "Senior portrait sessions in Frederick, Firestone, Longmont and across northern Colorado — shot fully manual by Ryan Petersen.",
   alternates: { canonical: canonical("portfolio/senior") },
 };
 

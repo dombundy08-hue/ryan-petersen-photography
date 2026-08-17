@@ -4,7 +4,7 @@ import "./globals.css";
 import { Navbar } from "@/components/navbar";
 import { Footer } from "@/components/footer";
 import { JsonLd } from "@/components/json-ld";
-import { SITE_URL, canonical } from "@/lib/site";
+import { SITE_URL, SITE_DESCRIPTION, canonical } from "@/lib/site";
 import { businessSchema, personSchema } from "@/lib/schema";
 
 const fraunces = Fraunces({
@@ -26,24 +26,25 @@ export const metadata: Metadata = {
   // set on the root layout is applied to every page that doesn't override
   // it — which made /about, /contact and /portfolio all declare themselves
   // duplicates of the home page. Each page sets its own.
+  // "RyanShutter" alone is a brand nobody is searching for yet. The title
+  // has to carry what he does and where, or it can only ever be found by
+  // people who already know the name.
   title: {
-    default: "RyanShutter",
-    template: "%s | RyanShutter",
+    default: "RyanShutter | Senior, Family & Nature Photographer in Frederick, CO",
+    template: "%s | RyanShutter — Frederick, CO Photographer",
   },
-  description:
-    "Senior, family, and nature photography by Ryan Petersen. Honest, local, and focused on capturing moments you'll want to look back on.",
+  description: SITE_DESCRIPTION,
   openGraph: {
-    title: "RyanShutter",
-    description:
-      "Senior, family, and nature photography by Ryan Petersen. Honest, local, and focused on capturing moments you'll want to look back on.",
+    title: "RyanShutter | Photographer in Frederick, Colorado",
+    description: SITE_DESCRIPTION,
     siteName: "RyanShutter",
+    locale: "en_US",
     type: "website",
   },
   twitter: {
     card: "summary_large_image",
-    title: "RyanShutter",
-    description:
-      "Senior, family, and nature photography by Ryan Petersen. Honest, local, and focused on capturing moments you'll want to look back on.",
+    title: "RyanShutter | Photographer in Frederick, Colorado",
+    description: SITE_DESCRIPTION,
   },
 };
 

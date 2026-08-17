@@ -11,7 +11,7 @@ import { seniorTeaserPool } from "@/lib/senior-teaser";
 export const metadata: Metadata = {
   title: "Portfolio",
   description:
-    "Senior, family, and nature photography portfolio by Ryan Petersen.",
+    "Senior, family and nature photography across Frederick, Firestone, Longmont and the Colorado Front Range — real sessions by Ryan Petersen.",
   alternates: { canonical: canonical("portfolio") },
 };
 

@@ -5,9 +5,9 @@ import { Section } from "@/components/section";
 import { ContactForm } from "@/components/contact-form";
 
 export const metadata: Metadata = {
-  title: "Contact",
+  title: "Book a Session",
   description:
-    "Get in touch to book a senior, family, or nature photography session with Ryan Petersen.",
+    "Book a senior, family or nature photography session with Ryan Petersen in Frederick, Colorado. Sessions are free while he builds his portfolio — call, text or email.",
   alternates: { canonical: canonical("contact") },
 };
 

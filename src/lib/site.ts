@@ -40,7 +40,10 @@ export interface BusinessFacts {
   country: string;
   /** Blank until confirmed — see `hasLocation`. */
   city: string;
+  /** Towns named in copy and schema. Confirm before extending. */
   serviceArea: string[];
+  /** The wider region he'll travel to, spelled out. */
+  serviceAreaState: string;
   priceRange: string;
   sameAs: string[];
 }
@@ -65,6 +68,17 @@ function loadBusiness(): BusinessFacts {
 }
 
 export const business: BusinessFacts = loadBusiness();
+
+/**
+ * The one-line description used for the home page and as the OG/Twitter
+ * fallback. Names the service, the town and the current offer, because all
+ * three are what someone actually types into a search box.
+ */
+export const SITE_DESCRIPTION =
+  `Senior, family, and nature photography by Ryan Petersen, based in ` +
+  `${business.city}, ${business.serviceAreaState}. Shot fully manual for ` +
+  `light that looks the way you remember it. Sessions are free while he ` +
+  `builds his portfolio.`;
 
 /** True once a city is filled in — gates the local-business schema. */
 export const hasLocation = Boolean(business.city.trim());

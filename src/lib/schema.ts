@@ -39,10 +39,17 @@ export function businessSchema() {
           addressCountry: business.country,
         }
       : null,
-    areaServed: business.serviceArea.map((area) => ({
-      "@type": "City",
-      name: area,
-    })),
+    // The named towns plus the wider state. Ryan travels, so the state
+    // entry is the honest upper bound and the towns carry the local signal.
+    areaServed: [
+      ...business.serviceArea.map((area) => ({
+        "@type": "City",
+        name: `${area}, ${business.region}`,
+      })),
+      business.serviceAreaState
+        ? { "@type": "State", name: business.serviceAreaState }
+        : null,
+    ],
     sameAs: business.sameAs,
   };
 }
