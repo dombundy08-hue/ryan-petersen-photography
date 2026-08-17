@@ -44,6 +44,9 @@ const SPECIALTIES: {
   },
 ];
 
+/** Deep-links the fourth home tile straight to the By Request section. */
+const REQUESTED_HREF = "/portfolio#requested";
+
 const PROCESS = [
   { step: "1", title: "Reach Out", description: "Send a message with what you're looking for." },
   { step: "2", title: "We Talk It Through", description: "I'll respond personally to sort out time, place, and package." },
@@ -117,7 +120,7 @@ export default function Home() {
           })}
 
           <Link
-            href="/contact"
+            href={REQUESTED_HREF}
             className="group relative flex aspect-[3/4] flex-col justify-end overflow-hidden rounded-xl border border-primary/40 bg-secondary"
           >
             <div className="absolute inset-0 flex items-center justify-center">
@@ -143,7 +146,7 @@ export default function Home() {
                 if you can picture it, I&apos;ll shoot it.
               </p>
               <span className="mt-3 inline-flex items-center gap-1 text-sm font-medium text-primary">
-                Tell me about it
+                See what I&apos;ll shoot
                 <ArrowRight className="size-4 transition-transform group-hover:translate-x-0.5" />
               </span>
             </div>

@@ -3,8 +3,10 @@
 import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
+import { Phone } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import type { Photo } from "@/lib/shoots";
+import { TEL_HREF } from "@/lib/contact";
 
 const INTERVAL_MS = 5000;
 
@@ -136,21 +138,41 @@ export function HeroCarousel({ photos }: { photos: Photo[] }) {
           Creating memorable moments, one photo at a time.
         </h1>
         <p className="mx-auto mt-6 max-w-xl text-base text-foreground/80 sm:text-lg">
-          Honest, local photography focused on making you feel comfortable in
-          front of the camera.
+          Senior, family and nature photography in Frederick, Colorado —
+          focused on making you feel comfortable in front of the camera.
+          Sessions are free while I build my portfolio.
         </p>
+        {/* Book a Session leads, as the filled/primary button. View My Work
+            is the secondary. On a phone the primary dials directly; on
+            desktop a tel: link is a dead end, so it goes to the contact
+            page instead. Both are rendered and swapped by CSS rather than
+            by JS, so the correct one is right on first paint. */}
         <div className="mt-10 flex flex-col items-center justify-center gap-3 sm:flex-row">
-          <Button size="lg" nativeButton={false} render={<Link href="/portfolio" />}>
-            View My Work
+          <Button
+            size="lg"
+            className="w-full sm:hidden"
+            nativeButton={false}
+            render={<a href={TEL_HREF} />}
+          >
+            <Phone className="size-4" aria-hidden="true" />
+            Call to Book a Session
           </Button>
           <Button
             size="lg"
-            variant="outline"
-            className="border-foreground/40 bg-black/10 text-foreground backdrop-blur-sm hover:bg-black/30"
+            className="hidden sm:inline-flex"
             nativeButton={false}
             render={<Link href="/contact" />}
           >
             Book a Session
+          </Button>
+          <Button
+            size="lg"
+            variant="outline"
+            className="w-full border-foreground/40 bg-black/10 text-foreground backdrop-blur-sm hover:bg-black/30 sm:w-auto"
+            nativeButton={false}
+            render={<Link href="/portfolio" />}
+          >
+            View My Work
           </Button>
         </div>
       </div>

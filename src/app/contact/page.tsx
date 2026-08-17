@@ -1,8 +1,16 @@
 import type { Metadata } from "next";
 import { canonical } from "@/lib/site";
 import { Mail, Phone, Clock } from "lucide-react";
+import { InstagramIcon } from "@/components/instagram-icon";
 import { Section } from "@/components/section";
 import { ContactForm } from "@/components/contact-form";
+import {
+  EMAIL,
+  PHONE_DISPLAY,
+  TEL_HREF,
+  INSTAGRAM,
+  bookingMailto,
+} from "@/lib/contact";
 
 export const metadata: Metadata = {
   title: "Book a Session",
@@ -26,33 +34,58 @@ export default function ContactPage() {
 
       <div className="mx-auto mt-12 grid max-w-4xl gap-10 md:grid-cols-[1fr_1.3fr]">
         <div className="space-y-6">
+          {/* Solid, button-shaped actions rather than quiet link tiles.
+              The email one opens a compose window with the subject and
+              questions already written — a blank window is where most
+              people stop, and a pre-filled one usually arrives as an
+              already-bookable enquiry. */}
           <a
-            href="mailto:rpetersen2008@gmail.com"
-            className="flex items-start gap-3 rounded-xl border-2 border-primary/60 bg-card p-5 transition-colors hover:border-primary"
+            href={bookingMailto()}
+            className="flex w-full items-center gap-3 rounded-xl bg-primary px-5 py-4 font-medium text-primary-foreground shadow-sm transition-transform hover:-translate-y-0.5"
           >
-            <span className="flex size-9 shrink-0 items-center justify-center rounded-full bg-primary text-primary-foreground">
+            <span className="flex size-9 shrink-0 items-center justify-center rounded-full bg-primary-foreground/15">
               <Mail className="size-4" aria-hidden="true" />
             </span>
-            <div>
-              <p className="text-sm font-medium text-foreground">Email</p>
-              <p className="text-sm text-muted-foreground">
-                rpetersen2008@gmail.com
-              </p>
-            </div>
+            <span className="text-left">
+              <span className="block text-sm font-semibold">
+                Email me — draft ready
+              </span>
+              <span className="block text-sm text-primary-foreground/75">
+                {EMAIL}
+              </span>
+            </span>
           </a>
           <a
-            href="tel:+17206008854"
-            className="flex items-start gap-3 rounded-xl border-2 border-primary/60 bg-card p-5 transition-colors hover:border-primary"
+            href={TEL_HREF}
+            className="flex w-full items-center gap-3 rounded-xl border-2 border-primary bg-card px-5 py-4 font-medium text-foreground transition-transform hover:-translate-y-0.5"
           >
             <span className="flex size-9 shrink-0 items-center justify-center rounded-full bg-primary text-primary-foreground">
               <Phone className="size-4" aria-hidden="true" />
             </span>
-            <div>
-              <p className="text-sm font-medium text-foreground">Phone</p>
-              <p className="text-sm text-muted-foreground">
-                (720) 600-8854
-              </p>
-            </div>
+            <span className="text-left">
+              <span className="block text-sm font-semibold">Call or text</span>
+              <span className="block text-sm text-muted-foreground">
+                {PHONE_DISPLAY}
+              </span>
+            </span>
+          </a>
+          <a
+            href={INSTAGRAM}
+            target="_blank"
+            rel="me noopener noreferrer"
+            className="flex w-full items-center gap-3 rounded-xl border-2 border-primary/60 bg-card px-5 py-4 font-medium text-foreground transition-transform hover:-translate-y-0.5 hover:border-primary"
+          >
+            <span className="flex size-9 shrink-0 items-center justify-center rounded-full bg-primary text-primary-foreground">
+              <InstagramIcon className="size-4" />
+            </span>
+            <span className="text-left">
+              <span className="block text-sm font-semibold">
+                Message on Instagram
+              </span>
+              <span className="block text-sm text-muted-foreground">
+                @photography_ryn18_
+              </span>
+            </span>
           </a>
           <div className="flex items-start gap-3 rounded-xl border-2 border-primary/60 bg-secondary/40 p-5">
             <span className="flex size-9 shrink-0 items-center justify-center rounded-full bg-primary text-primary-foreground">

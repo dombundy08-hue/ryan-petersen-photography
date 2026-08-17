@@ -48,6 +48,38 @@ const SECTION_BG: Record<string, string> = {
   nature: "bg-border",
 };
 
+/**
+ * Session types Ryan will shoot on request. These are deliberately NOT in
+ * CATEGORIES — there are no photos for them yet, and inventing a gallery
+ * would be a false claim about work he's done.
+ */
+const REQUESTED: { title: string; description: string }[] = [
+  {
+    title: "Couples & Engagements",
+    description: "Relaxed outdoor sessions — no stiff studio posing.",
+  },
+  {
+    title: "Sports & Action",
+    description: "Games, meets and practices, shot fully manual to keep up with the light.",
+  },
+  {
+    title: "Events & Milestones",
+    description: "Birthdays, graduations, anniversaries and the moments around them.",
+  },
+  {
+    title: "Pets",
+    description: "Your dog, outdoors, doing what it actually does.",
+  },
+  {
+    title: "Headshots",
+    description: "Clean, natural-light portraits for work or an online profile.",
+  },
+  {
+    title: "Something Else",
+    description: "If it's not listed, ask — the answer is usually yes.",
+  },
+];
+
 export default function PortfolioPage() {
   return (
     <>
@@ -121,6 +153,47 @@ export default function PortfolioPage() {
           </Section>
         );
       })}
+
+      {/* Shoot types Ryan will take on request but hasn't photographed yet.
+          Without this, someone wanting couples or event photos assumes he
+          doesn't do it and leaves — and there's no page for those searches
+          to land on either. */}
+      <Section
+        id="requested"
+        className="scroll-mt-16 border-t border-border bg-secondary"
+      >
+        <div className="mb-8">
+          <h2 className="text-2xl font-medium italic tracking-tight text-foreground">
+            By Request
+          </h2>
+          <p className="mt-1 max-w-2xl text-sm text-muted-foreground">
+            Not everything I shoot is in the gallery yet. These are sessions
+            I&apos;m happy to take on — ask and we&apos;ll plan it together.
+          </p>
+        </div>
+        <ul className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+          {REQUESTED.map(({ title, description }) => (
+            <li
+              key={title}
+              className="rounded-xl border border-border bg-background p-5"
+            >
+              <h3 className="font-medium text-foreground">{title}</h3>
+              <p className="mt-1 text-sm text-muted-foreground">
+                {description}
+              </p>
+            </li>
+          ))}
+        </ul>
+        <div className="mt-8">
+          <Button
+            size="lg"
+            nativeButton={false}
+            render={<Link href="/contact" />}
+          >
+            Request a Session
+          </Button>
+        </div>
+      </Section>
 
       <Section className="border-t border-border bg-[#5C4F3E]">
         <div className="mx-auto max-w-xl text-center">
