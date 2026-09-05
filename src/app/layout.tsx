@@ -36,7 +36,11 @@ export const metadata: Metadata = {
   // has to carry what he does and where, or it can only ever be found by
   // people who already know the name.
   title: {
-    default: "RyanShutter | Senior, Family & Nature Photographer in Frederick, CO",
+    // Frederick leads: he's the local option, and "photographer near me"
+    // is the search that converts. Nature and Custom Shots carry their own
+    // keywords on their own category pages rather than pushing this past
+    // ~60 characters, where Google truncates it.
+    default: "RyanShutter | Senior & Family Photographer in Frederick, CO",
     template: "%s | RyanShutter — Frederick, CO Photographer",
   },
   description: SITE_DESCRIPTION,

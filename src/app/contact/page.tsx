@@ -15,7 +15,7 @@ import {
 export const metadata: Metadata = {
   title: "Book a Session",
   description:
-    "Book a senior, family or nature photography session with Ryan Petersen in Frederick, Colorado. Sessions are free while he builds his portfolio — call, text or email.",
+    "Book a senior, family, nature or custom photography session with Ryan Petersen, local to Frederick, Colorado. Sessions are free while he builds his portfolio — call, text or email.",
   alternates: { canonical: canonical("contact") },
 };
 

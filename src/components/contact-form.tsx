@@ -18,6 +18,7 @@ const SESSION_TYPES = [
   { value: "Senior Photos", label: "Senior Photos" },
   { value: "Family Photos", label: "Family Photos" },
   { value: "Nature Photos", label: "Nature Photos" },
+  { value: "Custom Shots", label: "Custom Shots" },
   { value: "Something Else", label: "Something Else" },
 ];
 

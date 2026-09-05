@@ -1,10 +1,11 @@
 ﻿import Image from "next/image";
 import Link from "next/link";
-import { ArrowRight, Camera, Sparkles } from "lucide-react";
+import { ArrowRight, Camera } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Section } from "@/components/section";
 import { HeroCarousel } from "@/components/hero-carousel";
-import { allPhotos, shootsByCategory, type PhotoCategory } from "@/lib/shoots";
+import { heroPhotos, shootsByCategory } from "@/lib/shoots";
+import { CATEGORIES } from "@/lib/categories";
 import type { Metadata } from "next";
 import { canonical } from "@/lib/site";
 
@@ -15,37 +16,22 @@ export const metadata: Metadata = {
   alternates: { canonical: canonical() },
 };
 
-const SPECIALTIES: {
-  title: string;
-  description: string;
-  href: string;
-  category: PhotoCategory;
-}[] = [
-  {
-    title: "Senior Photos",
-    description:
-      "A milestone worth doing right — portraits that actually look like you.",
-    href: "/portfolio#senior",
-    category: "senior",
-  },
-  {
-    title: "Family Photos",
-    description:
-      "Relaxed sessions built around your family, not a stiff studio pose.",
-    href: "/portfolio#family",
-    category: "family",
-  },
-  {
-    title: "Nature Photos",
-    description:
-      "Landscapes and outdoor moments shot with an eye for natural light.",
-    href: "/portfolio#nature",
-    category: "nature",
-  },
-];
-
-/** Deep-links the fourth home tile straight to the By Request section. */
-const REQUESTED_HREF = "/portfolio#requested";
+/**
+ * The "What I shoot" tiles, derived from CATEGORIES rather than repeated.
+ *
+ * This used to be a hand-written array whose descriptions were copies of
+ * the ones in categories.ts, plus a hardcoded fourth "Requested" tile that
+ * linked to an anchor. Custom Shots is a real category now, so all four
+ * tiles come from one list and adding a fifth means editing categories.ts
+ * only. Each tile links to that category's directory — the reader wants
+ * the sessions, not a section heading.
+ */
+const SPECIALTIES = CATEGORIES.map((category) => ({
+  title: category.title,
+  description: category.description,
+  href: `/portfolio/${category.slug}`,
+  category: category.slug,
+}));
 
 const PROCESS = [
   { step: "1", title: "Reach Out", description: "Send a message with what you're looking for." },
@@ -58,9 +44,9 @@ const PROCESS = [
 export default function Home() {
   return (
     <>
-      <HeroCarousel photos={allPhotos} />
+      <HeroCarousel photos={heroPhotos} />
 
-      <Section data-theme="ember" className="border-t border-border">
+      <Section data-theme="ember">
         <div className="mx-auto max-w-2xl text-center">
           <h2 className="text-3xl font-medium italic tracking-tight text-foreground">
             What I shoot
@@ -85,7 +71,8 @@ export default function Home() {
                     alt={photo.alt}
                     fill
                     sizes="(max-width: 640px) 100vw, 33vw"
-                    className="object-cover transition-transform duration-500 group-hover:scale-105"
+                    style={{ objectPosition: photo.objectPosition ?? "50% 35%" }}
+                    className="object-cover brightness-[0.92] transition-[filter] duration-500 group-hover:brightness-105"
                   />
                 ) : (
                   <div className="absolute inset-0 flex items-center justify-center">
@@ -118,43 +105,10 @@ export default function Home() {
               </Link>
             );
           })}
-
-          <Link
-            href={REQUESTED_HREF}
-            className="group relative flex aspect-[3/4] flex-col justify-end overflow-hidden rounded-xl border border-primary/40 bg-secondary"
-          >
-            <div className="absolute inset-0 flex items-center justify-center">
-              <Sparkles
-                className="size-10 text-primary/40"
-                strokeWidth={1.5}
-                aria-hidden="true"
-              />
-            </div>
-            <div
-              className="absolute inset-0"
-              style={{
-                background:
-                  "linear-gradient(180deg, rgba(16,13,10,0) 40%, rgba(16,13,10,0.9) 100%)",
-              }}
-            />
-            <div className="relative p-6">
-              <h3 className="font-heading text-xl font-medium text-foreground">
-                Requested
-              </h3>
-              <p className="mt-1 text-sm text-foreground/75">
-                Something else in mind? Events, pets, sports, headshots —
-                if you can picture it, I&apos;ll shoot it.
-              </p>
-              <span className="mt-3 inline-flex items-center gap-1 text-sm font-medium text-primary">
-                See what I&apos;ll shoot
-                <ArrowRight className="size-4 transition-transform group-hover:translate-x-0.5" />
-              </span>
-            </div>
-          </Link>
         </div>
       </Section>
 
-      <Section data-theme="dusk" className="border-t border-border">
+      <Section data-theme="dusk">
         <div className="grid items-center gap-10 md:grid-cols-2">
           <div>
             <h2 className="text-3xl font-semibold tracking-tight text-foreground">
@@ -215,14 +169,15 @@ export default function Home() {
         </div>
       </Section>
 
-      <Section data-theme="night" className="border-t border-border">
+      <Section data-theme="night">
         <div className="mx-auto max-w-xl text-center">
           <h2 className="text-3xl font-semibold tracking-tight text-foreground">
             Let&apos;s build something to look back on.
           </h2>
           <p className="mt-4 text-foreground/80">
-            Whether it&apos;s senior portraits, a family session, or a shoot
-            out in nature — I&apos;d be glad to help tell your story.
+            Whether it&apos;s senior portraits, a family session, a shoot out
+            in nature, or your car in good light — I&apos;d be glad to help
+            tell your story.
           </p>
           <div className="mt-8">
             <Button size="lg" nativeButton={false} render={<Link href="/contact" />}>

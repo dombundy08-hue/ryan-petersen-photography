@@ -59,7 +59,7 @@ export default function Image() {
             marginTop: 20,
           }}
         >
-          Senior · Family · Nature Photography
+          Senior · Family · Nature · Custom
         </div>
       </div>
     ),

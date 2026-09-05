@@ -1,11 +1,9 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
-import Image from "next/image";
 import Link from "next/link";
+import { CrossfadeLayers } from "@/components/crossfade-layers";
+import { useCrossfade } from "@/hooks/use-crossfade";
 import type { Photo, PhotoCategory } from "@/lib/shoots";
-
-const INTERVAL_MS = 5000;
 
 /**
  * Default crop for the 21:9 featured tile.
@@ -23,6 +21,15 @@ export interface CategoryFeaturePhoto extends Photo {
 }
 
 /**
+ * FOCAL POINT — single source of this tile's object-position.
+ * Add the build-time focal-point manifest lookup here (between the
+ * per-photo override and the default) when it lands; nothing else in this
+ * file reads object-position.
+ */
+const featureCrop = (photo: CategoryFeaturePhoto) =>
+  photo.objectPosition ?? FEATURE_CROP;
+
+/**
  * The single full-width featured tile that heads each portfolio category.
  * Cycles one representative photo per shoot, so consecutive fades show
  * different people rather than two shots of the same one.
@@ -30,9 +37,12 @@ export interface CategoryFeaturePhoto extends Photo {
  * The whole tile links to the category directory, not to the shoot
  * currently on screen — see the note on the <Link>.
  *
- * Only the current + outgoing photo are ever mounted — see the note in
- * HeroCarousel for why mounting one <Image> per pool photo (even at
- * opacity-0) risks crashing mobile browsers with `images.unoptimized`.
+ * Rotation, decode-ahead and the two-slot memory bound live in
+ * `useCrossfade` — including why only two <Image> elements are ever mounted
+ * regardless of pool size.
+ *
+ * No hover/zoom effect on the photo itself: the crossfade is the effect, and
+ * a second one on top used to read as random zooming in and out on swap.
  */
 export function CategoryFeatureTile({
   category,
@@ -47,67 +57,9 @@ export function CategoryFeatureTile({
   nounPlural: string;
 }) {
   const count = photos.length;
-  const [index, setIndex] = useState(0);
-  const [prevIndex, setPrevIndex] = useState<number | null>(null);
-  const [fadingOut, setFadingOut] = useState(false);
-  const indexRef = useRef(0);
-  const [order, setOrder] = useState<number[]>(() =>
-    photos.map((_, i) => i)
-  );
-  const [reducedMotion, setReducedMotion] = useState(
-    () =>
-      typeof window !== "undefined" &&
-      window.matchMedia("(prefers-reduced-motion: reduce)").matches
-  );
+  const { layers, current } = useCrossfade(photos, { priorityFirst: false });
 
-  useEffect(() => {
-    const query = window.matchMedia("(prefers-reduced-motion: reduce)");
-    const onChange = () => setReducedMotion(query.matches);
-    query.addEventListener("change", onChange);
-    return () => query.removeEventListener("change", onChange);
-  }, []);
-
-  useEffect(() => {
-    if (photos.length <= 2) return;
-    // The server must render the unshuffled order and the client reorder
-    // after mount; randomising during render is a hydration mismatch.
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    setOrder((prev) => {
-      const [first, ...rest] = prev;
-      for (let i = rest.length - 1; i > 0; i--) {
-        const j = Math.floor(Math.random() * (i + 1));
-        [rest[i], rest[j]] = [rest[j], rest[i]];
-      }
-      return [first, ...rest];
-    });
-  }, [photos.length]);
-
-  useEffect(() => {
-    indexRef.current = index;
-  }, [index]);
-
-  useEffect(() => {
-    if (photos.length <= 1) return;
-    const id = setInterval(() => {
-      setPrevIndex(indexRef.current);
-      setFadingOut(false);
-      setIndex((i) => (i + 1) % photos.length);
-    }, INTERVAL_MS);
-    return () => clearInterval(id);
-  }, [photos.length]);
-
-  useEffect(() => {
-    if (prevIndex === null) return;
-    const raf1 = requestAnimationFrame(() => {
-      const raf2 = requestAnimationFrame(() => setFadingOut(true));
-      return () => cancelAnimationFrame(raf2);
-    });
-    return () => cancelAnimationFrame(raf1);
-  }, [prevIndex]);
-
-  if (photos.length === 0) return null;
-  const active = photos[order[index]];
-  const previous = prevIndex !== null ? photos[order[prevIndex]] : null;
+  if (count === 0) return null;
 
   return (
     /* Links to the category directory, NOT to whichever shoot happens to
@@ -119,45 +71,13 @@ export function CategoryFeatureTile({
       href={`/portfolio/${category}`}
       className="group relative flex aspect-[21/9] flex-col justify-end overflow-hidden rounded-xl border border-border"
     >
-      <div key={active.src} className="absolute inset-0">
-        <Image
-          src={active.src}
-          alt={active.alt}
-          fill
-          sizes="100vw"
-          style={{ objectPosition: active.objectPosition ?? FEATURE_CROP }}
-          /* No hover scale here. Each cycle mounts a NEW element for the
-             incoming photo, so with the cursor over the tile it mounted
-             already-scaled while the outgoing one sat at 1.0 — a visible
-             jump on every swap, which read as random zooming in and out.
-             The crossfade is the effect; it doesn't need a second one. */
-          className="object-cover"
-        />
-      </div>
-      {previous && (
-        <div
-          key={previous.src + "-out"}
-          className={
-            "absolute inset-0 " +
-            (reducedMotion
-              ? "opacity-0"
-              : "transition-opacity duration-1000 ease-in-out " +
-                (fadingOut ? "opacity-0" : "opacity-100"))
-          }
-          aria-hidden="true"
-        >
-          <Image
-            src={previous.src}
-            alt=""
-            fill
-            sizes="100vw"
-            style={{ objectPosition: previous.objectPosition ?? FEATURE_CROP }}
-            className="object-cover"
-          />
-        </div>
-      )}
+      <CrossfadeLayers
+        layers={layers}
+        sizes="100vw"
+        objectPosition={featureCrop}
+      />
       <div
-        className="absolute inset-0"
+        className="absolute inset-0 z-[3]"
         style={{
           background:
             "linear-gradient(180deg, rgba(16,13,10,0) 50%, rgba(16,13,10,0.85) 100%)",
@@ -166,8 +86,8 @@ export function CategoryFeatureTile({
       {/* The name still labels whoever is on screen, but the call to
           action says where the click actually goes, so the label changing
           mid-cycle never implies the destination changed with it. */}
-      <div className="relative p-5">
-        <p className="font-medium text-foreground">{active.shootTitle}</p>
+      <div className="relative z-10 p-5">
+        <p className="font-medium text-foreground">{current?.shootTitle}</p>
         <p className="text-sm text-foreground/70">
           See all {count} {count === 1 ? noun : nounPlural} &rarr;
         </p>

@@ -1,12 +1,55 @@
+# RyanShutter admin — Sveltia CMS configuration.
+# Docs: https://sveltiacms.app/en/docs/
+#
+# ---------------------------------------------------------------------------
+# ACTION REQUIRED BEFORE THIS ADMIN PANEL WILL LOG IN
+# ---------------------------------------------------------------------------
+# Netlify Git Gateway is deprecated and can no longer be enabled, so the old
+# `backend: git-gateway` never worked. Sveltia authenticates against GitHub
+# directly, which needs one small OAuth helper to exist. It has to be created
+# once, by the repo owner. Nothing below is a secret — the client secret is
+# stored in the OAuth helper, never in this file.
+#
+#   1. Deploy the Sveltia CMS Authenticator (a free Cloudflare Worker):
+#        https://github.com/sveltia/sveltia-cms-auth
+#      Note the worker URL it gives you, e.g.
+#        https://sveltia-cms-auth.<subdomain>.workers.dev
+#
+#   2. On GitHub: Settings > Developer settings > OAuth Apps > New OAuth App
+#        Application name:            RyanShutter Admin
+#        Homepage URL:                https://ryanshutter.com
+#        Authorization callback URL:  <WORKER_URL>/callback
+#      Click "Generate a new client secret" and copy both values.
+#
+#   3. In the Cloudflare Workers dashboard for that worker,
+#      Settings > Variables, add:
+#        GITHUB_CLIENT_ID      = the Client ID from step 2
+#        GITHUB_CLIENT_SECRET  = the client secret from step 2 (encrypt it)
+#        ALLOWED_DOMAINS       = ryanshutter.com
+#      Save and deploy.
+#
+#   4. Replace the REPLACE_ME placeholder on the `base_url` line below with
+#      the worker URL from step 1 (no trailing slash), then commit and push.
+#
+# Until step 4 is done, "Sign in with GitHub" will not work. A signed-in
+# GitHub user still needs write access to the repo below.
+# ---------------------------------------------------------------------------
+
 backend:
-  name: git-gateway
+  name: github
+  repo: dombundy08-hue/ryan-petersen-photography
   branch: master
+  # REPLACE_ME — see step 4 above. Example:
+  # base_url: https://sveltia-cms-auth.example.workers.dev
+  base_url: REPLACE_ME_WORKER_URL
 
 media_folder: "public/images/uploads"
 public_folder: "/images/uploads"
 
-site_url: https://dombundy08-hue.github.io/ryan-petersen-photography
-display_url: https://dombundy08-hue.github.io/ryan-petersen-photography
+# Cosmetic only — the "View site" link in the admin UI. Update these when the
+# production domain is confirmed live.
+site_url: https://ryanshutter.com
+display_url: https://ryanshutter.com
 
 collections:
   - name: "shoots"
@@ -17,6 +60,7 @@ collections:
     create: true
     slug: "{{slug}}"
     format: "json"
+    summary: "{{title}}"
     fields:
       - { label: "Title", name: "title", widget: "string", hint: "e.g. \"Golden Hour Senior Session\"" }
       - { label: "URL slug", name: "slug", widget: "string", hint: "No spaces — e.g. golden-hour-senior-session" }
@@ -27,15 +71,39 @@ collections:
           - { label: "Senior", value: "senior" }
           - { label: "Family", value: "family" }
           - { label: "Nature", value: "nature" }
+          - { label: "Custom Shots", value: "custom" }
       - { label: "Description", name: "description", widget: "text", hint: "One or two sentences shown on the portfolio page" }
-      - { label: "Subject Name (optional)", name: "subjectName", widget: "string", required: false, hint: "e.g. \"Dominic\" — shown on the senior teaser and shoot page" }
+      - { label: "Subject Name (optional)", name: "subjectName", widget: "string", required: false, hint: "e.g. \"Dominic\" — shown on the senior teaser and shoot page. Also used to write the accessibility description for every photo in this shoot." }
+      # Bulk upload: `multiple: true` on an image field lets the owner select
+      # or drag in any number of photos in one go. Sveltia saves this as a
+      # plain array of paths:
+      #   "photos": ["/images/uploads/a.jpg", "/images/uploads/b.jpg"]
+      # A `list` widget with nested src/alt subfields (the old Decap setup)
+      # forces one file picker per photo and has no bulk add — that is why
+      # the shape changed. src/lib/shoots.ts must accept both the new string
+      # form and the existing {src, alt} object form, and fill in alt text
+      # itself (see the accessibility note in the admin guide in
+      # design-system/ryan-petersen-photography/MASTER.md).
       - label: "Photos"
         name: "photos"
-        widget: "list"
-        summary: "{{fields.alt}}"
-        fields:
-          - { label: "Photo", name: "src", widget: "image" }
-          - { label: "Description (for accessibility/SEO)", name: "alt", widget: "string" }
+        widget: "image"
+        multiple: true
+        required: true
+        min: 1
+        accept: "image/jpeg,image/png,image/webp"
+        hint: "Select as many photos as you like at once, or drag them in. Drag a photo by its handle to reorder; the first photo is the cover. Use the X on a photo to remove it."
+      # OPTIONAL — not enabled. The existing hand-written shoots mark some
+      # photos `heroEligible: false` so a cropped/away-facing shot never
+      # lands in the wide homepage banner. That per-photo flag has no home in
+      # the bulk-upload shape above. If the site code adds support for a
+      # shoot-level exclusion list, uncomment this and it will just work:
+      #
+      # - label: "Keep out of the homepage banner (optional)"
+      #   name: "heroExclude"
+      #   widget: "image"
+      #   multiple: true
+      #   required: false
+      #   hint: "Photos here still appear in the gallery, but never in the wide banner on the homepage. Use it for close crops or photos where the face is turned away."
 
   - name: "settings"
     label: "Site Settings"
@@ -51,3 +119,21 @@ collections:
             widget: "image"
             required: false
             hint: "Shows on the About page. Leave empty to show a placeholder."
+          # These two were already in content/settings/about.json but were
+          # missing from the old config. A file collection writes back only
+          # the fields it knows about, so saving the About page would have
+          # silently deleted them. Declared here so they survive a save.
+          - label: "More photos of Ryan"
+            name: "morePhotos"
+            widget: "image"
+            multiple: true
+            required: false
+            hint: "Extra photos of Ryan shown on the About page."
+          - label: "Personal photos"
+            name: "personalPhotos"
+            widget: "list"
+            required: false
+            summary: "{{fields.alt}}"
+            fields:
+              - { label: "Photo", name: "src", widget: "image" }
+              - { label: "Description (for accessibility)", name: "alt", widget: "string" }

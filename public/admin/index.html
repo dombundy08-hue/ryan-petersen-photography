@@ -1,11 +1,25 @@
 <!doctype html>
-<html>
+<html lang="en">
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="robots" content="noindex" />
     <title>RyanShutter Admin</title>
   </head>
   <body>
-    <script src="https://unpkg.com/decap-cms@^3.0.0/dist/decap-cms.js"></script>
+    <!--
+      Sveltia CMS — drop-in replacement for Decap CMS.
+
+      Why we moved off Decap: Decap's `git-gateway` backend depends on
+      Netlify Git Gateway, which Netlify has deprecated and can no longer be
+      enabled (the enable button never provisions). Sveltia reads the same
+      config.yml format but talks to GitHub directly via OAuth, and — the
+      reason the owner needs it — it can upload many photos at once.
+
+      Do NOT add a stylesheet: all styles are bundled in the JS.
+      Do NOT add type="module": the current build is not an ES module.
+      Install snippet per https://sveltiacms.app/en/docs/start
+    -->
+    <script src="https://unpkg.com/@sveltia/cms/dist/sveltia-cms.js"></script>
   </body>
 </html>

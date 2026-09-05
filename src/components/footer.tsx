@@ -14,7 +14,7 @@ export function Footer() {
             Ryan<span className="text-primary">Shutter</span>
           </p>
           <p className="mt-1 text-sm text-muted-foreground">
-            Senior &middot; Family &middot; Nature photography
+            Senior &middot; Family &middot; Nature &middot; Custom photography
           </p>
         </div>
 

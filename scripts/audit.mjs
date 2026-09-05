@@ -99,6 +99,40 @@ function resolve(value, root) {
   return m ? (root[m[1]] ?? value) : value;
 }
 
+/** `rgba(r, g, b, a)` → `{r,g,b,a}`, or null if it isn't one. */
+function parseRgba(value) {
+  const m = value.match(
+    /^rgba?\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)\s*(?:,\s*([\d.]+)\s*)?\)$/
+  );
+  if (!m) return null;
+  return {
+    r: +m[1],
+    g: +m[2],
+    b: +m[3],
+    a: m[4] === undefined ? 1 : +m[4],
+  };
+}
+
+/** Flatten a translucent colour over an opaque hex backdrop. */
+function composite(rgba, hexBackdrop) {
+  const h = hexBackdrop.replace("#", "");
+  const full =
+    h.length === 3
+      ? h
+          .split("")
+          .map((c) => c + c)
+          .join("")
+      : h;
+  const n = parseInt(full, 16);
+  const mix = (fg, bg) => Math.round(rgba.a * fg + (1 - rgba.a) * bg);
+  const out = [
+    mix(rgba.r, (n >> 16) & 255),
+    mix(rgba.g, (n >> 8) & 255),
+    mix(rgba.b, n & 255),
+  ];
+  return `#${out.map((v) => v.toString(16).padStart(2, "0")).join("")}`;
+}
+
 function auditThemes() {
   const css = readFileSync("src/app/globals.css", "utf8");
 
@@ -132,9 +166,16 @@ function auditThemes() {
     // Every declaration, then check it parsed. A token written as oklch()
     // or var() would otherwise keep the :root value and the audit would
     // measure a colour the page never renders — passing a failing theme.
+    // --scene is the one token that is legitimately translucent: it's the
+    // radial glow painted over the section's ground, so it MUST carry
+    // alpha. Collected here and verified below against what it actually
+    // composites to, rather than being waved through.
+    let scene = null;
+
     for (const [, k, v] of body.matchAll(/--([\w-]+):\s*([^;]+);/g)) {
       const val = resolve(v.trim(), root);
       if (/^#[0-9a-fA-F]{3,8}$/.test(val)) t[k] = val;
+      else if (k === "scene" && parseRgba(val)) scene = parseRgba(val);
       else
         fail(
           "themes",
@@ -151,6 +192,33 @@ function auditThemes() {
           `theme "${name}": --${fg} ${t[fg]} on --${bg} ${t[bg]} = ${r.toFixed(2)}:1 (needs ${min})`
         );
     }
+    // The scene glow sits ON TOP of the ground, so the colour text is
+    // actually read against in the middle of a section is the composite,
+    // not --ground. A glow bright enough to lift the ground toward the
+    // cream foreground quietly eats contrast exactly where the headings
+    // are. Measure the real thing.
+    if (scene) {
+      const ground = t.ground ?? t.background;
+      if (ground) {
+        const lit = composite(scene, ground);
+        for (const [fg, min] of [
+          ["foreground", 4.5],
+          ["muted-foreground", 4.5],
+        ]) {
+          if (!t[fg]) continue;
+          const r = contrast(t[fg], lit);
+          if (r < min)
+            fail(
+              "contrast",
+              `theme "${name}": --${fg} ${t[fg]} over the lit ground ${lit} (--scene on --ground ${ground}) = ${r.toFixed(2)}:1 (needs ${min})`
+            );
+        }
+        notes.push(
+          `theme "${name}": lit ground ${lit}, fg ${contrast(t.foreground, lit).toFixed(1)}:1`
+        );
+      }
+    }
+
     // --border and --input must move together. A theme that restyles its
     // borders but leaves --input inherits the root hue, which is how the
     // contact page ended up with brown field borders in a slate section.

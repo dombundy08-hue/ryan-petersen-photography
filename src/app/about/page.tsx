@@ -4,11 +4,12 @@ import { Mountain, Car, Trophy, Gamepad2, User } from "lucide-react";
 import { Section } from "@/components/section";
 import { PhotoCarousel } from "@/components/photo-carousel";
 import { aboutPhoto, aboutMorePhotos } from "@/lib/settings";
+import { resolveObjectPosition } from "@/lib/focal-points";
 
 export const metadata: Metadata = {
   title: "About Ryan",
   description:
-    "Meet Ryan Petersen, a senior, family and nature photographer based in Frederick, Colorado. Fully manual, honest, and focused on making you comfortable on the day.",
+    "Meet Ryan Petersen, a photographer local to Frederick, Colorado — senior, family, nature and custom sessions. Fully manual, honest, and focused on making you comfortable on the day.",
   alternates: { canonical: canonical("about") },
 };
 
@@ -20,10 +21,14 @@ const HOBBIES = [
 ];
 
 export default function AboutPage() {
+  // These come from settings rather than a shoot, so they miss the
+  // focal-point resolution that shoots.ts does — and this is a 3:4 crop of
+  // a person's face, which is exactly where a centred crop goes wrong.
   const aboutPhotos = aboutPhoto
     ? [aboutPhoto, ...aboutMorePhotos].map((src) => ({
         src,
         alt: "Ryan Petersen",
+        objectPosition: resolveObjectPosition(src),
       }))
     : [];
 
@@ -98,7 +103,7 @@ export default function AboutPage() {
         </div>
       </Section>
 
-      <Section data-theme="ember" className="border-t border-border">
+      <Section data-theme="ember">
         <div className="mx-auto max-w-2xl">
           <h2 className="text-center font-heading text-lg font-semibold text-foreground">
             When I&apos;m not shooting
