@@ -21,7 +21,7 @@ export const metadata: Metadata = {
 
 export default function ContactPage() {
   return (
-    <Section data-theme="dusk" className="pt-16 pb-20 sm:pt-20">
+    <Section data-theme="cocoa" className="pt-16 pb-20 sm:pt-20">
       <div className="mx-auto max-w-2xl rounded-2xl border-2 border-primary bg-primary px-8 py-10 text-center shadow-[0_0_60px_-15px_var(--color-primary)]">
         <h1 className="text-4xl font-medium italic tracking-tight text-primary-foreground sm:text-5xl">
           Let&apos;s Talk

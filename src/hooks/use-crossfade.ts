@@ -47,6 +47,16 @@ export interface CrossfadeOptions {
   kenBurns?: boolean;
   /** Whether the very first photo should load with priority. */
   priorityFirst?: boolean;
+  /**
+   * How long each photo holds before the next one starts fading in.
+   * Defaults to CROSSFADE_INTERVAL_MS.
+   *
+   * The reason this is adjustable: a grid of these side by side all
+   * swapping on the same beat reads as one machine ticking, not as several
+   * photos shuffling. Giving each tile a slightly different interval keeps
+   * them permanently out of phase.
+   */
+  intervalMs?: number;
 }
 
 export interface CrossfadeResult<T extends CrossfadeItem> {
@@ -126,8 +136,16 @@ function decodeAhead(src: string, timeoutMs: number): Promise<void> {
  */
 export function useCrossfade<T extends CrossfadeItem>(
   items: T[],
-  { kenBurns = false, priorityFirst = true }: CrossfadeOptions = {}
+  {
+    kenBurns = false,
+    priorityFirst = true,
+    intervalMs = CROSSFADE_INTERVAL_MS,
+  }: CrossfadeOptions = {}
 ): CrossfadeResult<T> {
+  // A photo's whole on-screen life: it fades in, holds, then is covered.
+  // The Ken Burns ramp is tied to exactly this so it can never be cut off
+  // partway and restart from scale(1) — that was the visible "cut".
+  const lifetimeMs = intervalMs + 2 * CROSSFADE_FADE_MS;
   const count = items.length;
   // Read only inside the timer callback, so it can pick up a changed pool
   // without the interval effect re-running (and resetting the timer) every
@@ -229,12 +247,12 @@ export function useCrossfade<T extends CrossfadeItem>(
       };
       if (!nextItem) return;
       void decodeAhead(nextItem.src, DECODE_TIMEOUT_MS).then(stage);
-    }, CROSSFADE_INTERVAL_MS);
+    }, intervalMs);
     return () => {
       cancelled = true;
       clearTimeout(timer);
     };
-  }, [phase, pageHidden, count, front, back, slotPos, order]);
+  }, [phase, pageHidden, count, front, back, slotPos, order, intervalMs]);
 
   // 3 -> 4: two frames at the from-state, then start the fade. The timeout
   // is a backstop, not a duplicate: rAF callbacks don't run at all while the
@@ -283,7 +301,7 @@ export function useCrossfade<T extends CrossfadeItem>(
       transitions.push(`opacity ${CROSSFADE_FADE_MS}ms ease-in-out`);
     }
     if (zoom && visible) {
-      transitions.push(`transform ${CROSSFADE_LIFETIME_MS}ms ease-out`);
+      transitions.push(`transform ${lifetimeMs}ms ease-out`);
     }
 
     return {

@@ -108,7 +108,7 @@ export default function Home() {
         </div>
       </Section>
 
-      <Section data-theme="dusk">
+      <Section data-theme="cocoa">
         <div className="grid items-center gap-10 md:grid-cols-2">
           <div>
             <h2 className="text-3xl font-semibold tracking-tight text-foreground">
@@ -144,7 +144,7 @@ export default function Home() {
         </div>
       </Section>
 
-      <Section data-theme="sand" className="border-t border-border">
+      <Section data-theme="hearth">
         <div className="grid gap-6 sm:grid-cols-2">
           <div className="rounded-xl border border-border bg-card p-8">
             <h3 className="font-heading text-xl font-semibold text-foreground">

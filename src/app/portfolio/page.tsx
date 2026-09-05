@@ -3,8 +3,8 @@ import { canonical } from "@/lib/site";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Section } from "@/components/section";
-import { CategoryFeatureTile } from "@/components/category-feature-tile";
-import { CATEGORIES, categoryFeaturePhotos } from "@/lib/categories";
+import { CategoryTeaserGrid } from "@/components/category-teaser-grid";
+import { CATEGORIES, categoryTeaserTiles } from "@/lib/categories";
 
 export const metadata: Metadata = {
   title: "Portfolio",
@@ -61,9 +61,9 @@ export default function PortfolioPage() {
         </div>
       </Section>
 
-      {CATEGORIES.map(({ slug, theme, title, description, noun, nounPlural }, categoryIndex) => {
-        const photos = categoryFeaturePhotos(slug);
-        if (photos.length === 0) return null;
+      {CATEGORIES.map(({ slug, theme, title, description }, categoryIndex) => {
+        const tiles = categoryTeaserTiles(slug);
+        if (tiles.length === 0) return null;
 
         return (
           <Section
@@ -88,11 +88,9 @@ export default function PortfolioPage() {
                 See every session
               </Link>
             </div>
-            <CategoryFeatureTile
-              category={slug}
-              photos={photos}
-              noun={noun}
-              nounPlural={nounPlural}
+            <CategoryTeaserGrid
+              tiles={tiles}
+              categorySlug={slug}
               priority={categoryIndex === 0}
             />
 

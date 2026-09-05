@@ -27,7 +27,7 @@ export interface CategoryMeta {
    * so a reader who clicks Senior on the portfolio lands on a page that is
    * still the same room. Values are defined in globals.css.
    */
-  theme: "ember" | "dusk" | "moss" | "plum";
+  theme: "ember" | "cocoa" | "umber" | "tobacco";
 }
 
 export const CATEGORIES: CategoryMeta[] = [
@@ -46,7 +46,7 @@ export const CATEGORIES: CategoryMeta[] = [
   },
   {
     slug: "family",
-    theme: "dusk",
+    theme: "cocoa",
     title: "Family Photos",
     heading: "Family Sessions",
     description:
@@ -59,7 +59,7 @@ export const CATEGORIES: CategoryMeta[] = [
   },
   {
     slug: "nature",
-    theme: "moss",
+    theme: "umber",
     title: "Nature Photos",
     heading: "Nature & Landscape",
     description:
@@ -72,7 +72,7 @@ export const CATEGORIES: CategoryMeta[] = [
   },
   {
     slug: "custom",
-    theme: "plum",
+    theme: "tobacco",
     title: "Custom Shots",
     heading: "Custom Shots",
     description:
@@ -121,11 +121,61 @@ export function categoryEntries(category: PhotoCategory): CategoryEntry[] {
     .filter((e): e is CategoryEntry => e !== null);
 }
 
-/** One representative photo per shoot, for the rotating feature tile. */
-export function categoryFeaturePhotos(category: PhotoCategory) {
-  return categoryEntries(category).map((entry) => ({
-    ...entry.photo,
-    shootSlug: entry.slug,
-    shootTitle: entry.name,
-  }));
+export interface CategoryTeaserTile {
+  key: string;
+  /** The shoot this tile links to. Fixed — it never changes as photos cycle. */
+  slug: string;
+  name: string;
+  photos: Photo[];
+}
+
+/**
+ * The tiles for a category's section on /portfolio — several small shuffling
+ * photos rather than one big banner.
+ *
+ * Why not one tile per shoot: a category can have two shoots or twenty, and
+ * the section should look the same either way. Tiles are dealt round-robin
+ * across the shoots, so with four tiles and two shoots each person gets two
+ * tiles, and adjacent tiles are different people wherever that's possible.
+ *
+ * Each tile gets a *disjoint slice* of its shoot's photos (`idx % n === j`),
+ * so two tiles showing the same person never show the same photograph — and
+ * the slice is taken by stride rather than by chunk, so a tile draws from
+ * across the whole session instead of four near-identical frames from the
+ * same two minutes of it.
+ *
+ * A tile's link is its shoot, decided here and fixed. Linking to whichever
+ * photo happens to be showing would move the destination under the cursor.
+ */
+export function categoryTeaserTiles(
+  category: PhotoCategory,
+  count = 4
+): CategoryTeaserTile[] {
+  const shoots = shootsByCategory(category);
+  if (shoots.length === 0) return [];
+
+  const buckets = shoots.map((shoot, shootIndex) => {
+    // Round-robin share: the first (count % shoots.length) shoots get one extra.
+    const tileCount =
+      Math.floor(count / shoots.length) +
+      (shootIndex < count % shoots.length ? 1 : 0);
+
+    return Array.from({ length: tileCount }, (_, j) => ({
+      key: `${shoot.slug}-${j}`,
+      slug: shoot.slug,
+      name: shoot.subjectName ?? shoot.title,
+      // Every photo is fair game here, unlike the hero: heroEligible is about
+      // a 21:9 banner cropping a face out, and these tiles are portrait.
+      photos: shoot.photos.filter((_, idx) => idx % tileCount === j),
+    })).filter((tile) => tile.photos.length > 0);
+  });
+
+  // Interleave the buckets so tile order alternates between people.
+  const tiles: CategoryTeaserTile[] = [];
+  for (let j = 0; tiles.length < count; j++) {
+    const row = buckets.map((b) => b[j]).filter(Boolean);
+    if (row.length === 0) break;
+    tiles.push(...row);
+  }
+  return tiles.slice(0, count);
 }

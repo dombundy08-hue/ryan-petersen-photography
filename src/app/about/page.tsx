@@ -42,7 +42,7 @@ export default function AboutPage() {
         </div>
       </Section>
 
-      <Section data-theme="sand" className="border-t border-border pt-0">
+      <Section data-theme="hearth" className="pt-0">
         <div className="mx-auto grid max-w-4xl gap-10 md:grid-cols-[1.1fr_1fr] md:items-start">
           <div className="mx-auto w-full max-w-sm md:max-w-none">
             {aboutPhoto ? (

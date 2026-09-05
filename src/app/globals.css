@@ -103,11 +103,12 @@
    re-resolves for free — put `data-theme` on a <Section> and everything
    inside re-skins.
 
-   Four darks that genuinely differ in HUE, not just lightness — warm
-   brown, cool slate, green — plus exactly one light. Light is the
-   expensive move on a photography site; spend it once.
+   Every room is a warm brown — see ONE FAMILY: BROWN AND GOLD below for
+   why, and for what separates them now that hue no longer does.
 
-   Contrast is measured, not estimated; the ratios are in the comments.
+   Contrast is measured, not estimated; `npm run audit` recomputes every
+   pair against the declared tokens AND against the scene glow composited
+   over the ground, which is what the type is actually read against.
    ────────────────────────────────────────────────────────────────────── */
 
 /* ──────────────────────────────────────────────────────────────────────
@@ -161,10 +162,31 @@
   --accent: #201A13;
 }
 
-/* EMBER — warm amber-brown. Senior sessions. The house tone. */
+/* ──────────────────────────────────────────────────────────────────────
+   ONE FAMILY: BROWN AND GOLD
+
+   The rooms used to be four different hues — brown, indigo, green,
+   violet — plus one light sand section. The client's call (2026-09-05):
+   "Remove the blue. There should just be a brown and yellow style …
+   There shouldn't be a white."
+
+   So every room is now a warm brown and the ONLY chromatic accent is the
+   gold. They separate by three things instead of by hue:
+
+     • depth      — where the ground sits on the brown ladder
+     • temperature — redder cocoa vs yellower umber vs tan tobacco
+     • the glow    — how much gold, and how warm, sits in the middle
+
+   This is a tighter, more disciplined palette than four competing hues,
+   and it lets the photographs supply the colour. The seam invariant above
+   is what makes rooms this close to each other still read as separate
+   rooms rather than one long smear.
+   ────────────────────────────────────────────────────────────────────── */
+
+/* EMBER — the house tone, and the richest gold. Senior sessions. */
 [data-theme="ember"] {
-  --ground: #2A1C11;
-  --scene: rgba(211, 160, 84, 0.13);
+  --ground: #2E1D10;
+  --scene: rgba(211, 160, 84, 0.15);
   --background: #241A12;
   --card: #2F231A;
   --secondary: #3A2C20;
@@ -176,77 +198,81 @@
   --destructive: #EE7A72; /* 5.9:1 — the root red is 4.36:1 here */
 }
 
-/* DUSK — cool indigo. Family sessions. Reads apart from the browns. */
-[data-theme="dusk"] {
-  --ground: #171C2A;
-  --scene: rgba(124, 148, 214, 0.12);
-  --background: #15181F;
-  --card: #1D212A;
-  --secondary: #262B36;
-  --muted: #1D212A;
-  --muted-foreground: #A9B3C4; /* 9.1:1 */
-  --border: #2E3542;
-  --input: #2E3542;
-  --accent: #262B36;
+/* COCOA — the reddest, deepest brown. Family sessions. */
+[data-theme="cocoa"] {
+  --ground: #26150F;
+  --scene: rgba(198, 122, 78, 0.13);
+  --background: #201310;
+  --card: #2C1B15;
+  --secondary: #382419;
+  --muted: #2C1B15;
+  --muted-foreground: #C7B1A0;
+  --border: #432C20;
+  --input: #432C20;
+  --accent: #382419;
 }
 
-/* MOSS — green-black. Nature, and it breaks the brown/indigo pairing. */
-[data-theme="moss"] {
-  --ground: #151E13;
-  --scene: rgba(126, 176, 108, 0.12);
-  --background: #141810;
-  --card: #1C2117;
-  --secondary: #262C1F;
-  --muted: #1C2117;
-  --muted-foreground: #B2BCA3; /* 9.3:1 */
-  --border: #2E3625;
-  --input: #2E3625;
-  --accent: #262C1F;
+/* UMBER — yellow-brown, the warmest end of the ladder. Nature. */
+[data-theme="umber"] {
+  --ground: #23200F;
+  --scene: rgba(206, 178, 92, 0.12);
+  --background: #1E1B0E;
+  --card: #292416;
+  --secondary: #352F1D;
+  --muted: #292416;
+  --muted-foreground: #C6BE9E;
+  --border: #403927;
+  --input: #403927;
+  --accent: #352F1D;
+  /* The root red only clears 4.5:1 on near-black; these browns are
+     lighter, so it lifts. */
+  --destructive: #EE7A72;
 }
 
-/* PLUM — deep violet. Custom Shots (cars and one-off work). The fourth
-   distinct room: not brown, not indigo, not green. */
-[data-theme="plum"] {
-  --ground: #251426;
-  --scene: rgba(198, 130, 198, 0.12);
-  --background: #1F1220;
-  --card: #2A1A2B;
-  --secondary: #342234;
-  --muted: #2A1A2B;
-  --muted-foreground: #C3B0C4; /* 9.0:1 */
-  --border: #3E2A3E;
-  --input: #3E2A3E;
-  --accent: #342234;
+/* TOBACCO — lifted tan, the lightest of the four. Custom Shots. */
+[data-theme="tobacco"] {
+  --ground: #33230F;
+  --scene: rgba(224, 176, 96, 0.12);
+  --background: #2B1E0F;
+  --card: #372817;
+  --secondary: #44331E;
+  --muted: #372817;
+  --muted-foreground: #CDBB9D;
+  --border: #4F3C25;
+  --input: #4F3C25;
+  --accent: #44331E;
+  /* The root red only clears 4.5:1 on near-black; these browns are
+     lighter, so it lifts. */
+  --destructive: #EE7A72;
 }
 
-/* SAND — the one light section. The gold fails here at 2.3:1, so the
-   primary darkens to a bronze that holds at 5.6:1.
-
-   Sand is the deliberate exception to the seam invariant: it is a CUT, not
-   a fade. A light section cannot fade to a near-black seam without going
-   muddy through the middle, so it doesn't try — it lands flat, hard-edged,
-   and the border rule marks the cut. Light is the expensive move on a
-   photography site; spend it once, and spend it decisively. */
-[data-theme="sand"] {
-  background-image: none;
-  background-color: var(--background);
-  --background: #F4EFE6;
-  --foreground: #1A1510; /* 16.8:1 */
-  --card: #FBF8F2;
-  --card-foreground: #1A1510;
-  --primary: #7A5A1E; /* 5.6:1 */
-  --primary-foreground: #FBF8F2;
-  --secondary: #E8E0D2;
-  --secondary-foreground: #1A1510;
-  --muted: #EAE3D7;
-  --muted-foreground: #5B5145; /* 6.7:1 */
-  --border: #DDD3C2;
-  --input: #DDD3C2;
-  --accent: #E8E0D2;
-  --accent-foreground: #1A1510;
-  --ring: #7A5A1E;
-  --destructive: #9B2C22; /* 6.6:1 — the root red is 3.4:1 here */
+/* HEARTH — replaces the old light "sand" section. The client asked for no
+   white anywhere, so the one section that used to invert to a light ground
+   is now simply the brightest rung of the same brown ladder: it still
+   reads as a lift out of the dark, but the type stays cream and the gold
+   stays gold (on sand both had to be swapped for dark ink and a bronze).
+   Because it is on the ladder now rather than off it, it also stops being
+   a cut and fades like everything else. */
+[data-theme="hearth"] {
+  --ground: #3D2A16;
+  --scene: rgba(226, 186, 110, 0.14);
+  --background: #33240F;
+  --card: #40301C;
+  --secondary: #4D3B24;
+  --muted: #40301C;
+  --muted-foreground: #D2C0A4;
+  --border: #58432A;
+  --input: #58432A;
+  --accent: #4D3B24;
+  /* The root red only clears 4.5:1 on near-black; these browns are
+     lighter, so it lifts. */
+  --destructive: #EE7A72;
 }
+
+/* The light "sand" room is gone — see HEARTH above. With no light section
+   left, there is no theme that has to invert the type to dark ink or swap
+   the gold for a bronze, and no theme that has to opt out of the seam
+   invariant. Every room now fades, and cream-on-brown holds throughout. */
 
 .dark {
   --background: #100D0A;
