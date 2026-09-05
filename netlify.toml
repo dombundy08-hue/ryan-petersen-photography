@@ -2,6 +2,15 @@
   command = "npm run build"
   publish = "out"
 
+# Turns on the Netlify Image CDN loader in next.config.ts. Safe to commit —
+# it's a switch, not a secret, and it must live here rather than in Site
+# settings precisely because it has to be false everywhere that ISN'T
+# Netlify. A static export has no image optimizer of its own, so without
+# this the portfolio ships a 422 KB 2400px JPEG to a phone (LCP 6.0s,
+# Lighthouse Performance 66). With it, the same photo is 49 KB of WebP.
+[build.environment]
+  NEXT_PUBLIC_NETLIFY_IMAGES = "1"
+
 # GH_PAGES_BASE_PATH is intentionally NOT set here — Netlify serves this
 # site at its own domain root, so basePath must stay empty (the default in
 # next.config.ts). Only a GitHub Pages deploy needs that variable.

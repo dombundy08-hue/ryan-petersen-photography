@@ -49,15 +49,24 @@ export function CategoryFeatureTile({
   photos,
   noun,
   nounPlural,
+  priority = false,
 }: {
   category: PhotoCategory;
   photos: CategoryFeaturePhoto[];
   /** What one entry is called, e.g. "senior", "family", "series". */
   noun: string;
   nounPlural: string;
+  /**
+   * Set on the FIRST tile on a page only. Several of these render down
+   * /portfolio and marking them all priority would preload four 21:9
+   * photos at once — but the first one is above the fold and is the page's
+   * Largest Contentful Paint element, so leaving it lazy costs seconds.
+   * It measured LCP 6.0s and Lighthouse Performance 66 before this.
+   */
+  priority?: boolean;
 }) {
   const count = photos.length;
-  const { layers, current } = useCrossfade(photos, { priorityFirst: false });
+  const { layers, current } = useCrossfade(photos, { priorityFirst: priority });
 
   if (count === 0) return null;
 
@@ -73,7 +82,10 @@ export function CategoryFeatureTile({
     >
       <CrossfadeLayers
         layers={layers}
-        sizes="100vw"
+        /* The tile is full-width only until the Section's max-w-6xl
+           (1152px) takes over. Saying 100vw past that made a 1440px screen
+           fetch the 1920px file to paint 1152px of tile. */
+        sizes="(max-width: 1200px) 100vw, 1152px"
         objectPosition={featureCrop}
       />
       <div

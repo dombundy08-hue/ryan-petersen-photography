@@ -61,7 +61,7 @@ export default function PortfolioPage() {
         </div>
       </Section>
 
-      {CATEGORIES.map(({ slug, theme, title, description, noun, nounPlural }) => {
+      {CATEGORIES.map(({ slug, theme, title, description, noun, nounPlural }, categoryIndex) => {
         const photos = categoryFeaturePhotos(slug);
         if (photos.length === 0) return null;
 
@@ -93,6 +93,7 @@ export default function PortfolioPage() {
               photos={photos}
               noun={noun}
               nounPlural={nounPlural}
+              priority={categoryIndex === 0}
             />
 
             {/* Custom Shots is the catch-all, so the "I'll shoot this too"
