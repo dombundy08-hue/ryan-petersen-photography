@@ -43,9 +43,13 @@ export function HeroCarousel({ photos }: { photos: Photo[] }) {
 
       <div
         className="absolute inset-0 z-[3]"
+        /* Heavier than a card's floor: this one carries the H1 and both
+           CTAs over a photograph whose brightness changes every few
+           seconds, so it has to hold the worst frame in the rotation, not
+           the average one. */
         style={{
           background:
-            "linear-gradient(180deg, rgba(16,13,10,0.45) 0%, rgba(16,13,10,0.15) 40%, rgba(16,13,10,0.9) 100%)",
+            "linear-gradient(180deg, var(--scrim-soft) 0%, var(--scrim-faint) 40%, var(--scrim) 100%)",
         }}
       />
 

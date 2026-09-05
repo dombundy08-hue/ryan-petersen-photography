@@ -55,7 +55,10 @@ export default function AboutPage() {
               <div
                 role="img"
                 aria-label="Photo of Ryan Petersen — coming soon"
-                className="relative flex aspect-[3/4] items-center justify-center overflow-hidden rounded-xl border border-border bg-gradient-to-br from-[#D3A054]/20 via-[#5C4F3E]/15 to-[#1B1712]"
+                /* Token-derived, not literal hexes: this placeholder sits in
+                   the hearth room but was mixed from the dark room's card
+                   colour, so it read as a hole punched in a lighter section. */
+                className="relative flex aspect-[3/4] items-center justify-center overflow-hidden rounded-xl border border-border bg-gradient-to-br from-primary/20 via-primary/5 to-card"
               >
                 <div className="flex flex-col items-center gap-2 px-4 text-center">
                   <User

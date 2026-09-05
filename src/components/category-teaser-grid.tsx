@@ -71,7 +71,7 @@ function Tile({
         className="pointer-events-none absolute inset-0 z-[3]"
         style={{
           background:
-            "linear-gradient(180deg, rgba(16,13,10,0) 45%, rgba(16,13,10,0.88) 100%)",
+            "linear-gradient(180deg, transparent 45%, var(--scrim) 100%)",
         }}
       />
 

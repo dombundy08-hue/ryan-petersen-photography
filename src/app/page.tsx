@@ -87,7 +87,7 @@ export default function Home() {
                   className="absolute inset-0"
                   style={{
                     background:
-                      "linear-gradient(180deg, rgba(16,13,10,0) 40%, rgba(16,13,10,0.9) 100%)",
+                      "linear-gradient(180deg, transparent 40%, var(--scrim) 100%)",
                   }}
                 />
                 <div className="relative p-6">

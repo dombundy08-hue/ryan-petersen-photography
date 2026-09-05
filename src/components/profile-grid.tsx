@@ -99,7 +99,7 @@ export function ProfileGrid({
                 className="absolute inset-0"
                 style={{
                   background:
-                    "linear-gradient(180deg, rgba(16,13,10,0) 55%, rgba(16,13,10,0.85) 100%)",
+                    "linear-gradient(180deg, transparent 55%, var(--scrim) 100%)",
                 }}
               />
               <div className="relative p-3">

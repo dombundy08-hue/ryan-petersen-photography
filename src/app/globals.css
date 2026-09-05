@@ -58,6 +58,17 @@
      Identical to --background on purpose — see THE SEAM INVARIANT below.
      If you change one, change both, or section boundaries start to band. */
   --seam: #100D0A;
+  /* Veils laid over a photograph so type on top of it stays legible.
+     Three strengths: a faint overall knock-back, a soft top edge, and the
+     heavy floor a caption or headline actually sits on.
+
+     Derived from the surface they sit on rather than a fixed near-black —
+     a card in the tobacco or hearth room with a #100D0A floor reads as a
+     dark patch stamped onto a warm ground instead of part of the room.
+     Each themed section redeclares these from its own --ground below. */
+  --scrim-faint: color-mix(in oklab, var(--seam) 15%, transparent);
+  --scrim-soft: color-mix(in oklab, var(--seam) 45%, transparent);
+  --scrim: color-mix(in oklab, var(--seam) 90%, transparent);
   --foreground: #F3EDE3;
   --card: #1B1712;
   --card-foreground: #F3EDE3;
@@ -135,6 +146,10 @@
 [data-theme] {
   background-color: var(--seam);
   color: var(--foreground);
+  /* Redeclared from the room's own ground — see --scrim in :root. */
+  --scrim-faint: color-mix(in oklab, var(--ground) 15%, transparent);
+  --scrim-soft: color-mix(in oklab, var(--ground) 45%, transparent);
+  --scrim: color-mix(in oklab, var(--ground) 90%, transparent);
   background-image:
     radial-gradient(100% 52% at 50% 50%, var(--scene, transparent) 0%, transparent 72%),
     linear-gradient(
