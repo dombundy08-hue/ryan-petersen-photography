@@ -11,6 +11,7 @@ import {
   SheetTitle,
   SheetClose,
 } from "@/components/ui/sheet";
+import { LogoMark } from "@/components/logo";
 
 const NAV_LINKS = [
   { href: "/", label: "Home" },
@@ -27,8 +28,9 @@ export function Navbar() {
       <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-4 sm:px-6 lg:px-8">
         <Link
           href="/"
-          className="font-heading text-lg font-semibold tracking-tight text-foreground"
+          className="flex items-center gap-2.5 font-heading text-lg font-semibold tracking-tight text-foreground"
         >
+          <LogoMark className="size-7 shrink-0" />
           Ryan<span className="text-primary">Shutter</span>
         </Link>
 

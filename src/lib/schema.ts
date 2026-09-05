@@ -81,7 +81,6 @@ export function shootSchema(shoot: Shoot) {
     name: shoot.title,
     description: shoot.description,
     url,
-    isPartOf: { "@id": `${SITE_URL}/#website` },
     provider: { "@id": ORG_ID },
     image: shoot.photos.map((photo) => ({
       "@type": "ImageObject",

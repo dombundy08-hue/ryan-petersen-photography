@@ -6,17 +6,10 @@ import { ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Section } from "@/components/section";
 import { shoots, getShoot } from "@/lib/shoots";
+import { getCategory } from "@/lib/categories";
 import { JsonLd } from "@/components/json-ld";
 import { canonical } from "@/lib/site";
 import { shootSchema, breadcrumbSchema } from "@/lib/schema";
-
-// Column count scales to the shoot's real photo count, so a small
-// gallery (even a single photo) always reads as intentionally full
-// instead of leaving empty grid cells.
-function gridColsClass(count: number): string {
-  if (count === 2) return "sm:grid-cols-2";
-  return "sm:grid-cols-2 lg:grid-cols-3";
-}
 
 export function generateStaticParams() {
   return shoots.map((shoot) => ({
@@ -54,7 +47,12 @@ export default async function ShootPage({
   if (!shoot) notFound();
 
   return (
-    <Section data-theme="night" className="border-t border-border pt-16 pb-20 sm:pt-20">
+    // The gallery stays in its category's own colour — clicking through
+    // from Senior shouldn't land you in a different room.
+    <Section
+      data-theme={getCategory(shoot.category)?.theme ?? "night"}
+      className="pt-16 pb-20 sm:pt-20"
+    >
       <JsonLd data={shootSchema(shoot)} />
       <JsonLd
         data={breadcrumbSchema([
@@ -83,37 +81,30 @@ export default async function ShootPage({
         <p className="mt-2 text-muted-foreground">{shoot.description}</p>
       </div>
 
-      {shoot.photos.length === 1 ? (
-        <div className="relative mt-10 aspect-[21/9] overflow-hidden rounded-xl border border-border">
-          <Image
-            src={shoot.photos[0].src}
-            alt={shoot.photos[0].alt}
-            fill
-            sizes="100vw"
-            className="object-cover"
-            priority
-          />
-        </div>
-      ) : (
-        <div
-          className={`mt-10 grid grid-cols-2 gap-4 ${gridColsClass(shoot.photos.length)}`}
-        >
-          {shoot.photos.map((photo) => (
-            <div
-              key={photo.src}
-              className="relative aspect-[4/5] overflow-hidden rounded-xl border border-border"
-            >
-              <Image
-                src={photo.src}
-                alt={photo.alt}
-                fill
-                sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
-                className="object-cover"
-              />
-            </div>
-          ))}
-        </div>
-      )}
+      {/* Every gallery renders identically, whatever its photo count. This
+          used to branch: one photo became a full-bleed 21:9 banner and two
+          photos got their own column count, which is why the family and
+          nature shoots read as enormous next to a senior gallery of the
+          same thing. A one-photo shoot is now simply a one-card gallery.
+          flex-wrap centres a partial last row instead of leaving a hole. */}
+      <div className="mt-10 flex flex-wrap justify-center gap-4">
+        {shoot.photos.map((photo, i) => (
+          <div
+            key={photo.src}
+            className="relative aspect-[4/5] basis-[calc(50%-0.5rem)] overflow-hidden rounded-xl border border-border lg:basis-[calc(33.333%-0.667rem)]"
+          >
+            <Image
+              src={photo.src}
+              alt={photo.alt}
+              fill
+              sizes="(max-width: 1024px) 50vw, 33vw"
+              style={{ objectPosition: photo.objectPosition ?? "50% 35%" }}
+              className="object-cover"
+              priority={i === 0}
+            />
+          </div>
+        ))}
+      </div>
 
       <div className="mt-14 text-center">
         <p className="text-muted-foreground">

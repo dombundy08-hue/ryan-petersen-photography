@@ -1,9 +1,9 @@
 import type { Metadata } from "next";
-import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { ArrowLeft } from "lucide-react";
 import { Section } from "@/components/section";
+import { ProfileGrid } from "@/components/profile-grid";
 import { JsonLd } from "@/components/json-ld";
 import { canonical } from "@/lib/site";
 import { breadcrumbSchema } from "@/lib/schema";
@@ -73,44 +73,20 @@ export default async function CategoryDirectoryPage({
       </Section>
 
       {entries.length > 0 && (
-        <Section data-theme="ember" className="border-t border-border">
-          <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
-            {entries.map((entry) => (
-              <Link
-                key={entry.slug}
-                href={`/portfolio/${meta.slug}/${entry.slug}`}
-                className="group relative flex aspect-[4/5] flex-col justify-end overflow-hidden rounded-xl border border-border"
-              >
-                <Image
-                  src={entry.photo.src}
-                  alt={entry.photo.alt}
-                  fill
-                  sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
-                  /* Cards are portrait-shaped, so a centred crop is fine
-                     here — unlike the 21:9 tile. Per-photo overrides still
-                     win where a shot needs one. */
-                  style={{ objectPosition: entry.photo.objectPosition ?? "50% 40%" }}
-                  className="object-cover transition-transform duration-500 group-hover:scale-105"
-                />
-                <div
-                  className="absolute inset-0"
-                  style={{
-                    background:
-                      "linear-gradient(180deg, rgba(16,13,10,0) 55%, rgba(16,13,10,0.85) 100%)",
-                  }}
-                />
-                <div className="relative p-3">
-                  <p className="text-sm font-medium text-foreground">
-                    {entry.name}
-                  </p>
-                  <p className="text-xs text-foreground/70">
-                    {entry.photoCount} photo{entry.photoCount === 1 ? "" : "s"}
-                    {" · "}View gallery &rarr;
-                  </p>
-                </div>
-              </Link>
-            ))}
-          </div>
+        <Section data-theme={meta.theme}>
+          <ProfileGrid
+            categorySlug={meta.slug}
+            noun={meta.noun}
+            nounPlural={meta.nounPlural}
+            cards={entries.map((entry) => ({
+              slug: entry.slug,
+              name: entry.name,
+              src: entry.photo.src,
+              alt: entry.photo.alt,
+              objectPosition: entry.photo.objectPosition,
+              photoCount: entry.photoCount,
+            }))}
+          />
         </Section>
       )}
     </>

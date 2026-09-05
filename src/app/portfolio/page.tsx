@@ -9,25 +9,16 @@ import { CATEGORIES, categoryFeaturePhotos } from "@/lib/categories";
 export const metadata: Metadata = {
   title: "Portfolio",
   description:
-    "Senior, family and nature photography across Frederick, Firestone, Longmont and the Colorado Front Range — real sessions by Ryan Petersen.",
+    "Senior, family, nature and custom photography across Frederick, Firestone, Longmont and the Colorado Front Range — real sessions by Ryan Petersen.",
   alternates: { canonical: canonical("portfolio") },
 };
 
-// Progressive brightening ramp down the page, same technique/tokens as
-// Home and About — each category section reads a little lighter than the
-// last instead of one flat background throughout.
-/* One theme per category so the three sections read as different rooms
-   rather than three shades of the same brown. Nature gets moss. */
-const SECTION_THEME: Record<string, string> = {
-  senior: "ember",
-  family: "dusk",
-  nature: "moss",
-};
-
 /**
- * Session types Ryan will shoot on request. These are deliberately NOT in
- * CATEGORIES — there are no photos for them yet, and inventing a gallery
- * would be a false claim about work he's done.
+ * Session types Ryan will shoot on request but has no gallery for yet.
+ * Inventing a gallery for these would be a false claim about work he's
+ * done, so they stay a plain list — and they live inside Custom Shots,
+ * which is the catch-all category they belong to, rather than as a fifth
+ * section competing with the four real ones.
  */
 const REQUESTED: { title: string; description: string }[] = [
   {
@@ -70,7 +61,7 @@ export default function PortfolioPage() {
         </div>
       </Section>
 
-      {CATEGORIES.map(({ slug, title, description, noun }) => {
+      {CATEGORIES.map(({ slug, theme, title, description, noun, nounPlural }) => {
         const photos = categoryFeaturePhotos(slug);
         if (photos.length === 0) return null;
 
@@ -78,8 +69,8 @@ export default function PortfolioPage() {
           <Section
             key={slug}
             id={slug}
-            data-theme={SECTION_THEME[slug]}
-            className="scroll-mt-16 border-t border-border"
+            data-theme={theme}
+            className="scroll-mt-16"
           >
             <div className="mb-8 flex flex-col gap-1 sm:flex-row sm:items-end sm:justify-between">
               <div>
@@ -101,55 +92,54 @@ export default function PortfolioPage() {
               category={slug}
               photos={photos}
               noun={noun}
-              nounPlural={noun === "family" ? "families" : `${noun}s`}
+              nounPlural={nounPlural}
             />
+
+            {/* Custom Shots is the catch-all, so the "I'll shoot this too"
+                list belongs here rather than in a fifth section of its
+                own. Someone looking for couples or pet photos finds it
+                under the category that already means "something else". */}
+            {slug === "custom" && (
+              <div className="mt-12 border-t border-border pt-10">
+                <h3 className="text-lg font-medium italic tracking-tight text-foreground">
+                  Also on request
+                </h3>
+                <p className="mt-1 max-w-2xl text-sm text-muted-foreground">
+                  Not everything I shoot is in the gallery yet. These are
+                  sessions I&apos;m happy to take on — ask and we&apos;ll plan
+                  it together.
+                </p>
+                <ul className="mt-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+                  {REQUESTED.map((request) => (
+                    <li
+                      key={request.title}
+                      className="rounded-xl border border-border bg-card p-5"
+                    >
+                      <h4 className="font-medium text-foreground">
+                        {request.title}
+                      </h4>
+                      <p className="mt-1 text-sm text-muted-foreground">
+                        {request.description}
+                      </p>
+                    </li>
+                  ))}
+                </ul>
+                <div className="mt-8">
+                  <Button
+                    size="lg"
+                    nativeButton={false}
+                    render={<Link href="/contact" />}
+                  >
+                    Request a Session
+                  </Button>
+                </div>
+              </div>
+            )}
           </Section>
         );
       })}
 
-      {/* Shoot types Ryan will take on request but hasn't photographed yet.
-          Without this, someone wanting couples or event photos assumes he
-          doesn't do it and leaves — and there's no page for those searches
-          to land on either. */}
-      <Section
-        id="requested"
-        data-theme="sand"
-        className="scroll-mt-16 border-t border-border"
-      >
-        <div className="mb-8">
-          <h2 className="text-2xl font-medium italic tracking-tight text-foreground">
-            By Request
-          </h2>
-          <p className="mt-1 max-w-2xl text-sm text-muted-foreground">
-            Not everything I shoot is in the gallery yet. These are sessions
-            I&apos;m happy to take on — ask and we&apos;ll plan it together.
-          </p>
-        </div>
-        <ul className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-          {REQUESTED.map(({ title, description }) => (
-            <li
-              key={title}
-              className="rounded-xl border border-border bg-background p-5"
-            >
-              <h3 className="font-medium text-foreground">{title}</h3>
-              <p className="mt-1 text-sm text-muted-foreground">
-                {description}
-              </p>
-            </li>
-          ))}
-        </ul>
-        <div className="mt-8">
-          <Button
-            size="lg"
-            nativeButton={false}
-            render={<Link href="/contact" />}
-          >
-            Request a Session
-          </Button>
-        </div>
-      </Section>
-
-      <Section data-theme="night" className="border-t border-border">
+      <Section data-theme="night">
         <div className="mx-auto max-w-xl text-center">
           <h2 className="text-2xl font-semibold tracking-tight text-foreground">
             Want to be featured in this gallery?

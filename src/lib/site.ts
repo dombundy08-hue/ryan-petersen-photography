@@ -98,7 +98,7 @@ export const business: BusinessFacts = loadBusiness();
  * three are what someone actually types into a search box.
  */
 export const SITE_DESCRIPTION =
-  `Senior, family, and nature photography by Ryan Petersen, based in ` +
+  `Senior, family, nature, and custom photography by Ryan Petersen, local to ` +
   `${business.city}, ${business.serviceAreaState}. Shot fully manual for ` +
   `light that looks the way you remember it. Sessions are free while he ` +
   `builds his portfolio.`;

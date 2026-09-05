@@ -1,7 +1,7 @@
 import { shootsByCategory, type PhotoCategory, type Photo } from "@/lib/shoots";
 
 /**
- * The three shot categories, in the order they appear everywhere.
+ * The four shot categories, in the order they appear everywhere.
  *
  * One definition, used by the portfolio page, the category directories,
  * generateStaticParams and the sitemap — so adding a category is a single
@@ -16,43 +16,72 @@ export interface CategoryMeta {
   description: string;
   /** What one entry in this category is called. */
   noun: string;
+  /** Explicit plural — deriving it with +"s" gives "seriess". */
+  nounPlural: string;
   metaTitle: string;
   metaDescription: string;
+  /**
+   * The `data-theme` this category paints itself in, everywhere it
+   * appears — its portfolio section, its directory page, its galleries.
+   * Declared here so a category is one edit rather than one per page, and
+   * so a reader who clicks Senior on the portfolio lands on a page that is
+   * still the same room. Values are defined in globals.css.
+   */
+  theme: "ember" | "dusk" | "moss" | "plum";
 }
 
 export const CATEGORIES: CategoryMeta[] = [
   {
     slug: "senior",
+    theme: "ember",
     title: "Senior Photos",
     heading: "Senior Sessions",
     description:
       "A milestone worth doing right — portraits that actually look like you.",
     noun: "senior",
+    nounPlural: "seniors",
     metaTitle: "Senior Portraits",
     metaDescription:
       "Senior portrait sessions in Frederick, Firestone, Longmont and across northern Colorado — shot fully manual by Ryan Petersen.",
   },
   {
     slug: "family",
+    theme: "dusk",
     title: "Family Photos",
     heading: "Family Sessions",
     description:
       "Relaxed sessions built around your family, not a stiff studio pose.",
     noun: "family",
+    nounPlural: "families",
     metaTitle: "Family Photography",
     metaDescription:
       "Family photography sessions in Frederick, Firestone, Longmont and across northern Colorado — relaxed, natural, and built around your family.",
   },
   {
     slug: "nature",
+    theme: "moss",
     title: "Nature Photos",
     heading: "Nature & Landscape",
     description:
       "Landscapes and outdoor moments shot with an eye for natural light.",
     noun: "series",
+    nounPlural: "series",
     metaTitle: "Nature & Landscape Photography",
     metaDescription:
       "Landscape and outdoor photography across the Colorado Front Range — shot fully manual by Ryan Petersen.",
+  },
+  {
+    slug: "custom",
+    theme: "plum",
+    title: "Custom Shots",
+    heading: "Custom Shots",
+    description:
+      "Cars, details and one-off ideas — the sessions that don't fit a category.",
+    noun: "set",
+    nounPlural: "sets",
+    metaTitle: "Custom & Automotive Photography",
+    metaDescription:
+      "Automotive, detail and custom photography in Frederick, Firestone, Longmont and across northern Colorado — shot fully manual by Ryan Petersen.",
   },
 ];
 

@@ -54,6 +54,10 @@
      standing default here, not a toggleable mode — photos carry the
      color, the UI stays quiet and out of the way. */
   --background: #100D0A;
+  /* The value every themed section fades to at its top and bottom edge.
+     Identical to --background on purpose — see THE SEAM INVARIANT below.
+     If you change one, change both, or section boundaries start to band. */
+  --seam: #100D0A;
   --foreground: #F3EDE3;
   --card: #1B1712;
   --card-foreground: #F3EDE3;
@@ -106,58 +110,126 @@
    Contrast is measured, not estimated; the ratios are in the comments.
    ────────────────────────────────────────────────────────────────────── */
 
+/* ──────────────────────────────────────────────────────────────────────
+   THE SEAM INVARIANT
+
+   Every themed section paints a vertical gradient that STARTS and ENDS on
+   --seam, blooming into its own --ground in the middle. --seam is the same
+   value as the root --background, so:
+
+     • two themed sections always meet seam-to-seam,
+     • a themed section always meets an unthemed one seam-to-seam,
+     • and the page background behind everything is that same seam.
+
+   Which means no boundary on any page can band, in any section order,
+   without anyone having to check. The colour lives in the middle of a
+   section where it has room to fade, never at an edge where it would
+   step. Adding a fifth category can't break a seam.
+
+   The scene layer on top is a wide, soft radial in the category's own hue.
+   It's sized so it reaches transparent well before the section's top and
+   bottom edges — a glow that runs off an edge renders as a hard stripe.
+   ────────────────────────────────────────────────────────────────────── */
+
 [data-theme] {
-  background-color: var(--background);
+  background-color: var(--seam);
   color: var(--foreground);
+  background-image:
+    radial-gradient(100% 52% at 50% 50%, var(--scene, transparent) 0%, transparent 72%),
+    linear-gradient(
+      180deg in oklab,
+      var(--seam) 0%,
+      var(--ground) 34%,
+      var(--ground) 66%,
+      var(--seam) 100%
+    );
 }
 
-/* NIGHT — deepest. Hero and closing CTA, where photos carry everything. */
+/* NIGHT — deepest. Hero and closing CTA, where photos carry everything.
+   Dips BELOW the seam rather than above it, so a night section reads as
+   the page holding its breath. */
 [data-theme="night"] {
+  --ground: #0A0806;
+  --scene: rgba(211, 160, 84, 0.05);
   --background: #0C0A07;
   --card: #17130E;
   --secondary: #201A13;
   --muted: #17130E;
   --muted-foreground: #B4A794; /* 9.5:1 */
   --border: #2C251C;
+  --input: #2C251C;
   --accent: #201A13;
 }
 
-/* EMBER — warm, saturated brown. The house tone, used with intent. */
+/* EMBER — warm amber-brown. Senior sessions. The house tone. */
 [data-theme="ember"] {
+  --ground: #2A1C11;
+  --scene: rgba(211, 160, 84, 0.13);
   --background: #241A12;
   --card: #2F231A;
   --secondary: #3A2C20;
   --muted: #2F231A;
-  --muted-foreground: #C4B4A0; /* 8.4:1 */
+  --muted-foreground: #C4B4A0; /* 8.4:1 on --background */
   --border: #443426;
+  --input: #443426;
   --accent: #3A2C20;
+  --destructive: #EE7A72; /* 5.9:1 — the root red is 4.36:1 here */
 }
 
-/* DUSK — cool slate. Reads unmistakably apart from the browns. */
+/* DUSK — cool indigo. Family sessions. Reads apart from the browns. */
 [data-theme="dusk"] {
+  --ground: #171C2A;
+  --scene: rgba(124, 148, 214, 0.12);
   --background: #15181F;
   --card: #1D212A;
   --secondary: #262B36;
   --muted: #1D212A;
   --muted-foreground: #A9B3C4; /* 9.1:1 */
   --border: #2E3542;
+  --input: #2E3542;
   --accent: #262B36;
 }
 
-/* MOSS — green-black. For nature, and to break the brown/slate pairing. */
+/* MOSS — green-black. Nature, and it breaks the brown/indigo pairing. */
 [data-theme="moss"] {
+  --ground: #151E13;
+  --scene: rgba(126, 176, 108, 0.12);
   --background: #141810;
   --card: #1C2117;
   --secondary: #262C1F;
   --muted: #1C2117;
   --muted-foreground: #B2BCA3; /* 9.3:1 */
   --border: #2E3625;
+  --input: #2E3625;
   --accent: #262C1F;
 }
 
+/* PLUM — deep violet. Custom Shots (cars and one-off work). The fourth
+   distinct room: not brown, not indigo, not green. */
+[data-theme="plum"] {
+  --ground: #251426;
+  --scene: rgba(198, 130, 198, 0.12);
+  --background: #1F1220;
+  --card: #2A1A2B;
+  --secondary: #342234;
+  --muted: #2A1A2B;
+  --muted-foreground: #C3B0C4; /* 9.0:1 */
+  --border: #3E2A3E;
+  --input: #3E2A3E;
+  --accent: #342234;
+}
+
 /* SAND — the one light section. The gold fails here at 2.3:1, so the
-   primary darkens to a bronze that holds at 5.6:1. */
+   primary darkens to a bronze that holds at 5.6:1.
+
+   Sand is the deliberate exception to the seam invariant: it is a CUT, not
+   a fade. A light section cannot fade to a near-black seam without going
+   muddy through the middle, so it doesn't try — it lands flat, hard-edged,
+   and the border rule marks the cut. Light is the expensive move on a
+   photography site; spend it once, and spend it decisively. */
 [data-theme="sand"] {
+  background-image: none;
+  background-color: var(--background);
   --background: #F4EFE6;
   --foreground: #1A1510; /* 16.8:1 */
   --card: #FBF8F2;
@@ -173,6 +245,7 @@
   --accent: #E8E0D2;
   --accent-foreground: #1A1510;
   --ring: #7A5A1E;
+  --destructive: #9B2C22; /* 6.6:1 — the root red is 3.4:1 here */
 }
 
 .dark {
@@ -227,14 +300,12 @@
   }
 }
 
-@keyframes kenburns {
-  from {
-    transform: scale(1);
-  }
-  to {
-    transform: scale(1.08);
-  }
-}
+/* The Ken Burns zoom is no longer a keyframe animation. It lives in
+   src/hooks/use-crossfade.ts as a transform transition, because the
+   carousel's two layers are persistent elements that swap their src — a
+   CSS animation on a persistent element needs a reflow hack to restart,
+   whereas a transition restarts naturally when the value changes. The old
+   9s keyframe on a 5s swap cycle was the visible "cut" between photos. */
 
 @keyframes marquee-flow {
   from {
