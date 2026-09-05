@@ -4,7 +4,12 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Section } from "@/components/section";
 import { CategoryTeaserGrid } from "@/components/category-teaser-grid";
-import { CATEGORIES, categoryTeaserTiles } from "@/lib/categories";
+import { PortfolioSearch } from "@/components/portfolio-search";
+import {
+  CATEGORIES,
+  categoryTeaserTiles,
+  allProfiles,
+} from "@/lib/categories";
 
 export const metadata: Metadata = {
   title: "Portfolio",
@@ -56,8 +61,20 @@ export default function PortfolioPage() {
             Portfolio
           </h1>
           <p className="mt-4 text-muted-foreground">
-            Click a session below to see the full shoot.
+            Pick a category below, or search for a name.
           </p>
+          <PortfolioSearch
+            profiles={allProfiles().map((profile) => ({
+              slug: profile.slug,
+              name: profile.name,
+              category: profile.category,
+              categoryTitle: profile.categoryTitle,
+              src: profile.photo.src,
+              alt: profile.photo.alt,
+              objectPosition: profile.photo.objectPosition,
+              photoCount: profile.photoCount,
+            }))}
+          />
         </div>
       </Section>
 

@@ -1,3 +1,5 @@
+import fs from "node:fs";
+import path from "node:path";
 import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
@@ -5,11 +7,41 @@ import { notFound } from "next/navigation";
 import { ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Section } from "@/components/section";
-import { shoots, getShoot } from "@/lib/shoots";
+import { shoots, getShoot, type Shoot } from "@/lib/shoots";
 import { getCategory } from "@/lib/categories";
 import { JsonLd } from "@/components/json-ld";
 import { canonical } from "@/lib/site";
 import { shootSchema, breadcrumbSchema } from "@/lib/schema";
+import { withBasePath } from "@/lib/base-path";
+import { DownloadAllButton } from "@/components/download-all-button";
+
+/**
+ * Total bytes of a shoot's original files, measured off disk at build time.
+ *
+ * The download button hands over the untouched `/images` originals rather
+ * than the Netlify-CDN thumbnails the gallery renders, so a 108-photo
+ * senior session is tens of megabytes. Warning someone before they start
+ * that on cellular needs a real number, and the browser can't get one
+ * without downloading the files first — so it's measured here, where the
+ * files are actually on disk, and passed down as a prop.
+ */
+function totalPhotoBytes(shoot: Shoot): number {
+  // photo.src has already been through withBasePath(); strip that prefix
+  // back off to get at the file under public/.
+  const prefix = withBasePath("");
+  return shoot.photos.reduce((total, photo) => {
+    const relative = photo.src.startsWith(prefix)
+      ? photo.src.slice(prefix.length)
+      : photo.src;
+    try {
+      return total + fs.statSync(path.join(process.cwd(), "public", relative)).size;
+    } catch {
+      // A src with no file behind it is the audit's problem, not a reason
+      // to fail the build — just leave it out of the estimate.
+      return total;
+    }
+  }, 0);
+}
 
 export function generateStaticParams() {
   return shoots.map((shoot) => ({
@@ -79,6 +111,17 @@ export default async function ShootPage({
           </p>
         )}
         <p className="mt-2 text-muted-foreground">{shoot.description}</p>
+
+        {/* Above the grid, not below it: the client who paid for this
+            session came here to collect their photos, and on a 108-photo
+            gallery a button under the last tile is a very long scroll away
+            from the thing that made them open the page. */}
+        <DownloadAllButton
+          photos={shoot.photos.map((photo) => photo.src)}
+          fileBaseName={shoot.slug}
+          galleryLabel={shoot.subjectName ?? shoot.title}
+          totalBytes={totalPhotoBytes(shoot)}
+        />
       </div>
 
       {/* Every gallery renders identically, whatever its photo count. This

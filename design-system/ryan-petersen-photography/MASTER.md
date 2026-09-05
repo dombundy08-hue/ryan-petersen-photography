@@ -209,23 +209,36 @@ components.
 | Category | Slug | Room (`data-theme`) | What it holds |
 |---|---|---|---|
 | Senior Photos | `senior` | `ember` (warm amber-brown) | Senior sessions |
-| Family Photos | `family` | `dusk` (cool indigo) | Family sessions |
-| Nature Photos | `nature` | `moss` (green-black) | Landscape / outdoor |
-| Custom Shots | `custom` | `plum` (deep violet) | Cars, details, one-offs |
+| Family Photos | `family` | `cocoa` (deep red-brown) | Family sessions |
+| Nature Photos | `nature` | `umber` (yellow-brown) | Landscape / outdoor |
+| Custom Shots | `custom` | `tobacco` (lifted tan) | Cars, details, one-offs |
 
 "Custom Shots" replaced a hardcoded "Requested" block that was not a real
 category. The list of session types Ryan will shoot on request still exists,
 but it now lives *inside* the Custom Shots section rather than competing as
 a fifth section of its own.
 
-### Rooms — one colour per category
+### Rooms — one colour per category, all of them brown
 
-Each category owns a colour and keeps it everywhere it appears: its section
-on `/portfolio`, its directory page, and every gallery inside it. Clicking
-Senior should never drop you into a differently-coloured page.
+Each category owns a room and keeps it everywhere it appears: its section on
+`/portfolio`, its directory page, and every gallery inside it. Clicking
+Senior should never drop you into a differently-coloured page. The `theme`
+is declared on the category itself, so the colour travels automatically.
 
-The `theme` is declared on the category itself, so the colour travels with
-the category automatically.
+**Every room is a warm brown.** An earlier version gave each category its own
+hue — brown, indigo, green, violet — plus one light sand section. The client
+rejected it (2026-09-05): *"Remove the blue. There should just be a brown and
+yellow style … There shouldn't be a white."* Rooms are now told apart by
+depth, by temperature (redder cocoa, yellower umber, tan tobacco) and by how
+much gold sits in their glow. The gold is the only chromatic accent on the
+site and is reserved for primary actions.
+
+There is no light theme any more. `hearth` — the brightest rung — does the
+job `sand` used to, without having to invert type to dark ink or swap the
+gold for a bronze to hold contrast.
+
+A published reference of the whole palette, with the rooms rendered in their
+real CSS and the measured contrast for each, is linked from the run log.
 
 ### The seam invariant
 
@@ -253,6 +266,19 @@ structure is three levels deep:
 /portfolio/[category]         → the directory: one card per profile + search
 /portfolio/[category]/[slug]  → the profile itself: the full gallery
 ```
+
+**How someone actually reaches a gallery.** The tiles on `/portfolio` shuffle
+through everyone in their category, captioned with whoever is currently
+showing — but they link to the *directory*, never to the gallery on screen.
+A tile changes every few seconds, so a link that followed the photo would
+mean reaching a particular person depended on catching their frame as it
+came round. The directory lists everyone by name and lets the reader choose.
+The client was explicit about this (2026-09-05): the tiles advertise, the
+directory decides.
+
+Above them, a name search covers **every profile in every category** — for
+the visitor who already has a name and shouldn't need to know whether that
+person was filed under Senior or Family.
 
 Rules that matter:
 

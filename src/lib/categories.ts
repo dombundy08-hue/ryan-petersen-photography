@@ -121,12 +121,37 @@ export function categoryEntries(category: PhotoCategory): CategoryEntry[] {
     .filter((e): e is CategoryEntry => e !== null);
 }
 
+export interface TeaserPhoto extends Photo {
+  /** Whose session this frame is from. Captioned, and changes with the photo. */
+  name: string;
+}
+
 export interface CategoryTeaserTile {
   key: string;
-  /** The shoot this tile links to. Fixed — it never changes as photos cycle. */
+  photos: TeaserPhoto[];
+}
+
+/** Every profile on the site, for the portfolio-wide name search. */
+export interface ProfileSummary {
   slug: string;
   name: string;
-  photos: Photo[];
+  category: PhotoCategory;
+  categoryTitle: string;
+  photo: Photo;
+  photoCount: number;
+}
+
+export function allProfiles(): ProfileSummary[] {
+  return CATEGORIES.flatMap((category) =>
+    categoryEntries(category.slug).map((entry) => ({
+      slug: entry.slug,
+      name: entry.name,
+      category: category.slug,
+      categoryTitle: category.title,
+      photo: entry.photo,
+      photoCount: entry.photoCount,
+    }))
+  );
 }
 
 /**
@@ -154,28 +179,42 @@ export function categoryTeaserTiles(
   const shoots = shootsByCategory(category);
   if (shoots.length === 0) return [];
 
-  const buckets = shoots.map((shoot, shootIndex) => {
-    // Round-robin share: the first (count % shoots.length) shoots get one extra.
-    const tileCount =
-      Math.floor(count / shoots.length) +
-      (shootIndex < count % shoots.length ? 1 : 0);
-
-    return Array.from({ length: tileCount }, (_, j) => ({
-      key: `${shoot.slug}-${j}`,
-      slug: shoot.slug,
+  // Interleave the shoots so consecutive pool entries are different people.
+  // Dealing the pool out by stride then puts a different face in each tile
+  // from the first frame, instead of tile 1 spending its first minute on
+  // one long gallery while tile 2 waits its turn.
+  const perShoot = shoots.map((shoot) =>
+    // Every photo is fair game here, unlike the hero: heroEligible is about
+    // a 21:9 banner cropping a face out, and these tiles are portrait.
+    shoot.photos.map((photo) => ({
+      ...photo,
       name: shoot.subjectName ?? shoot.title,
-      // Every photo is fair game here, unlike the hero: heroEligible is about
-      // a 21:9 banner cropping a face out, and these tiles are portrait.
-      photos: shoot.photos.filter((_, idx) => idx % tileCount === j),
-    })).filter((tile) => tile.photos.length > 0);
-  });
+    }))
+  );
 
-  // Interleave the buckets so tile order alternates between people.
-  const tiles: CategoryTeaserTile[] = [];
-  for (let j = 0; tiles.length < count; j++) {
-    const row = buckets.map((b) => b[j]).filter(Boolean);
+  const pool: TeaserPhoto[] = [];
+  for (let i = 0; ; i++) {
+    const row = perShoot.map((photos) => photos[i]).filter(Boolean);
     if (row.length === 0) break;
-    tiles.push(...row);
+    pool.push(...row);
   }
-  return tiles.slice(0, count);
+  if (pool.length === 0) return [];
+
+  // Tiles are NOT bound to one person any more. Each cycles through the
+  // whole category so the wall reads as a rotation of everyone Ryan has
+  // shot, with the caption naming whoever is currently showing. Clicking
+  // goes to the category's directory rather than to whichever gallery
+  // happened to be on screen — picking a person should be a decision, not
+  // a matter of waiting for their photo to come round.
+  return Array.from({ length: count }, (_, i) => ({
+    key: `tile-${i}`,
+    photos:
+      pool.length >= count
+        ? pool.filter((_, idx) => idx % count === i)
+        : // Fewer photos than tiles: repeat rather than leave a hole. A
+          // category with one photo shows that photo four times, which the
+          // client explicitly preferred to an empty or ragged row until
+          // there are more sessions to show.
+          [pool[i % pool.length]],
+  }));
 }

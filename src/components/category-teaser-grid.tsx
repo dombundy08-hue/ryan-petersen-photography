@@ -5,23 +5,24 @@ import { useCrossfade, CROSSFADE_INTERVAL_MS } from "@/hooks/use-crossfade";
 import { CrossfadeLayers } from "@/components/crossfade-layers";
 
 /**
- * A category's section on /portfolio: several small shuffling photos.
+ * A category's section on /portfolio: four small tiles, each shuffling
+ * through everyone in that category, captioned with whoever is currently
+ * showing.
  *
- * This replaces a single 21:9 banner per category. Two reasons it's better
- * here: a portrait photograph put through a 21:9 crop shows a horizontal
- * slice of a person, and one big image can only ever advertise one session
- * at a time. Four portrait tiles show four different people at once and
- * crop the way the photos were actually shot.
- *
- * Structural type rather than importing CategoryTeaserTile from
- * `@/lib/categories` — that module reads the filesystem at load, so pulling
- * it into a client component would drag `node:fs` into the browser bundle.
+ * Structural type rather than importing from `@/lib/categories` — that
+ * module reads the filesystem at load, so pulling it into a client
+ * component would drag `node:fs` into the browser bundle.
  */
+export interface TeaserPhoto {
+  src: string;
+  alt: string;
+  objectPosition?: string;
+  name: string;
+}
+
 export interface TeaserTile {
   key: string;
-  slug: string;
-  name: string;
-  photos: { src: string; alt: string; objectPosition?: string }[];
+  photos: TeaserPhoto[];
 }
 
 /**
@@ -30,7 +31,7 @@ export interface TeaserTile {
  *
  * The interval is nudged per tile so a row of them never swaps on the same
  * beat. In lockstep the grid reads as one machine ticking; a few hundred
- * milliseconds apart it reads as photographs shuffling, which is the ask.
+ * milliseconds apart it reads as photographs shuffling.
  */
 function Tile({
   tile,
@@ -43,18 +44,19 @@ function Tile({
   index: number;
   priority: boolean;
 }) {
-  const { layers } = useCrossfade(tile.photos, {
+  const { layers, current } = useCrossfade(tile.photos, {
     priorityFirst: priority,
     intervalMs: CROSSFADE_INTERVAL_MS + index * 900,
   });
 
   return (
     <Link
-      /* Shoot pages live at /portfolio/<category>/<shoot> — the category
-         segment is not optional. Linking to /portfolio/<shoot> produced
-         four 404s per section, which the build audit caught. */
-      href={`/portfolio/${categorySlug}/${tile.slug}`}
-      aria-label={`View ${tile.name}'s gallery`}
+      /* Goes to the category's directory, NOT to the gallery of whoever is
+         on screen. The tile changes every few seconds, so a link that
+         followed it would mean reaching a particular person depended on
+         catching their photo as it came round. The directory lists everyone
+         by name and lets the reader choose. */
+      href={`/portfolio/${categorySlug}/`}
       className="group relative aspect-[4/5] basis-[calc(50%-0.5rem)] overflow-hidden rounded-xl border border-border transition-colors hover:border-primary/60 focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none lg:basis-[calc(25%-0.75rem)]"
     >
       <CrossfadeLayers
@@ -62,17 +64,32 @@ function Tile({
         sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
         objectPosition={(photo) => photo.objectPosition}
       />
-      {/* Nothing but a soft floor so the tiles sit as a set rather than as
-          four bright rectangles. Names live on the directory page — these
-          are a teaser, and captioning four of them turns a photo wall into
-          a list. */}
+
+      {/* Floor gradient so the caption always has something to sit on,
+          whatever the photo underneath is doing. */}
       <div
-        className="pointer-events-none absolute inset-0 z-[3] transition-opacity duration-500 group-hover:opacity-0"
+        className="pointer-events-none absolute inset-0 z-[3]"
         style={{
           background:
-            "linear-gradient(180deg, rgba(16,13,10,0) 60%, rgba(16,13,10,0.55) 100%)",
+            "linear-gradient(180deg, rgba(16,13,10,0) 45%, rgba(16,13,10,0.88) 100%)",
         }}
       />
+
+      {current && (
+        <div className="pointer-events-none absolute inset-x-0 bottom-0 z-10 p-3">
+          {/* Keyed on the name so a change remounts the span and replays the
+              fade — the caption arrives with its photo instead of snapping
+              a second before it. Only re-fades when the NAME changes, not on
+              every photo, so a run of frames from one session reads as one
+              person rather than a flickering label. */}
+          <span
+            key={current.name}
+            className="animate-in fade-in block text-sm font-medium text-foreground duration-700"
+          >
+            {current.name}
+          </span>
+        </div>
+      )}
     </Link>
   );
 }
@@ -83,7 +100,7 @@ export function CategoryTeaserGrid({
   priority = false,
 }: {
   tiles: TeaserTile[];
-  /** The category segment of each tile's URL. */
+  /** The directory every tile in this section links to. */
   categorySlug: string;
   /** True for the first category on the page — its tiles are the LCP. */
   priority?: boolean;
