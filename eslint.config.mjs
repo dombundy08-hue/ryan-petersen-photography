@@ -14,6 +14,11 @@ const eslintConfig = defineConfig([
     "next-env.d.ts",
     // docs/ holds the committed GitHub Pages build output, not source.
     "docs/**",
+    // .netlify/ is the Netlify CLI's scratch dir for bundling the functions in
+    // netlify/functions/. Flat config does not read .gitignore, so without this
+    // a single `netlify dev` run makes `npm run lint` report thousands of
+    // problems in generated, minified code.
+    ".netlify/**",
   ]),
 ]);
 

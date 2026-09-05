@@ -53,10 +53,10 @@ photos carry the color, the UI stays quiet.
 - **Mood:** editorial, timeless, warm, intentional, photography-first
 - **Google Fonts:** [Fraunces + Inter](https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=Inter:wght@400;500;600;700&display=swap)
 
-**CSS Import:**
-```css
-@import url('https://fonts.googleapis.com/css2?family=Archivo:wght@300;400;500;600;700&family=Space+Grotesk:wght@300;400;500;600;700&display=swap');
-```
+**How they're actually loaded:** `next/font/google` in `src/app/layout.tsx`,
+exposed as `--font-heading` (Fraunces) and `--font-sans` (Inter). There is no
+`@import` — Next self-hosts both, which is why there is no render-blocking
+request to fonts.googleapis.com on any page.
 
 ### Spacing Variables
 
@@ -102,11 +102,10 @@ photos carry the color, the UI stays quiet.
   transform: translateY(-1px);
 }
 
-/* Secondary Button */
+/* Secondary Button — SOLID, not outlined. */
 .btn-secondary {
-  background: transparent;
+  background: #2A241D;          /* --secondary */
   color: #F3EDE3;
-  border: 2px solid #F3EDE3;
   padding: 12px 24px;
   border-radius: 8px;
   font-weight: 600;
@@ -114,6 +113,13 @@ photos carry the color, the UI stays quiet.
   cursor: pointer;
 }
 ```
+
+> **Corrected 2026-09-05.** This spec used to describe the secondary button
+> as transparent with a 2px border. That is a ghost button, the rubric caps
+> CTAs at solid fill, and the one place it shipped — "View My Work" over the
+> hero — was the least legible element on the site, sitting on a photograph
+> whose brightness changes every five seconds. Secondary reads as subordinate
+> by being a quieter fill, never by being hollow.
 
 ### Cards
 
@@ -145,9 +151,11 @@ photos carry the color, the UI stays quiet.
 }
 
 .input:focus {
-  border-color: #C2410C;
+  border-color: #D3A054;        /* --ring. Was #C2410C, a burnt orange from
+                                   the pre-2026-08-04 palette that no longer
+                                   exists anywhere in the system. */
   outline: none;
-  box-shadow: 0 0 0 3px #C2410C20;
+  box-shadow: 0 0 0 3px #D3A05433;
 }
 ```
 
@@ -160,7 +168,9 @@ photos carry the color, the UI stays quiet.
 }
 
 .modal {
-  background: white;
+  background: #1B1712;          /* --card. NOT white — see below. */
+  color: #F3EDE3;
+  border: 1px solid #332C23;    /* --border */
   border-radius: 16px;
   padding: 32px;
   box-shadow: var(--shadow-xl);
@@ -168,6 +178,12 @@ photos carry the color, the UI stays quiet.
   width: 90%;
 }
 ```
+
+> **Corrected 2026-09-05.** This said `background: white`. There is no white
+> surface anywhere on this site — the client removed the one light section
+> that existed. A white modal over a dark page would be the brightest thing
+> on screen, and would need its type, its buttons and its gold all swapped to
+> stay legible.
 
 ---
 
@@ -370,17 +386,131 @@ Before delivering any UI code, verify:
 
 ### Signing in
 
-1. Go to **https://ryanshutter.com/admin/** (bookmark it).
+1. Go to **https://ryanshutter.netlify.app/admin/** (bookmark it).
 2. Click **Sign in with GitHub**.
-3. A GitHub window opens. Log in and click **Authorize**.
+3. A small GitHub window opens. Log in and click **Authorize**.
 
-You only authorize once per browser. If sign-in does nothing, the site's
-GitHub connection needs setting up — that's a one-time developer step, not
-something to retry.
+You only authorize once per browser. The window closes itself and the portal
+appears.
 
 Everything you save here is committed straight to the website's repository.
 The site rebuilds itself and the change is live in about a minute or two.
 Nothing is ever lost: every save is a version you can roll back to.
+
+### First-time setup — do this once, before the first sign-in
+
+> Sign-in will not work until this is done. It takes about ten minutes and you
+> only ever do it once. You need to be logged in to **GitHub** and to
+> **Netlify** in the same browser. Nothing here touches the website itself —
+> you cannot break the site by doing this.
+>
+> The sign-in helper already lives inside the website (it's part of every
+> deploy). All you're doing is giving it two keys so it's allowed to talk to
+> GitHub on your behalf. There is no Cloudflare account and nothing to install.
+
+**Part 1 — Create the key on GitHub (5 minutes)**
+
+1. Open **https://github.com/settings/developers** in your browser.
+2. In the left-hand menu click **OAuth Apps**.
+3. Click the green **New OAuth App** button (top right). If GitHub instead
+   shows a **Register a new application** page, you're already in the right
+   place.
+4. Fill in the four boxes exactly like this — copy and paste the URLs, don't
+   retype them:
+
+   | Box | Paste this |
+   |-----|-----------|
+   | **Application name** | `RyanShutter Admin` |
+   | **Homepage URL** | `https://ryanshutter.netlify.app` |
+   | **Application description** | *(leave empty)* |
+   | **Authorization callback URL** | `https://ryanshutter.netlify.app/oauth/callback` |
+
+   The **Authorization callback URL** is the one that matters. One wrong
+   character there and sign-in fails. It must end in `/oauth/callback`.
+
+5. Click **Register application**.
+6. GitHub now shows a page with a **Client ID** — a line of letters and
+   numbers. **Copy it** and paste it somewhere safe for a moment (a blank
+   note, an email draft to yourself). You'll need it in Part 2.
+7. On that same page, click **Generate a new client secret**. GitHub may ask
+   for your password or two-factor code.
+8. A long secret appears, usually starting with `ghp_` or similar. **Copy it
+   immediately** and paste it next to the Client ID in your note.
+   **You cannot see this again.** If you lose it, come back here and click
+   **Generate a new client secret** for a fresh one — that's fine, no harm
+   done.
+
+Leave this GitHub tab open. Don't close it until Part 2 works.
+
+**Part 2 — Paste the two keys into Netlify (5 minutes)**
+
+1. Open **https://app.netlify.com** and sign in.
+2. Click the site called **ryanshutter**.
+3. In the left menu click **Site configuration**.
+4. In the menu that appears under it, click **Environment variables**.
+5. Click **Add a variable** → **Add a single variable**.
+6. Fill it in:
+   - **Key:** `GITHUB_OAUTH_CLIENT_ID`
+   - **Values:** paste the **Client ID** from Part 1 step 6
+   - Leave the scope/deploy-context options at their defaults
+   - Click **Create variable**
+7. Click **Add a variable** → **Add a single variable** a second time:
+   - **Key:** `GITHUB_OAUTH_CLIENT_SECRET`
+   - **Values:** paste the **client secret** from Part 1 step 8
+   - Click **Create variable**
+
+   Type the two key names exactly as written above — all capitals, underscores
+   between words, no spaces. That's the most common thing to get wrong.
+
+8. In the left menu click **Deploys**, then the **Trigger deploy** button
+   (top right of the deploy list) → **Deploy site**. Wait until the newest
+   deploy says **Published** (a minute or two). The keys only take effect
+   after this.
+
+**Part 3 — Check it worked (1 minute)**
+
+1. Go to **https://ryanshutter.netlify.app/admin/**.
+2. Click **Sign in with GitHub**.
+3. Log in if asked, then click the green **Authorize** button.
+4. The window closes and the portal opens. Done — you never do this again.
+
+You can now delete the note with the Client ID and secret in it. Netlify has
+them, and the secret is never shown to anyone visiting the website.
+
+**If something goes wrong, it tells you what.** Sign-in never just spins
+forever. You get a sentence in plain English — either on the portal page after
+the little window closes, or inside the window itself if it stays open. Match
+the first few words against this table:
+
+| What it says | What to do |
+|--------------|------------|
+| *"This site has no GitHub sign-in keys configured…"* | Part 2 wasn't finished, or the deploy in step 8 hasn't published yet. Check both variable names are spelled exactly right (all capitals, underscores), then trigger the deploy again. |
+| *"GitHub refused to issue an access token: incorrect_client_credentials"* | The Client ID and the secret don't belong to the same OAuth App — usually one was pasted with a stray space, or an old secret was reused. Redo Part 1 steps 7–8 for a fresh secret, then re-paste **both** values in Netlify and redeploy. |
+| *"This sign-in could not be verified…"* | Harmless. The window sat open too long, or was opened twice. Close it and click **Sign in with GitHub** again. |
+| *"The admin portal is running on … which this sign-in helper is not configured to serve"* | You opened the portal on a different web address from the one it's set up for. Use **https://ryanshutter.netlify.app/admin/**. If that's the address you used, send this message to your developer. |
+| *"GitHub refused the sign-in request"* / *"The user denied access"* | You clicked **Cancel** on GitHub instead of **Authorize**. Close the window and try again. |
+| *"Could not reach GitHub"* or *"GitHub sent back something this site could not read"* | GitHub itself is having a moment. Wait a minute and try again; check https://www.githubstatus.com if it persists. |
+| *"The admin portal did not answer"* (window stays open ~10 seconds) | The web address in the portal's settings doesn't match the one you opened. Send this message to your developer. |
+| *"Nothing to do here"* | You opened `/oauth/auth` or `/oauth/callback` directly. Go to **/admin/** instead. |
+
+**A note for whoever maintains the site.** The sign-in helper is two Netlify
+Functions — `netlify/functions/oauth-auth.mjs` and `oauth-callback.mjs`, sharing
+`netlify/oauth-shared.mjs` — wired to `/oauth/auth` and `/oauth/callback` by
+rewrites in `netlify.toml`. They hold the client secret server-side, protect the
+round trip with a `state` cookie scoped to `Path=/oauth`, and hand the access
+token to the CMS with a `postMessage` aimed at this site's own origin, never
+`*`. They deliberately send Sveltia **no** `errorCode`: Sveltia ships its own
+generic English for every code the reference Cloudflare Worker uses, and it
+overrides whatever message we wrote — omitting the code is what lets the
+specific, actionable sentence reach the owner. Two protocol details are
+load-bearing and easy to break: the popup must post `authorizing:github` first
+and only answer with the token *after* the CMS echoes it back, and every
+message must originate from the exact origin in `base_url` or the CMS ignores
+it. If the site moves to the **ryanshutter.com** custom domain, three things
+must change at the same time or sign-in breaks: `base_url` in
+`public/admin/config.yml`, the **Authorization callback URL** on the GitHub
+OAuth App, and — for as long as both hostnames are in use — the optional
+`CMS_ALLOWED_ORIGINS` environment variable in Netlify.
 
 ### Adding a new profile (a shoot)
 
@@ -459,8 +589,9 @@ you one word and it's what keeps the accessibility score at 100.
 
 - **A change hasn't appeared yet** — give it two minutes and hard-refresh
   (Ctrl+Shift+R). The site rebuilds after each save.
-- **Sign-in fails or spins forever** — stop and ask; it's a connection
-  problem on the GitHub side, not something you did.
+- **Sign-in fails** — the sign-in window always says what went wrong in plain
+  English. Read it, then look it up in the table under *First-time setup*
+  above. It is never something you did wrong inside the portal.
 - **You saved something you didn't mean to** — nothing is unrecoverable.
   Every save is a version in the repository and can be rolled back.
 

@@ -34,6 +34,54 @@
 # pages) is pre-rendered to a real HTML file via generateStaticParams, and
 # Netlify serves out/404.html automatically for genuinely missing paths.
 
+# The admin portal's GitHub sign-in. Two Netlify Functions, deployed alongside
+# the static export rather than from it — `output: "export"` publishes out/,
+# and functions are bundled separately from the directory below, so neither can
+# break the other. This is the whole reason there is no Cloudflare Worker: the
+# OAuth proxy has to run server-side (it holds the client secret), and the site
+# already has a server-side runtime right here.
+[functions]
+  directory = "netlify/functions"
+  node_bundler = "esbuild"
+
+# Clean URLs for the two endpoints. status = 200 makes these rewrites, not
+# redirects: the browser's address bar keeps /oauth/auth, which matters because
+# the CSRF cookie is scoped to Path=/oauth and would not be sent back to
+# /oauth/callback if the browser thought it had been somewhere else. The
+# function's own response status — including its 302 out to GitHub — is passed
+# straight through.
+#
+# /oauth/callback is the exact string registered as the Authorization callback
+# URL on the GitHub OAuth App. Renaming it here means renaming it there.
+[[redirects]]
+  from = "/oauth/auth"
+  to = "/.netlify/functions/oauth-auth"
+  status = 200
+
+[[redirects]]
+  from = "/oauth/callback"
+  to = "/.netlify/functions/oauth-callback"
+  status = 200
+
+# Secrets for that sign-in are deliberately NOT here, same rule as
+# NEXT_PUBLIC_SITE_URL above. Set them in Site configuration > Environment
+# variables:
+#
+#   GITHUB_OAUTH_CLIENT_ID      Client ID of the GitHub OAuth App. Not itself
+#                               secret, but kept beside its partner so there is
+#                               one place to look.
+#   GITHUB_OAUTH_CLIENT_SECRET  Client secret of the same OAuth App. Secret.
+#                               Never commit it, never paste it into a PR.
+#   CMS_ALLOWED_ORIGINS         Optional, comma-separated. Extra origins allowed
+#                               to receive the access token. Only needed when
+#                               /admin/ is opened on a different hostname from
+#                               the one in config.yml's base_url — e.g. during a
+#                               move to the ryanshutter.com custom domain, while
+#                               both hosts are in use.
+#
+# Missing the first two does not hang sign-in: the popup renders a message
+# naming the variables that are absent. See netlify/oauth-shared.mjs.
+
 [[headers]]
   for = "/images/*"
   [headers.values]

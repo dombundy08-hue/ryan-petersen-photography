@@ -36,6 +36,11 @@ yarn-error.log*
 # vercel
 .vercel
 
+# netlify — scratch dir the Netlify CLI writes when it bundles the functions
+# in netlify/functions/ (`netlify dev`, `netlify functions:serve`). Generated
+# output plus the site link, never source.
+/.netlify/
+
 # typescript
 *.tsbuildinfo
 next-env.d.ts

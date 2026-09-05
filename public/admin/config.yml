@@ -2,46 +2,58 @@
 # Docs: https://sveltiacms.app/en/docs/
 #
 # ---------------------------------------------------------------------------
-# ACTION REQUIRED BEFORE THIS ADMIN PANEL WILL LOG IN
+# HOW SIGN-IN WORKS (and the one thing the owner has to set up)
 # ---------------------------------------------------------------------------
 # Netlify Git Gateway is deprecated and can no longer be enabled, so the old
 # `backend: git-gateway` never worked. Sveltia authenticates against GitHub
-# directly, which needs one small OAuth helper to exist. It has to be created
-# once, by the repo owner. Nothing below is a secret — the client secret is
-# stored in the OAuth helper, never in this file.
+# directly. That needs a server-side helper to hold the OAuth client secret and
+# do the code-for-token exchange — a browser can never be trusted with a secret.
 #
-#   1. Deploy the Sveltia CMS Authenticator (a free Cloudflare Worker):
-#        https://github.com/sveltia/sveltia-cms-auth
-#      Note the worker URL it gives you, e.g.
-#        https://sveltia-cms-auth.<subdomain>.workers.dev
+# That helper is part of THIS site: two Netlify Functions in `netlify/functions/`
+# served at /oauth/auth and /oauth/callback. No Cloudflare Worker, no second
+# account, no separate deploy. Nothing in this file is a secret; the client
+# secret lives only in Netlify's environment variables.
 #
-#   2. On GitHub: Settings > Developer settings > OAuth Apps > New OAuth App
+# One-time setup, done once by the repo owner:
+#
+#   1. GitHub > Settings > Developer settings > OAuth Apps > New OAuth App
 #        Application name:            RyanShutter Admin
-#        Homepage URL:                https://ryanshutter.com
-#        Authorization callback URL:  <WORKER_URL>/callback
-#      Click "Generate a new client secret" and copy both values.
+#        Homepage URL:                https://ryanshutter.netlify.app
+#        Authorization callback URL:  https://ryanshutter.netlify.app/oauth/callback
+#      Register, then "Generate a new client secret" and copy both values.
 #
-#   3. In the Cloudflare Workers dashboard for that worker,
-#      Settings > Variables, add:
-#        GITHUB_CLIENT_ID      = the Client ID from step 2
-#        GITHUB_CLIENT_SECRET  = the client secret from step 2 (encrypt it)
-#        ALLOWED_DOMAINS       = ryanshutter.com
-#      Save and deploy.
+#   2. Netlify > the `ryanshutter` site > Site configuration >
+#      Environment variables > Add a variable:
+#        GITHUB_OAUTH_CLIENT_ID      = the Client ID from step 1
+#        GITHUB_OAUTH_CLIENT_SECRET  = the client secret from step 1
+#      Then Deploys > Trigger deploy > Deploy site.
 #
-#   4. Replace the REPLACE_ME placeholder on the `base_url` line below with
-#      the worker URL from step 1 (no trailing slash), then commit and push.
+# The same steps written for a non-developer, with what to click:
+# design-system/ryan-petersen-photography/MASTER.md, "Admin Portal — Owner's
+# Guide". If either variable is missing, the sign-in popup says so in plain
+# words rather than hanging.
 #
-# Until step 4 is done, "Sign in with GitHub" will not work. A signed-in
-# GitHub user still needs write access to the repo below.
+# A signed-in GitHub user still needs write access to the repo below.
+#
+# If the site ever moves to the ryanshutter.com custom domain, three things
+# change together or sign-in breaks: `base_url` here, the Authorization
+# callback URL on the OAuth App, and — while both hostnames are live — the
+# optional CMS_ALLOWED_ORIGINS variable in Netlify.
 # ---------------------------------------------------------------------------
 
 backend:
   name: github
   repo: dombundy08-hue/ryan-petersen-photography
   branch: master
-  # REPLACE_ME — see step 4 above. Example:
-  # base_url: https://sveltia-cms-auth.example.workers.dev
-  base_url: REPLACE_ME_WORKER_URL
+  # Origin of this site. Sveltia builds the popup URL as
+  # `<base_url>/<auth_endpoint>` and — this is the part that bites — ignores
+  # any postMessage whose origin isn't this exact origin. So it has to be the
+  # same host the admin portal itself is opened on.
+  base_url: https://ryanshutter.netlify.app
+  # Sveltia's default is `auth`, i.e. /auth. Ours is namespaced under /oauth/
+  # so the CSRF cookie can be scoped to that path alone and is never sent with
+  # an ordinary page request. See the rewrites in netlify.toml.
+  auth_endpoint: oauth/auth
 
 media_folder: "public/images/uploads"
 public_folder: "/images/uploads"
