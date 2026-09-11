@@ -161,7 +161,7 @@ export default function PortfolioPage() {
             Want to be featured in this gallery?
           </h2>
           <p className="mt-3 text-foreground/80">
-            Book a session now while it&apos;s free — your photos could be
+            Book a session — your photos could be
             some of the first ones shown here.
           </p>
           <div className="mt-6">

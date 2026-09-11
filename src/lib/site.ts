@@ -94,14 +94,13 @@ export const business: BusinessFacts = loadBusiness();
 
 /**
  * The one-line description used for the home page and as the OG/Twitter
- * fallback. Names the service, the town and the current offer, because all
- * three are what someone actually types into a search box.
+ * fallback. Names the service and the town, because both are what someone
+ * actually types into a search box.
  */
 export const SITE_DESCRIPTION =
   `Senior, family, nature, and custom photography by Ryan Petersen, local to ` +
   `${business.city}, ${business.serviceAreaState}. Shot fully manual for ` +
-  `light that looks the way you remember it. Sessions are free while he ` +
-  `builds his portfolio.`;
+  `light that looks the way you remember it.`;
 
 /** True once a city is filled in — gates the local-business schema. */
 export const hasLocation = Boolean(business.city.trim());

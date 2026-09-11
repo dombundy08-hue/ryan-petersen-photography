@@ -8,9 +8,8 @@ interface AboutSettingsFile {
 }
 
 /**
- * Read from content/settings/about.json — managed by the admin panel
- * (public/admin/, "Site Settings" > "About Page"). Ryan uploads his photo
- * there and it shows up here on the next rebuild.
+ * Read from content/settings/about.json. Edited in the repo, not through the
+ * admin portal — the portal only manages photo shoots.
  */
 function loadAboutSettings(): AboutSettingsFile {
   const filePath = path.join(

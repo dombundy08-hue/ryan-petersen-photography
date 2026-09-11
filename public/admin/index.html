@@ -2,24 +2,148 @@
 <html lang="en">
   <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="robots" content="noindex" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="robots" content="noindex, nofollow" />
     <title>RyanShutter Admin</title>
+    <!--
+      The admin portal. Plain HTML/CSS/JS with no framework and nothing loaded
+      from another domain (the CSP in netlify.toml forbids it). The server
+      side is netlify/functions/admin-api.mjs; the owner's guide is in
+      design-system/ryan-petersen-photography/MASTER.md.
+    -->
+    <link rel="stylesheet" href="/admin/admin.css" />
+    <script src="/admin/admin.js" defer></script>
   </head>
   <body>
-    <!--
-      Sveltia CMS — drop-in replacement for Decap CMS.
+    <a class="skip" href="#main">Skip to content</a>
 
-      Why we moved off Decap: Decap's `git-gateway` backend depends on
-      Netlify Git Gateway, which Netlify has deprecated and can no longer be
-      enabled (the enable button never provisions). Sveltia reads the same
-      config.yml format but talks to GitHub directly via OAuth, and — the
-      reason the owner needs it — it can upload many photos at once.
+    <header class="topbar">
+      <p class="brand"><a href="/">RyanShutter</a> <span>Admin</span></p>
+      <nav id="nav" aria-label="Admin" hidden>
+        <a class="btn btn-quiet btn-small" href="/" target="_blank" rel="noopener">View Site</a>
+        <button type="button" class="btn btn-quiet btn-small" id="account-open">Account</button>
+        <button type="button" class="btn btn-quiet btn-small" id="sign-out">Sign Out</button>
+      </nav>
+    </header>
 
-      Do NOT add a stylesheet: all styles are bundled in the JS.
-      Do NOT add type="module": the current build is not an ES module.
-      Install snippet per https://sveltiacms.app/en/docs/start
-    -->
-    <script src="https://unpkg.com/@sveltia/cms/dist/sveltia-cms.js"></script>
+    <main id="main">
+      <p id="boot" class="hint">Loading…</p>
+
+      <section id="signin" class="card narrow" aria-labelledby="signin-title" hidden>
+        <h1 id="signin-title">Sign In</h1>
+        <p class="lead">Manage the photo profiles on ryanshutter.com.</p>
+        <form id="signin-form" novalidate>
+          <div class="field">
+            <label for="username">Username</label>
+            <input id="username" name="username" autocomplete="username" autocapitalize="none" spellcheck="false" required />
+          </div>
+          <div class="field">
+            <label for="password">Password</label>
+            <input id="password" name="password" type="password" autocomplete="current-password" required />
+          </div>
+          <p id="signin-error" class="error" role="alert"></p>
+          <button class="btn btn-primary" type="submit">Sign In</button>
+        </form>
+      </section>
+
+      <div id="app" hidden>
+        <h1>Your Photo Profiles</h1>
+        <div id="notices"></div>
+        <p id="status" class="status" role="status" aria-live="polite"></p>
+
+        <section class="card" aria-labelledby="add-title">
+          <h2 id="add-title">Add a Profile</h2>
+          <p class="hint">Name it after the person or family, pick a category, add the photos. It publishes by itself.</p>
+
+          <form id="add-form" novalidate>
+            <div class="grid-2">
+              <div class="field">
+                <label for="subject">Name</label>
+                <input id="subject" maxlength="60" autocomplete="off" required aria-describedby="subject-hint" />
+                <p class="hint" id="subject-hint">The person or family — e.g. Dominic, or Bundy.</p>
+              </div>
+              <div class="field">
+                <label for="category">Category</label>
+                <select id="category" required>
+                  <option value="">Choose one…</option>
+                  <option value="senior">Senior</option>
+                  <option value="family">Family</option>
+                  <option value="nature">Nature</option>
+                  <option value="custom">Custom Shots</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="field">
+              <label for="title">Title</label>
+              <input id="title" maxlength="120" autocomplete="off" aria-describedby="title-hint" />
+              <p class="hint" id="title-hint">The heading on the profile page. Filled in for you — change it if you like.</p>
+            </div>
+
+            <div class="field">
+              <label for="description">Description <span class="optional">(optional)</span></label>
+              <textarea id="description" rows="3" maxlength="600" aria-describedby="description-hint"></textarea>
+              <p class="hint" id="description-hint">A sentence or two about the session. Leave it empty and one is written from the name and category.</p>
+            </div>
+
+            <div class="field">
+              <p class="label" id="photos-label">Photos</p>
+              <input id="photos" type="file" accept="image/*" multiple class="sr-only" aria-labelledby="photos-label" aria-describedby="photos-hint" />
+              <label class="dropzone" id="dropzone" for="photos">
+                <span class="dropzone-title">Choose Photos or Drag Them Here</span>
+                <span class="hint" id="photos-hint">Select as many as you like. JPG, PNG or WebP — big photos are resized for the web automatically. The first photo is the cover.</span>
+              </label>
+              <p id="photo-count" class="hint" aria-live="polite"></p>
+              <ul id="thumbs" class="thumbs"></ul>
+            </div>
+
+            <p id="add-error" class="error" role="alert"></p>
+            <div id="progress-wrap" class="progress" hidden>
+              <progress id="progress" max="100" value="0"></progress>
+              <p id="progress-text" class="hint" aria-live="polite"></p>
+            </div>
+            <button class="btn btn-primary" type="submit" id="add-submit">Upload and Publish</button>
+          </form>
+        </section>
+
+        <section class="card" aria-labelledby="list-title">
+          <div class="section-head">
+            <h2 id="list-title">Profiles on the Site</h2>
+            <button type="button" class="btn btn-quiet btn-small" id="publish-now">Publish Now</button>
+          </div>
+          <p class="hint">Hide takes a profile off the website but keeps it here — Unhide brings it back. Delete removes it and its photos for good.</p>
+          <div id="shoots" aria-busy="true"></div>
+        </section>
+      </div>
+    </main>
+
+    <dialog id="account" aria-labelledby="account-title">
+      <form id="account-form" novalidate>
+        <h2 id="account-title">Account</h2>
+        <p class="hint">Change your username or password. Every other device that's signed in gets signed out.</p>
+        <div class="field">
+          <label for="current-password">Current Password</label>
+          <input id="current-password" type="password" autocomplete="current-password" required />
+        </div>
+        <div class="field">
+          <label for="new-username">Username</label>
+          <input id="new-username" autocomplete="username" autocapitalize="none" spellcheck="false" required />
+        </div>
+        <div class="field">
+          <label for="new-password">New Password</label>
+          <input id="new-password" type="password" autocomplete="new-password" minlength="10" required aria-describedby="new-password-hint" />
+          <p class="hint" id="new-password-hint">At least 10 characters. A short sentence is easy to remember and hard to guess.</p>
+        </div>
+        <div class="field">
+          <label for="confirm-password">Type It Again</label>
+          <input id="confirm-password" type="password" autocomplete="new-password" required />
+        </div>
+        <p id="account-error" class="error" role="alert"></p>
+        <div class="actions">
+          <button type="button" class="btn btn-quiet" id="account-cancel">Cancel</button>
+          <button type="submit" class="btn btn-primary">Save</button>
+        </div>
+      </form>
+    </dialog>
   </body>
 </html>

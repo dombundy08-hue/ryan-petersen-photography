@@ -41,6 +41,10 @@ yarn-error.log*
 # output plus the site link, never source.
 /.netlify/
 
+# Admin-portal photos, copied in from Netlify Blobs during a Netlify build
+# (netlify/plugins/content-from-blobs). Never source.
+/public/media/
+
 # typescript
 *.tsbuildinfo
 next-env.d.ts

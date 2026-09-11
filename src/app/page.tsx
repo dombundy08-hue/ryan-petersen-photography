@@ -144,31 +144,6 @@ export default function Home() {
         </div>
       </Section>
 
-      <Section data-theme="hearth">
-        <div className="grid gap-6 sm:grid-cols-2">
-          <div className="rounded-xl border border-border bg-card p-8">
-            <h3 className="font-heading text-xl font-semibold text-foreground">
-              Free sessions, for now
-            </h3>
-            <p className="mt-2 text-sm text-muted-foreground">
-              I&apos;m offering sessions free of charge while I grow my
-              portfolio — paid packages and special offers are coming soon.
-              Book now while it lasts.
-            </p>
-          </div>
-          <div className="rounded-xl border border-border bg-card p-8">
-            <h3 className="font-heading text-xl font-semibold text-foreground">
-              Reviews coming soon
-            </h3>
-            <p className="mt-2 text-sm text-muted-foreground">
-              I&apos;m just getting started, so I don&apos;t have reviews up
-              yet — be one of my first clients and help me build that track
-              record.
-            </p>
-          </div>
-        </div>
-      </Section>
-
       <Section data-theme="night">
         <div className="mx-auto max-w-xl text-center">
           <h2 className="text-3xl font-semibold tracking-tight text-foreground">

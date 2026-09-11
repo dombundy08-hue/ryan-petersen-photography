@@ -378,228 +378,121 @@ Before delivering any UI code, verify:
 
 ## Admin Portal — Owner's Guide
 
-> Written for Ryan, not for a developer. The admin portal is **Sveltia CMS**,
-> served from `public/admin/`. It replaced Decap CMS in 2026-09 because
-> Netlify shut off Git Gateway, which the old portal needed to save anything.
-> The new one signs in with GitHub and — the reason for the switch — takes a
-> whole shoot's worth of photos in a single upload.
+> Written for Ryan, not for a developer. The admin portal is a small custom
+> page at **/admin/** with a normal username and password. It replaced the
+> GitHub sign-in (Sveltia CMS) on 2026-09-10: you no longer need a GitHub
+> account for anything, and everything the portal saves lives inside the
+> Netlify site itself.
 
-### Signing in
+### Signing In
 
-1. Go to **https://ryanshutter.netlify.app/admin/** (bookmark it).
-2. Click **Sign in with GitHub**.
-3. A small GitHub window opens. Log in and click **Authorize**.
+1. Go to **https://ryanshutter.com/admin/** (bookmark it).
+2. Type your **username** and **password**, then **Sign In**.
 
-You only authorize once per browser. The window closes itself and the portal
-appears.
+You stay signed in on that device for a week. **Sign Out** (top right) ends it
+straight away.
 
-Everything you save here is committed straight to the website's repository.
-The site rebuilds itself and the change is live in about a minute or two.
-Nothing is ever lost: every save is a version you can roll back to.
+The first time, you'll use the **starter password** you were given. The
+portal shows a notice until you replace it: click **Account**, type the
+starter password once, then choose your own. From then on only you know it —
+the starter password stops working for good.
 
-### First-time setup — do this once, before the first sign-in
+Five wrong passwords in a row locks sign-in from that device for 15 minutes.
+Wait it out; nothing is lost.
 
-> Sign-in will not work until this is done. It takes about ten minutes and you
-> only ever do it once. You need to be logged in to **GitHub** and to
-> **Netlify** in the same browser. Nothing here touches the website itself —
-> you cannot break the site by doing this.
->
-> The sign-in helper already lives inside the website (it's part of every
-> deploy). All you're doing is giving it two keys so it's allowed to talk to
-> GitHub on your behalf. There is no Cloudflare account and nothing to install.
+### Adding a New Profile
 
-**Part 1 — Create the key on GitHub (5 minutes)**
+1. Under **Add a Profile**, type the **Name** — the person or family, e.g.
+   *Dominic*, or *Bundy* for a family.
+2. Pick the **Category**: Senior, Family, Nature or Custom Shots. This decides
+   which page the profile appears on.
+3. The **Title** fills itself in (*Dominic’s Senior Session*, *Bundy Family*).
+   Change it if you like.
+4. **Description** is optional. Leave it empty and one is written from the
+   name and category.
+5. **Photos** — click **Choose Photos or Drag Them Here** and select every
+   photo for the session at once (Ctrl+A in a folder grabs them all), or drag
+   a pile of files onto the box. There's no practical limit.
+   - The **first photo is the cover**. Use **Make Cover** on any other photo
+     to move it to the front, **Remove** to drop one.
+   - Big camera files are shrunk to web size (2400 px) on your computer
+     before they upload, and location data is stripped out.
+   - Photos in Google Drive: download them to a folder first, then choose
+     them from there.
+6. Click **Upload and Publish**. A bar shows the upload; then the site
+   rebuilds itself and the new profile is live in about two minutes.
 
-1. Open **https://github.com/settings/developers** in your browser.
-2. In the left-hand menu click **OAuth Apps**.
-3. Click the green **New OAuth App** button (top right). If GitHub instead
-   shows a **Register a new application** page, you're already in the right
-   place.
-4. Fill in the four boxes exactly like this — copy and paste the URLs, don't
-   retype them:
+### Hiding, Unhiding and Deleting
 
-   | Box | Paste this |
-   |-----|-----------|
-   | **Application name** | `RyanShutter Admin` |
-   | **Homepage URL** | `https://ryanshutter.netlify.app` |
-   | **Application description** | *(leave empty)* |
-   | **Authorization callback URL** | `https://ryanshutter.netlify.app/oauth/callback` |
+Every profile is listed under **Profiles on the Site**, grouped by category.
 
-   The **Authorization callback URL** is the one that matters. One wrong
-   character there and sign-in fails. It must end in `/oauth/callback`.
+- **Hide** takes a profile off the website — its page, its homepage tiles, the
+  search — but keeps it in the portal with every photo. **Unhide** puts it back
+  exactly as it was.
+- **Delete** removes the profile and the photos you uploaded for it, for good.
+  The portal asks you to confirm first. When in doubt, Hide.
+- **View** opens the live profile page.
+- **Publish Now** rebuilds the site by hand. You shouldn't need it — every
+  save already does this — but it's there if a change doesn't show up.
 
-5. Click **Register application**.
-6. GitHub now shows a page with a **Client ID** — a line of letters and
-   numbers. **Copy it** and paste it somewhere safe for a moment (a blank
-   note, an email draft to yourself). You'll need it in Part 2.
-7. On that same page, click **Generate a new client secret**. GitHub may ask
-   for your password or two-factor code.
-8. A long secret appears, usually starting with `ghp_` or similar. **Copy it
-   immediately** and paste it next to the Client ID in your note.
-   **You cannot see this again.** If you lose it, come back here and click
-   **Generate a new client secret** for a fresh one — that's fine, no harm
-   done.
+Deleting from the portal only affects the website. Your own copies on your
+computer or card are untouched.
 
-Leave this GitHub tab open. Don't close it until Part 2 works.
+### Photo Descriptions (Why You Don't Have to Type Them)
 
-**Part 2 — Paste the two keys into Netlify (5 minutes)**
+Every photo on a website needs a short text description for screen readers
+and Google — the site is held to WCAG AA. The site writes them for you from
+the profile's **Name** and **Category**: a senior profile named *Avyian*
+produces *"Senior portrait of Avyian"*. That's why the name matters more than
+it looks.
 
-1. Open **https://app.netlify.com** and sign in.
-2. Click the site called **ryanshutter**.
-3. In the left menu click **Site configuration**.
-4. In the menu that appears under it, click **Environment variables**.
-5. Click **Add a variable** → **Add a single variable**.
-6. Fill it in:
-   - **Key:** `GITHUB_OAUTH_CLIENT_ID`
-   - **Values:** paste the **Client ID** from Part 1 step 6
-   - Leave the scope/deploy-context options at their defaults
-   - Click **Create variable**
-7. Click **Add a variable** → **Add a single variable** a second time:
-   - **Key:** `GITHUB_OAUTH_CLIENT_SECRET`
-   - **Values:** paste the **client secret** from Part 1 step 8
-   - Click **Create variable**
+### If Something Looks Wrong
 
-   Type the two key names exactly as written above — all capitals, underscores
-   between words, no spaces. That's the most common thing to get wrong.
+- **A change hasn't appeared** — give it two minutes and hard-refresh
+  (Ctrl+Shift+R). Still nothing? Press **Publish Now**.
+- **The portal says automatic publishing isn't switched on** — saves are kept,
+  but the site only picks them up on its next deploy. Whoever manages the
+  Netlify account needs to do the one-time build hook step below.
+- **Forgot the password** — see *Locked Out* below. It needs the Netlify
+  account, not a developer.
 
-8. In the left menu click **Deploys**, then the **Trigger deploy** button
-   (top right of the deploy list) → **Deploy site**. Wait until the newest
-   deploy says **Published** (a minute or two). The keys only take effect
-   after this.
+### For Whoever Manages the Netlify Account
 
-**Part 3 — Check it worked (1 minute)**
+**How it works.** The page is `public/admin/` (plain HTML/CSS/JS). Its API is
+one Netlify Function, `netlify/functions/admin-api.mjs` at `/api/admin/*`.
+Profiles and photos are stored in **Netlify Blobs** (stores `shoots`,
+`media`, `admin`), which belong to this Netlify site and move with it on a
+transfer. Before every build, the local build plugin
+`netlify/plugins/content-from-blobs` writes the stored profiles into
+`content/shoots/` and the photos into `public/media/`, so the static export
+and the Image CDN treat them like any other content. The shoot JSON committed
+in `content/shoots/` was copied into Blobs once, on the first build, and is
+now only what `next dev` shows locally — editing it doesn't change the live
+site.
 
-1. Go to **https://ryanshutter.netlify.app/admin/**.
-2. Click **Sign in with GitHub**.
-3. Log in if asked, then click the green **Authorize** button.
-4. The window closes and the portal opens. Done — you never do this again.
+**One-time setup: automatic publishing.**
 
-You can now delete the note with the Client ID and secret in it. Netlify has
-them, and the secret is never shown to anyone visiting the website.
+1. Netlify → the **ryanshutter** site → **Site configuration** →
+   **Build & deploy** → **Build hooks** → **Add build hook**. Name it
+   *Admin portal*, branch **master**, **Save**. Copy the URL it shows.
+2. **Site configuration** → **Environment variables** → **Add a variable**:
+   key `BUILD_HOOK_URL`, value = that URL.
+3. **Deploys** → **Trigger deploy** → **Deploy site**.
 
-**If something goes wrong, it tells you what.** Sign-in never just spins
-forever. You get a sentence in plain English — either on the portal page after
-the little window closes, or inside the window itself if it stays open. Match
-the first few words against this table:
+**Contact form emails.** **Site configuration** → **Notifications** →
+**Emails and webhooks** → **Form submission notifications** → **Add
+notification** → **Email notification** → Form: *contact* → the address that
+should receive enquiries.
 
-| What it says | What to do |
-|--------------|------------|
-| *"This site has no GitHub sign-in keys configured…"* | Part 2 wasn't finished, or the deploy in step 8 hasn't published yet. Check both variable names are spelled exactly right (all capitals, underscores), then trigger the deploy again. |
-| *"GitHub refused to issue an access token: incorrect_client_credentials"* | The Client ID and the secret don't belong to the same OAuth App — usually one was pasted with a stray space, or an old secret was reused. Redo Part 1 steps 7–8 for a fresh secret, then re-paste **both** values in Netlify and redeploy. |
-| *"This sign-in could not be verified…"* | Harmless. The window sat open too long, or was opened twice. Close it and click **Sign in with GitHub** again. |
-| *"The admin portal is running on … which this sign-in helper is not configured to serve"* | You opened the portal on a different web address from the one it's set up for. Use **https://ryanshutter.netlify.app/admin/**. If that's the address you used, send this message to your developer. |
-| *"GitHub refused the sign-in request"* / *"The user denied access"* | You clicked **Cancel** on GitHub instead of **Authorize**. Close the window and try again. |
-| *"Could not reach GitHub"* or *"GitHub sent back something this site could not read"* | GitHub itself is having a moment. Wait a minute and try again; check https://www.githubstatus.com if it persists. |
-| *"The admin portal did not answer"* (window stays open ~10 seconds) | The web address in the portal's settings doesn't match the one you opened. Send this message to your developer. |
-| *"Nothing to do here"* | You opened `/oauth/auth` or `/oauth/callback` directly. Go to **/admin/** instead. |
+**Locked out.** On any computer with this repo:
+`node scripts/admin-password.mjs "the new password"` prints a hash. In
+Netlify, add `ADMIN_PASSWORD_HASH` = that hash (and `ADMIN_USERNAME` if the
+username should change), then redeploy. That variable overrides the portal's
+own password until it is deleted; delete it once signed in if you want the
+portal's **Account** dialog to manage the password again.
 
-**A note for whoever maintains the site.** The sign-in helper is two Netlify
-Functions — `netlify/functions/oauth-auth.mjs` and `oauth-callback.mjs`, sharing
-`netlify/oauth-shared.mjs` — wired to `/oauth/auth` and `/oauth/callback` by
-rewrites in `netlify.toml`. They hold the client secret server-side, protect the
-round trip with a `state` cookie scoped to `Path=/oauth`, and hand the access
-token to the CMS with a `postMessage` aimed at this site's own origin, never
-`*`. They deliberately send Sveltia **no** `errorCode`: Sveltia ships its own
-generic English for every code the reference Cloudflare Worker uses, and it
-overrides whatever message we wrote — omitting the code is what lets the
-specific, actionable sentence reach the owner. Two protocol details are
-load-bearing and easy to break: the popup must post `authorizing:github` first
-and only answer with the token *after* the CMS echoes it back, and every
-message must originate from the exact origin in `base_url` or the CMS ignores
-it. If the site moves to the **ryanshutter.com** custom domain, three things
-must change at the same time or sign-in breaks: `base_url` in
-`public/admin/config.yml`, the **Authorization callback URL** on the GitHub
-OAuth App, and — for as long as both hostnames are in use — the optional
-`CMS_ALLOWED_ORIGINS` environment variable in Netlify.
-
-### Adding a new profile (a shoot)
-
-1. In the left sidebar click **Photo Shoots**.
-2. Click **New Shoot** (top right).
-3. Fill in the fields:
-
-| Field | What to put in it |
-|-------|-------------------|
-| **Title** | What the session is called, e.g. *Avyian's Senior Session*. This is the heading people see. |
-| **URL slug** | The same name, all lowercase with hyphens instead of spaces: `avyians-senior-session`. No spaces, no apostrophes, no capitals. |
-| **Category** | Pick one: **Senior**, **Family**, **Nature**, or **Custom Shots**. This is the only thing that decides which page the shoot appears on. |
-| **Description** | One or two sentences about the session. Shows on the portfolio page. |
-| **Subject Name** | The person's first name, e.g. *Avyian*. Optional, but fill it in — it's used on the page and in the photo descriptions screen readers announce. |
-| **Photos** | See below. |
-
-4. **Photos — this is the bulk upload.** Click the big upload button, then
-   select **every photo for the shoot at once** (click the first, hold
-   Shift, click the last — or Ctrl+A to grab a whole folder). You can also
-   drag a pile of files straight onto the field. There is no limit; a
-   hundred photos in one go is fine. They upload together and appear as a
-   row of thumbnails.
-5. Drag a thumbnail by its handle to reorder. **The first photo is the
-   cover** for that shoot, so put the strongest one first.
-6. Click **Save** — this publishes it.
-
-**Categories, and what each one is for**
-
-| Shows as | Used for |
-|----------|----------|
-| Senior | Senior portrait sessions |
-| Family | Family sessions |
-| Nature | Landscape and nature work |
-| Custom Shots | Cars and other one-off work |
-
-### Deleting
-
-- **A whole profile:** open **Photo Shoots**, click the shoot, then use the
-  **⋯** menu at the top of the editor and choose **Delete**. Confirm. The
-  shoot disappears from its category page and from the homepage on the next
-  rebuild.
-- **A single photo:** open the shoot, hover the photo's thumbnail in the
-  **Photos** field, click the **✕** on it, then **Save**. The rest of the
-  shoot is untouched.
-
-Deleting from the portal removes the photo from the *website*. Your own
-copies on your computer or card are not affected.
-
-### Photo descriptions (why you don't have to type them)
-
-Every photo on a website needs a short text description so screen readers and
-Google know what it is — the site is held to WCAG AA. Typing a hundred of
-those by hand is not realistic, so **the site writes them for you** from the
-shoot's **Subject Name** and **Category**. A senior shoot named *Avyian*
-produces descriptions like *"Senior portrait of Avyian"*.
-
-That's why filling in **Subject Name** matters more than it looks. It costs
-you one word and it's what keeps the accessibility score at 100.
-
-### What NOT to touch
-
-- ❌ **Don't change the URL slug of a shoot that's already live.** Any link
-  you've already sent to a client or posted on Instagram will break. Make a
-  new shoot instead.
-- ❌ **Don't upload anything but photos** — JPG, PNG and WEBP only. Video,
-  PDFs and RAW files will not display.
-- ❌ **Don't rename or re-order the fields**, and don't paste HTML or code
-  into the Description box. Plain sentences only.
-- ❌ **Don't touch colours, fonts, layout or spacing.** They aren't in the
-  portal on purpose — the look of the site is fixed by this design system,
-  and the portal only ever edits words and photos.
-- ❌ **Don't use the Workflow / branch options** if you ever see them. Save
-  is all you need.
-
-### If something looks wrong
-
-- **A change hasn't appeared yet** — give it two minutes and hard-refresh
-  (Ctrl+Shift+R). The site rebuilds after each save.
-- **Sign-in fails** — the sign-in window always says what went wrong in plain
-  English. Read it, then look it up in the table under *First-time setup*
-  above. It is never something you did wrong inside the portal.
-- **You saved something you didn't mean to** — nothing is unrecoverable.
-  Every save is a version in the repository and can be rolled back.
-
-### Owner-facing checklist for a new shoot
-
-- [ ] Title reads like a real session name
-- [ ] Slug is lowercase-with-hyphens and unique
-- [ ] Category is one of Senior / Family / Nature / Custom Shots
-- [ ] Subject Name filled in (drives the photo descriptions)
-- [ ] All photos uploaded in one go, best photo dragged to first position
-- [ ] Saved, and checked on the live site after a couple of minutes
+**Security notes.** Passwords are stored only as scrypt hashes. Sessions are
+HMAC-signed, HttpOnly, Secure, SameSite=Strict cookies scoped to
+`/api/admin`, and changing the password signs every session out. The admin
+page ships with a strict Content-Security-Policy and `noindex`
+(`netlify.toml`).

@@ -35,6 +35,13 @@ export interface Shoot {
   description: string;
   /** e.g. "Dominic" — shown on the senior teaser/directory/detail pages. */
   subjectName?: string;
+  /**
+   * Set from the admin portal's Hide button. A hidden shoot is dropped in
+   * loadShoots below, so it has no page, no tile, no sitemap entry and no
+   * photos in the hero — but its record and photos are kept, and Unhide
+   * brings it back exactly as it was.
+   */
+  hidden?: boolean;
   photos: Photo[];
 }
 
@@ -115,12 +122,24 @@ function normalizePhoto(input: PhotoInput, shoot: RawShoot): Photo {
 }
 
 /**
- * Shoots are read from content/shoots/*.json at build time — this is the
- * folder RyanShutter's admin panel (Decap CMS, public/admin/) manages, so a
- * shoot Ryan adds/edits there shows up here automatically on the next
- * rebuild. No code change needed to add a shoot; editing this file by hand
- * still works too (same JSON shape), it just won't show up in the CMS UI
- * until it matches a file in content/shoots/.
+ * A description for a shoot saved without one. The admin portal makes the
+ * field optional, but the shoot page uses it as its meta description, so it
+ * can never be blank. Built only from what Ryan typed — nothing invented.
+ */
+function deriveDescription(shoot: RawShoot): string {
+  const label = CATEGORY_ALT_LABEL[shoot.category] ?? "Photo";
+  const subject = shoot.subjectName ? ` of ${shoot.subjectName}` : "";
+  return `${label}s${subject} by Ryan Petersen — ${shoot.title}.`;
+}
+
+/**
+ * Shoots are read from content/shoots/*.json at build time.
+ *
+ * On Netlify that folder is rewritten before every build from Netlify Blobs,
+ * where the admin portal (public/admin/) saves shoots — see
+ * netlify/plugins/content-from-blobs. The JSON files committed here are the
+ * one-time seed for that store and what `next dev` shows locally; editing
+ * them no longer changes the live site.
  */
 const CONTENT_DIR = path.join(process.cwd(), "content", "shoots");
 
@@ -132,12 +151,16 @@ function loadShoots(): Shoot[] {
   return files
     .map((file) => {
       const raw = fs.readFileSync(path.join(CONTENT_DIR, file), "utf-8");
-      const shoot = JSON.parse(raw) as RawShoot;
-      return {
-        ...shoot,
-        photos: shoot.photos.map((photo) => normalizePhoto(photo, shoot)),
-      };
+      return JSON.parse(raw) as RawShoot;
     })
+    .filter((shoot) => !shoot.hidden && shoot.photos?.length > 0)
+    .map((shoot) => ({
+      ...shoot,
+      description: shoot.description?.trim()
+        ? shoot.description
+        : deriveDescription(shoot),
+      photos: shoot.photos.map((photo) => normalizePhoto(photo, shoot)),
+    }))
     .sort((a, b) => a.title.localeCompare(b.title));
 }
 

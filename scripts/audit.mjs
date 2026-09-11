@@ -25,7 +25,7 @@ const OUT = "out";
 /**
  * Routes that are built but are not content, and so are correctly absent
  * from the sitemap and correctly carry no canonical:
- *   /admin/       the Decap CMS panel
+ *   /admin/       the admin portal (static page in public/admin/)
  *   /_not-found/  Next's 404
  * Flagging these was the audit's own first false positive. Anything added
  * here needs a reason, or the audit quietly stops checking real pages.

@@ -60,7 +60,7 @@ export function HeroCarousel({ photos }: { photos: Photo[] }) {
         <p className="mx-auto mt-6 max-w-xl text-base text-foreground/80 sm:text-lg">
           Senior, family, nature and custom photography — local to
           Frederick, Colorado, and focused on making you feel comfortable in
-          front of the camera. Sessions are free while I build my portfolio.
+          front of the camera.
         </p>
         {/* Book a Session leads, as the filled/primary button. View My Work
             is the secondary. On a phone the primary dials directly; on

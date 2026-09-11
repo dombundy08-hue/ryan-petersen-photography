@@ -49,7 +49,10 @@ import { fileURLToPath, pathToFileURL } from "node:url";
 import sharp from "sharp";
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
-const IMAGES_DIR = path.join(ROOT, "public", "images");
+// public/media/ holds photos uploaded through the admin portal. They live in
+// Netlify Blobs and are only written to disk during a Netlify build (see
+// netlify/plugins/content-from-blobs), so locally that folder is usually absent.
+const IMAGE_DIRS = [path.join(ROOT, "public", "images"), path.join(ROOT, "public", "media")];
 const OUT_FILE = path.join(ROOT, "content", "generated", "focal-points.json");
 
 const IMAGE_EXTENSIONS = new Set([".jpg", ".jpeg", ".png", ".webp", ".avif", ".tiff", ".gif"]);
@@ -401,7 +404,7 @@ export async function main(argv = process.argv.slice(2)) {
   const verbose = argv.includes("--verbose") || argv.includes("-v");
 
   const started = Date.now();
-  const files = await listImages(IMAGES_DIR);
+  const files = (await Promise.all(IMAGE_DIRS.map(listImages))).flat();
   const existing = force ? {} : await readExisting();
 
   // Drop entries for images that no longer exist, so the manifest cannot rot.
