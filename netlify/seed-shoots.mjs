@@ -5,12 +5,16 @@
  *
  * This has to happen in a function: Netlify lets a build read site-wide
  * Blobs stores but not write to them.
+ *
+ * These are frozen copies in netlify/seed/, NOT content/shoots/. Once the
+ * store is seeded, the build plugin rewrites content/shoots/ from it before
+ * functions are bundled, so importing from there broke the bundle.
  */
-import autumnSeniorSession from "../content/shoots/autumn-senior-session.json";
-import ballfieldSunset from "../content/shoots/ballfield-sunset.json";
-import dominickSeniorSession from "../content/shoots/dominick-senior-session.json";
-import lakesideFamilySession from "../content/shoots/lakeside-family-session.json";
-import samuraiDetail from "../content/shoots/samurai-detail.json";
+import autumnSeniorSession from "./seed/autumn-senior-session.json";
+import ballfieldSunset from "./seed/ballfield-sunset.json";
+import dominickSeniorSession from "./seed/dominick-senior-session.json";
+import lakesideFamilySession from "./seed/lakeside-family-session.json";
+import samuraiDetail from "./seed/samurai-detail.json";
 
 export const SEED_SHOOTS = [
   autumnSeniorSession,

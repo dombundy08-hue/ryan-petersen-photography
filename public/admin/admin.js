@@ -160,11 +160,8 @@
   // Add a profile
   // -------------------------------------------------------------------------
 
-  function suggestTitle(name, category) {
-    if (!name) return "";
-    const possessive = /s$/i.test(name) ? `${name}’` : `${name}’s`;
-    if (category === "senior") return `${possessive} Senior Session`;
-    if (category === "family") return /family$/i.test(name) ? name : `${name} Family`;
+  // The title is the name, exactly as typed — the category never changes it.
+  function suggestTitle(name) {
     return name;
   }
 

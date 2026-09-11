@@ -1,0 +1,24 @@
+{
+  "slug": "samurai-detail",
+  "category": "custom",
+  "title": "Suzuki Samurai",
+  "subjectName": "Suzuki Samurai",
+  "description": "Detail and golden-hour work on my own Suzuki Samurai — the kind of shoot I'd do for your car, your bike, or whatever else you've put the hours into.",
+  "photos": [
+    {
+      "src": "/images/personal/samurai-sunset.jpg",
+      "alt": "Suzuki Samurai on a dirt road at sunset",
+      "heroEligible": false
+    },
+    {
+      "src": "/images/personal/wheel-detail.jpg",
+      "alt": "Close-up detail of a tire and wheel on a Suzuki Samurai",
+      "heroEligible": false
+    },
+    {
+      "src": "/images/personal/samurai-badge.jpg",
+      "alt": "Suzuki Samurai badge detail",
+      "heroEligible": false
+    }
+  ]
+}
