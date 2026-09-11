@@ -26,6 +26,7 @@ import crypto from "node:crypto";
 import { getStore } from "@netlify/blobs";
 import { verifyPassword, hashPassword } from "./password-hash.mjs";
 import { BOOTSTRAP_CREDENTIAL } from "./admin-bootstrap.mjs";
+import { SEED_SHOOTS } from "./seed-shoots.mjs";
 
 export { verifyPassword };
 
@@ -51,6 +52,33 @@ export const MEDIA_SRC = /^\/media\/([a-z0-9-]{8,40})\/([A-Za-z0-9_-]{12})\.jpg$
 
 const fingerprint = (value) =>
   crypto.createHash("sha256").update(String(value)).digest("hex").slice(0, 16);
+
+// ---------------------------------------------------------------------------
+// One-time seed. Until the `seeded` marker exists, the build keeps using the
+// committed content/shoots/ (see netlify/plugins/content-from-blobs); the
+// first time the portal touches shoots, those are copied into the store and
+// the store takes over.
+// ---------------------------------------------------------------------------
+
+let seededThisInstance = false;
+
+export async function ensureSeeded() {
+  if (seededThisInstance) return;
+  const admin = adminStore();
+  if (!(await admin.get("seeded"))) {
+    const shoots = shootsStore();
+    let count = 0;
+    for (const record of SEED_SHOOTS) {
+      if (!record?.slug) continue;
+      if (!(await shoots.get(record.slug))) {
+        await shoots.setJSON(record.slug, record);
+        count++;
+      }
+    }
+    await admin.setJSON("seeded", { at: new Date().toISOString(), count });
+  }
+  seededThisInstance = true;
+}
 
 // ---------------------------------------------------------------------------
 // Credential

@@ -465,10 +465,12 @@ Profiles and photos are stored in **Netlify Blobs** (stores `shoots`,
 transfer. Before every build, the local build plugin
 `netlify/plugins/content-from-blobs` writes the stored profiles into
 `content/shoots/` and the photos into `public/media/`, so the static export
-and the Image CDN treat them like any other content. The shoot JSON committed
-in `content/shoots/` was copied into Blobs once, on the first build, and is
-now only what `next dev` shows locally — editing it doesn't change the live
-site.
+and the Image CDN treat them like any other content. Builds can read Blobs but
+not write them, so the shoot JSON committed in `content/shoots/` is copied into
+Blobs by the admin function the first time the portal lists profiles
+(`netlify/seed-shoots.mjs`). Until then builds use the committed files; after
+it they are only what `next dev` shows locally — editing them doesn't change
+the live site.
 
 **One-time setup: automatic publishing.**
 

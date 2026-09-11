@@ -15,6 +15,7 @@ import {
   autoPublishEnabled,
   clearFailedLogins,
   createSessionCookie,
+  ensureSeeded,
   getCredential,
   inBatches,
   json,
@@ -65,6 +66,7 @@ export default async (req, context) => {
     }
 
     if (route === "account" && method === "POST") return await changeAccount(req, credential);
+    if (route === "shoots") await ensureSeeded();
     if (route === "shoots" && !id && method === "GET") return await listShoots();
     if (route === "shoots" && !id && method === "POST") return await createShoot(req);
     if (route === "shoots" && id && method === "PATCH") return await setHidden(id, req);

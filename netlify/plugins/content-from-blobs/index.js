@@ -9,10 +9,12 @@
  * already knows how to build — so no page code had to change, and every
  * photo still goes through the Image CDN.
  *
- * FIRST RUN: if the store has never been seeded, the shoot JSON committed in
- * content/shoots/ is copied into it once. After that the store is the source
- * of truth and the committed files are ignored on Netlify (they are still
- * what `next dev` shows locally).
+ * BEFORE THE FIRST SEED: a build may read site-wide Blobs stores but not
+ * write them, so seeding is done by the admin function (ensureSeeded in
+ * netlify/admin-core.mjs) the first time the portal is used. Until the
+ * `seeded` marker exists this plugin leaves the committed content/shoots/
+ * alone; after it, the store is the source of truth and the committed files
+ * are ignored on Netlify (they are still what `next dev` shows locally).
  *
  * If Blobs can't be read the build fails on purpose. Building from the
  * committed seed instead would quietly bring back profiles Ryan hid or
@@ -60,29 +62,6 @@ async function openStores(constants) {
   throw lastError;
 }
 
-async function readCommittedShoots() {
-  const files = (await fs.readdir(SHOOTS_DIR)).filter((file) => file.endsWith(".json"));
-  return Promise.all(
-    files.map(async (file) => {
-      const record = JSON.parse(await fs.readFile(path.join(SHOOTS_DIR, file), "utf8"));
-      return { key: record.slug || path.basename(file, ".json"), record };
-    })
-  );
-}
-
-async function seedOnce({ shoots, admin }) {
-  if (await admin.get("seeded")) return 0;
-  let seeded = 0;
-  for (const { key, record } of await readCommittedShoots()) {
-    if (!(await shoots.get(key))) {
-      await shoots.setJSON(key, { ...record, slug: key });
-      seeded++;
-    }
-  }
-  await admin.setJSON("seeded", { at: new Date().toISOString(), count: seeded });
-  return seeded;
-}
-
 async function downloadAll(media, keys) {
   const missing = new Set();
   let index = 0;
@@ -106,7 +85,10 @@ async function downloadAll(media, keys) {
 export const onPreBuild = async ({ constants, utils }) => {
   try {
     const stores = await openStores(constants);
-    const seeded = await seedOnce(stores);
+    if (!(await stores.admin.get("seeded"))) {
+      console.log("content-from-blobs: admin portal not used yet, building from committed content/shoots/");
+      return;
+    }
 
     const { blobs } = await stores.shoots.list();
     const records = (
@@ -144,8 +126,7 @@ export const onPreBuild = async ({ constants, utils }) => {
     console.log(
       `content-from-blobs: ${records.length} profiles (${hidden} hidden), ` +
         `${mediaKeys.length - missing.size} uploaded photos copied` +
-        (missing.size ? `, ${missing.size} missing and skipped` : "") +
-        (seeded ? `, ${seeded} seeded from the repo` : "")
+        (missing.size ? `, ${missing.size} missing and skipped` : "")
     );
   } catch (error) {
     utils.build.failBuild(
