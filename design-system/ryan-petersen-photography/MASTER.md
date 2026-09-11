@@ -434,6 +434,23 @@ Every profile is listed under **Profiles on the Site**, grouped by category.
 - **View** opens the live profile page.
 - **Publish Now** rebuilds the site by hand. You shouldn't need it — every
   save already does this — but it's there if a change doesn't show up.
+- **Find a Profile** — type part of a name to filter the list.
+
+### Adding Several Profiles at Once (Saves Netlify Credits)
+
+Every time the site goes live costs Netlify credits (15 each; the free plan
+has 300 a month). To add a batch of people for the price of one:
+
+1. At the top of **Add a Profile**, switch **How Many Profiles?** to
+   **Several Profiles**.
+2. Fill in the first person and press **Save and Add Another**. The form
+   clears for the next one. Repeat for everyone.
+3. Each one shows **Waiting to go live** in the list, and a bar at the top
+   counts them. When you've added them all, press **Publish All** — one
+   deploy for the whole batch. They're live in about two minutes.
+
+Waiting profiles are kept even if you close the portal; the bar is still
+there next time you sign in.
 
 Deleting from the portal only affects the website. Your own copies on your
 computer or card are untouched.

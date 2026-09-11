@@ -14,7 +14,15 @@
   const MAX_BYTES = 4 * 1024 * 1024; // under the server's 4.5 MB ceiling
   const UPLOADS_AT_ONCE = 3;
 
-  const state = { session: null, files: [], titleTouched: false, busy: false };
+  const state = { session: null, files: [], titleTouched: false, busy: false, shoots: [], mode: "one" };
+
+  const MODE_TEXT = {
+    one: { hint: "It goes live as soon as it's saved.", button: "Upload and Publish" },
+    many: {
+      hint: "Each profile is saved but waits. Add them all, then press Publish All — one deploy for the whole batch instead of one per profile.",
+      button: "Save and Add Another",
+    },
+  };
 
   class ApiError extends Error {
     constructor(message, status) {
@@ -160,8 +168,13 @@
   // Add a profile
   // -------------------------------------------------------------------------
 
-  // The title is the name, exactly as typed — the category never changes it.
-  function suggestTitle(name) {
+  // "Dominic" + Senior -> "Dominic’s Senior Session"; + Family -> "Bundy Family".
+  // Profile cards still show just the name (subjectName); this is the page title.
+  function suggestTitle(name, category) {
+    if (!name) return "";
+    const possessive = /s$/i.test(name) ? `${name}’` : `${name}’s`;
+    if (category === "senior") return `${possessive} Senior Session`;
+    if (category === "family") return /family$/i.test(name) ? name : `${name} Family`;
     return name;
   }
 
@@ -341,8 +354,20 @@
     $("#progress-text").textContent = text;
   }
 
+  function setMode(mode) {
+    state.mode = mode;
+    $("#mode-hint").textContent = MODE_TEXT[mode].hint;
+    $("#add-submit").textContent = MODE_TEXT[mode].button;
+  }
+
+  document.querySelectorAll('input[name="mode"]').forEach((radio) =>
+    radio.addEventListener("change", (event) => setMode(event.target.value))
+  );
+
   function resetForm() {
     $("#add-form").reset();
+    // reset() puts the radios back to "One Profile"; keep the chosen mode.
+    document.querySelector(`input[name="mode"][value="${state.mode}"]`).checked = true;
     state.files.forEach((item) => URL.revokeObjectURL(item.url));
     state.files = [];
     state.titleTouched = false;
@@ -402,10 +427,16 @@
       }
 
       setProgress(total, total, "Saving the profile…");
-      const result = await api("shoots", { method: "POST", body: { title, category, subjectName, description, photos } });
+      const publish = state.mode === "one";
+      const result = await api("shoots", { method: "POST", body: { title, category, subjectName, description, photos, publish } });
       resetForm();
-      announce(publishMessage(result, `“${title}” is saved.`));
-      loadShoots();
+      announce(
+        result.queued
+          ? `“${title}” is saved and waiting. Add the next one, or press Publish All when you're done.`
+          : publishMessage(result, `“${title}” is saved.`)
+      );
+      await loadShoots();
+      if (!publish) $("#subject").focus();
     } catch (err) {
       if (err.status !== 401) error.textContent = err.message;
     } finally {
@@ -425,8 +456,10 @@
     const box = $("#shoots");
     box.setAttribute("aria-busy", "true");
     try {
-      const { shoots } = await api("shoots");
-      renderShoots(shoots);
+      const { shoots, pendingCount } = await api("shoots");
+      state.shoots = shoots;
+      renderPending(pendingCount || 0);
+      renderShoots();
     } catch (error) {
       if (error.status !== 401) {
         box.textContent = "";
@@ -454,10 +487,29 @@
     return b;
   }
 
-  function renderShoots(shoots) {
+  function renderPending(count) {
+    $("#pending").hidden = count === 0;
+    $("#pending-text").textContent = `${plural(count, "profile")} waiting to go live.`;
+  }
+
+  /** Small square thumbnail from the Image CDN; falls back to the original once. */
+  function setThumb(img, src) {
+    img.src = `/.netlify/images?url=${encodeURIComponent(src)}&w=128&h=128&fit=cover&q=70`;
+    img.addEventListener("error", () => { img.src = src; }, { once: true });
+  }
+
+  const normalize = (text) => text.normalize("NFKD").replace(/[^\w\s]/g, "").toLowerCase().trim();
+
+  function renderShoots() {
     const box = $("#shoots");
     box.textContent = "";
-    if (!shoots.length) {
+    const query = normalize($("#shoot-search").value);
+    const all = state.shoots;
+    const shoots = query
+      ? all.filter((shoot) => normalize(`${shoot.title} ${shoot.subjectName}`).includes(query))
+      : all;
+    $("#search-empty").hidden = !(query && all.length && !shoots.length);
+    if (!all.length) {
       const p = document.createElement("p");
       p.className = "hint";
       p.textContent = "No profiles yet. Add one above.";
@@ -480,7 +532,7 @@
         img.alt = "";
         img.loading = "lazy";
         img.decoding = "async";
-        if (shoot.cover) img.src = shoot.cover;
+        if (shoot.cover) setThumb(img, shoot.cover);
 
         const text = document.createElement("div");
         text.className = "text";
@@ -491,14 +543,15 @@
         meta.className = "meta";
         meta.append(`${plural(shoot.photoCount, "photo")} · `);
         const tag = document.createElement("span");
-        tag.textContent = shoot.hidden ? "Hidden" : "Live";
+        tag.textContent = shoot.hidden ? "Hidden" : shoot.pending ? "Waiting to go live" : "Live";
         if (shoot.hidden) tag.className = "hidden-tag";
+        else if (shoot.pending) tag.className = "pending-tag";
         meta.append(tag);
         text.append(title, meta);
 
         const actions = document.createElement("div");
         actions.className = "actions";
-        if (!shoot.hidden) {
+        if (!shoot.hidden && !shoot.pending) {
           const view = document.createElement("a");
           view.className = "btn btn-small btn-quiet";
           view.href = shoot.url;
@@ -552,11 +605,14 @@
     }
   });
 
-  $("#publish-now").addEventListener("click", async (event) => {
+  $("#shoot-search").addEventListener("input", () => renderShoots());
+
+  async function publishEverything(event) {
     const b = event.currentTarget;
     b.disabled = true;
     try {
       const result = await api("publish", { method: "POST" });
+      await loadShoots();
       announce(
         !result.autoPublish
           ? "Automatic publishing isn't switched on yet — see the notice above."
@@ -569,7 +625,10 @@
     } finally {
       b.disabled = false;
     }
-  });
+  }
+
+  $("#publish-now").addEventListener("click", publishEverything);
+  $("#publish-all").addEventListener("click", publishEverything);
 
   // -------------------------------------------------------------------------
   // Account

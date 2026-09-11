@@ -133,6 +133,23 @@ progress { width: 100%; height: 8px; accent-color: var(--primary); }
 .shoot .actions { display: flex; gap: 8px; flex-wrap: wrap; }
 .shoot.is-hidden img { opacity: 0.5; }
 
+/* One / Several switch */
+fieldset.mode { border: 0; margin: 0 0 24px; padding: 0; }
+.segmented { display: inline-flex; background: var(--muted); border: 1px solid var(--border); border-radius: 8px; padding: 4px; gap: 4px; }
+.segmented label { position: relative; cursor: pointer; }
+.segmented input { position: absolute; opacity: 0; inset: 0; margin: 0; cursor: pointer; }
+.segmented span { display: inline-flex; align-items: center; min-height: 40px; padding: 0 16px; border-radius: 6px; font-weight: 600; color: var(--muted-foreground); }
+.segmented input:checked + span { background: var(--primary); color: var(--primary-foreground); }
+.segmented input:focus-visible + span { outline: 2px solid var(--primary); outline-offset: 2px; }
+fieldset.mode .hint { margin-top: 8px; }
+
+/* Waiting-to-publish bar */
+.pending { display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap; background: var(--card); border: 1px solid var(--primary); border-radius: var(--radius); padding: 16px 24px; margin-bottom: 32px; }
+.pending p { font-weight: 600; }
+.shoot .meta .pending-tag { color: var(--primary); }
+
+.search { max-width: 400px; margin: 16px 0 8px; }
+
 /* Notices */
 .notice { background: var(--secondary); border: 1px solid var(--border); border-left: 3px solid var(--primary); border-radius: 8px; padding: 16px; margin-bottom: 16px; }
 

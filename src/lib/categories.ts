@@ -1,4 +1,12 @@
-import { shootsByCategory, type PhotoCategory, type Photo } from "@/lib/shoots";
+import { budgetedSample, shootsByCategory, type PhotoCategory, type Photo } from "@/lib/shoots";
+
+/**
+ * Photo budget for one category's four rotating tiles. Without it every
+ * photo in the category was embedded in the page — fine at a hundred,
+ * several hundred KB at thousands. See budgetedSample.
+ */
+const TEASER_MAX_PHOTOS = 48;
+const TEASER_MAX_PER_SHOOT = 12;
 
 /**
  * The four shot categories, in the order they appear everywhere.
@@ -183,13 +191,17 @@ export function categoryTeaserTiles(
   // Dealing the pool out by stride then puts a different face in each tile
   // from the first frame, instead of tile 1 spending its first minute on
   // one long gallery while tile 2 waits its turn.
-  const perShoot = shoots.map((shoot) =>
-    // Every photo is fair game here, unlike the hero: heroEligible is about
-    // a 21:9 banner cropping a face out, and these tiles are portrait.
-    shoot.photos.map((photo) => ({
-      ...photo,
-      name: shoot.subjectName ?? shoot.title,
-    }))
+  const perShoot = budgetedSample(
+    shoots.map((shoot) =>
+      // Every photo is fair game here, unlike the hero: heroEligible is about
+      // a 21:9 banner cropping a face out, and these tiles are portrait.
+      shoot.photos.map((photo) => ({
+        ...photo,
+        name: shoot.subjectName ?? shoot.title,
+      }))
+    ),
+    TEASER_MAX_PHOTOS,
+    TEASER_MAX_PER_SHOOT
   );
 
   const pool: TeaserPhoto[] = [];

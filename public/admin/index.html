@@ -51,11 +51,25 @@
         <div id="notices"></div>
         <p id="status" class="status" role="status" aria-live="polite"></p>
 
+        <div id="pending" class="pending" hidden>
+          <p id="pending-text"></p>
+          <button type="button" class="btn btn-primary" id="publish-all">Publish All</button>
+        </div>
+
         <section class="card" aria-labelledby="add-title">
           <h2 id="add-title">Add a Profile</h2>
           <p class="hint">Name it after the person or family, pick a category, add the photos. It publishes by itself.</p>
 
           <form id="add-form" novalidate>
+            <fieldset class="mode">
+              <legend class="label">How Many Profiles?</legend>
+              <div class="segmented">
+                <label><input type="radio" name="mode" value="one" checked /> <span>One Profile</span></label>
+                <label><input type="radio" name="mode" value="many" /> <span>Several Profiles</span></label>
+              </div>
+              <p class="hint" id="mode-hint">It goes live as soon as it's saved.</p>
+            </fieldset>
+
             <div class="grid-2">
               <div class="field">
                 <label for="subject">Name</label>
@@ -112,6 +126,11 @@
             <button type="button" class="btn btn-quiet btn-small" id="publish-now">Publish Now</button>
           </div>
           <p class="hint">Hide takes a profile off the website but keeps it here — Unhide brings it back. Delete removes it and its photos for good.</p>
+          <div class="field search">
+            <label for="shoot-search">Find a Profile</label>
+            <input id="shoot-search" type="search" placeholder="Type a name" autocomplete="off" />
+          </div>
+          <p id="search-empty" class="hint" hidden>No profiles match that search.</p>
           <div id="shoots" aria-busy="true"></div>
         </section>
       </div>

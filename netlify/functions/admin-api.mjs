@@ -19,6 +19,7 @@ import {
   getCredential,
   inBatches,
   json,
+  lastPublishAt,
   mediaStore,
   minutesLocked,
   photoSrc,
@@ -160,19 +161,29 @@ async function allShoots() {
 }
 
 async function listShoots() {
-  const shoots = (await allShoots())
-    .map((shoot) => ({
-      slug: shoot.slug,
-      title: shoot.title,
-      category: shoot.category,
-      subjectName: shoot.subjectName ?? "",
-      hidden: Boolean(shoot.hidden),
-      photoCount: shoot.photos?.length ?? 0,
-      cover: photoSrc(shoot.photos?.[0]) ?? null,
-      url: `/portfolio/${shoot.category}/${shoot.slug}/`,
-    }))
+  const [records, lastPublish] = await Promise.all([allShoots(), lastPublishAt()]);
+  const shoots = records
+    .map((shoot) => {
+      const changedAt = shoot.updatedAt || shoot.createdAt;
+      return {
+        slug: shoot.slug,
+        title: shoot.title,
+        category: shoot.category,
+        subjectName: shoot.subjectName ?? "",
+        hidden: Boolean(shoot.hidden),
+        // Saved in "several profiles" mode and not published since.
+        pending: Boolean(lastPublish && changedAt && changedAt > lastPublish),
+        photoCount: shoot.photos?.length ?? 0,
+        cover: photoSrc(shoot.photos?.[0]) ?? null,
+        url: `/portfolio/${shoot.category}/${shoot.slug}/`,
+      };
+    })
     .sort((a, b) => a.title.localeCompare(b.title));
-  return json({ shoots, autoPublish: autoPublishEnabled() });
+  return json({
+    shoots,
+    pendingCount: shoots.filter((shoot) => shoot.pending).length,
+    autoPublish: autoPublishEnabled(),
+  });
 }
 
 async function createShoot(req) {
@@ -212,6 +223,11 @@ async function createShoot(req) {
   };
   await store.setJSON(slug, record);
 
+  // "Several profiles" mode saves without publishing; one Publish All at the
+  // end costs a single deploy for the whole batch.
+  if (body.publish === false) {
+    return json({ ok: true, slug, url: `/portfolio/${category}/${slug}/`, queued: true }, 201);
+  }
   const publish = await publishSite(`added "${title}"`);
   return json({ ok: true, slug, url: `/portfolio/${category}/${slug}/`, ...publish }, 201);
 }

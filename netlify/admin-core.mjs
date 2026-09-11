@@ -221,6 +221,12 @@ export async function clearFailedLogins(ip) {
 
 export const autoPublishEnabled = () => Boolean(process.env.BUILD_HOOK_URL);
 
+/** ISO time of the last build the portal triggered, or null if none yet. */
+export async function lastPublishAt() {
+  const record = await adminStore().get("last-publish", { type: "json" });
+  return record?.at ?? null;
+}
+
 export async function publishSite(reason) {
   const hook = process.env.BUILD_HOOK_URL;
   if (!hook) return { autoPublish: false, triggered: false };
@@ -229,6 +235,8 @@ export async function publishSite(reason) {
   )}`;
   try {
     const res = await fetch(url, { method: "POST" });
+    // Anything saved after this moment is "waiting to go live" in the portal.
+    if (res.ok) await adminStore().setJSON("last-publish", { at: new Date().toISOString() });
     return { autoPublish: true, triggered: res.ok };
   } catch (error) {
     console.error("Build hook failed", error);

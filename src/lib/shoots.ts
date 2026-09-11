@@ -203,19 +203,57 @@ export const allPhotos: (Photo & { category: PhotoCategory })[] = shoots
  * the front, so a shoot doesn't contribute four near-identical frames from
  * the same two minutes of the same session.
  */
-const HERO_PHOTOS_PER_SHOOT = 4;
+/** `n` photos spread across a gallery rather than its first `n` frames. */
+export function spreadSample<T>(items: T[], n: number): T[] {
+  if (items.length <= n) return items;
+  const stride = items.length / n;
+  return Array.from({ length: n }, (_, i) => items[Math.floor(i * stride)]);
+}
 
-export const heroPhotos: (Photo & { category: PhotoCategory })[] = shoots
-  .flatMap((shoot) => {
-    const eligible = shoot.photos.filter((photo) => photo.heroEligible !== false);
-    if (eligible.length <= HERO_PHOTOS_PER_SHOOT) return eligible.map((photo) => ({ ...photo, category: shoot.category }));
+/** Changes once a day, so each day's build features a different mix. */
+const BUILD_SEED = Math.floor(Date.now() / 86_400_000);
 
-    const stride = eligible.length / HERO_PHOTOS_PER_SHOOT;
-    return Array.from({ length: HERO_PHOTOS_PER_SHOOT }, (_, i) => ({
-      ...eligible[Math.floor(i * stride)],
-      category: shoot.category,
-    }));
-  });
+function seededShuffle<T>(items: T[], seed = BUILD_SEED): T[] {
+  const pool = [...items];
+  let s = seed || 1;
+  const nextRandom = () => {
+    s = (s * 1103515245 + 12345) & 0x7fffffff;
+    return s / 0x7fffffff;
+  };
+  for (let i = pool.length - 1; i > 0; i--) {
+    const j = Math.floor(nextRandom() * (i + 1));
+    [pool[i], pool[j]] = [pool[j], pool[i]];
+  }
+  return pool;
+}
+
+/**
+ * A fixed photo budget shared fairly across galleries: up to `perGallery`
+ * frames each, fewer as galleries multiply, never more than `max` in total.
+ * With more galleries than the budget, a daily seeded pick decides who is
+ * featured — the page stays the same size at 10 profiles or 500, and over a
+ * few days of builds everyone takes a turn. The client still shuffles the
+ * chosen set per visit (use-crossfade).
+ */
+export function budgetedSample<T>(galleries: T[][], max: number, perGallery: number): T[][] {
+  const nonEmpty = galleries.filter((gallery) => gallery.length > 0);
+  const chosen = nonEmpty.length > max ? seededShuffle(nonEmpty).slice(0, max) : nonEmpty;
+  const share = Math.max(1, Math.min(perGallery, Math.floor(max / Math.max(chosen.length, 1))));
+  return chosen.map((gallery) => spreadSample(gallery, share));
+}
+
+const HERO_MAX_PHOTOS = 24;
+const HERO_MAX_PER_SHOOT = 4;
+
+export const heroPhotos: (Photo & { category: PhotoCategory })[] = budgetedSample(
+  shoots.map((shoot) =>
+    shoot.photos
+      .filter((photo) => photo.heroEligible !== false)
+      .map((photo) => ({ ...photo, category: shoot.category }))
+  ),
+  HERO_MAX_PHOTOS,
+  HERO_MAX_PER_SHOOT
+).flat();
 
 /**
  * Every photo across every shoot, unfiltered — for decorative uses (e.g. a
