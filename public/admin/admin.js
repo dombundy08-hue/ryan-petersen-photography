@@ -14,12 +14,15 @@
   const MAX_BYTES = 4 * 1024 * 1024; // under the server's 4.5 MB ceiling
   const UPLOADS_AT_ONCE = 3;
 
-  const state = { session: null, files: [], titleTouched: false, busy: false, shoots: [], mode: "one" };
+  const state = { session: null, files: [], titleTouched: false, busy: false, shoots: [], mode: "one", pending: 0 };
 
   const MODE_TEXT = {
     one: { hint: "It goes live as soon as it's saved.", button: "Upload and Publish" },
     many: {
-      hint: "Each profile is saved but waits. Add them all, then press Publish All — one deploy for the whole batch instead of one per profile.",
+      // No batch size to reach and no maximum: two profiles publish the same
+      // way twenty do. Say so, because the old wording ("add them all, then
+      // press Publish All") read like the batch had to be finished first.
+      hint: "Each profile is saved and waits — add as many as you like, there's no limit. Publish whenever you're ready, after two or after twenty: it's one deploy for everything waiting.",
       button: "Save and Add Another",
     },
   };
@@ -347,6 +350,10 @@
       el.disabled = busy;
     });
     $("#progress-wrap").hidden = !busy;
+    // The batch button lives inside the form, so the loop above disabled it
+    // too. Re-derive its own state: an upload in flight keeps it off, and
+    // finishing one must not switch it on when nothing is waiting.
+    renderBatch();
   }
 
   function setProgress(done, total, text) {
@@ -358,6 +365,25 @@
     state.mode = mode;
     $("#mode-hint").textContent = MODE_TEXT[mode].hint;
     $("#add-submit").textContent = MODE_TEXT[mode].button;
+    renderBatch();
+  }
+
+  /**
+   * The publish control under the form. Present the whole time Several
+   * Profiles is selected — including before anything is waiting, so it is
+   * never a button that appears out of nowhere — and disabled until there is
+   * something to send.
+   */
+  function renderBatch() {
+    const box = $("#batch");
+    const many = state.mode === "many";
+    box.hidden = !many;
+    if (!many) return;
+    const count = state.pending;
+    $("#batch-text").textContent = count
+      ? `${plural(count, "profile")} waiting to go live. Publish now, or add more first — either is fine.`
+      : "Nothing waiting yet. Save a profile above and it collects here until you publish.";
+    $("#publish-batch").disabled = count === 0 || state.busy;
   }
 
   document.querySelectorAll('input[name="mode"]').forEach((radio) =>
@@ -432,7 +458,7 @@
       resetForm();
       announce(
         result.queued
-          ? `“${title}” is saved and waiting. Add the next one, or press Publish All when you're done.`
+          ? `“${title}” is saved and waiting. Add the next one, or press Publish All Now below whenever you want these live.`
           : publishMessage(result, `“${title}” is saved.`)
       );
       await loadShoots();
@@ -488,8 +514,10 @@
   }
 
   function renderPending(count) {
+    state.pending = count;
     $("#pending").hidden = count === 0;
     $("#pending-text").textContent = `${plural(count, "profile")} waiting to go live.`;
+    renderBatch();
   }
 
   /** Small square thumbnail from the Image CDN; falls back to the original once. */
@@ -624,11 +652,16 @@
       if (error.status !== 401) announce(error.message);
     } finally {
       b.disabled = false;
+      // b is one of three publish buttons; the batch one has its own rule
+      // (off when nothing is waiting), so let it re-derive rather than
+      // inheriting the blanket re-enable above.
+      renderBatch();
     }
   }
 
   $("#publish-now").addEventListener("click", publishEverything);
   $("#publish-all").addEventListener("click", publishEverything);
+  $("#publish-batch").addEventListener("click", publishEverything);
 
   // -------------------------------------------------------------------------
   // Account

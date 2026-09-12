@@ -4,8 +4,11 @@
  * Only a scrypt hash is stored here, never the password. It is used until a
  * password is saved from the portal's Account dialog, and ignored from then
  * on. See netlify/admin-core.mjs for the full order of precedence.
+ *
+ * The username is stored lower-cased because sign-in lower-cases whatever is
+ * typed — Ry6nShutt3rs18, ry6nshutt3rs18 and RY6NSHUTT3RS18 all match.
  */
 export const BOOTSTRAP_CREDENTIAL = {
-  username: "ryan",
-  hash: "scrypt$32768$8$1$ZCKJXLIpDdT4c5/FdBRmbw==$PnumTpilART+80ZYvUN9UvFE/m6wF4KAHhD7heoyK6E=",
+  username: "ry6nshutt3rs18",
+  hash: "scrypt$32768$8$1$gyW/q9VUTywQ0nMcpbxS2A==$80V3uHJSGwcDFpgSkzZbG0jquTlQ6048lNxf7MM8+9k=",
 };

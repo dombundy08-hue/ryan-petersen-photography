@@ -146,6 +146,10 @@ fieldset.mode .hint { margin-top: 8px; }
 /* Waiting-to-publish bar */
 .pending { display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap; background: var(--card); border: 1px solid var(--primary); border-radius: var(--radius); padding: 16px 24px; margin-bottom: 32px; }
 .pending p { font-weight: 600; }
+/* The same bar, sitting under the form's submit button instead of above the
+   page. It follows the button it belongs to, so it needs the margin on top. */
+.batch { margin: 24px 0 0; }
+.batch p { font-weight: 500; }
 .shoot .meta .pending-tag { color: var(--primary); }
 
 .search { max-width: 400px; margin: 16px 0 8px; }

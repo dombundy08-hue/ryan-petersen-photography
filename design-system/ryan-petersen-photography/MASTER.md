@@ -389,6 +389,9 @@ Before delivering any UI code, verify:
 1. Go to **https://ryanshutter.com/admin/** (bookmark it).
 2. Type your **username** and **password**, then **Sign In**.
 
+Capital letters in the username don't matter — `Ry6nShutt3rs18` and
+`ry6nshutt3rs18` are the same login. The password is exact, capitals and all.
+
 You stay signed in on that device for a week. **Sign Out** (top right) ends it
 straight away.
 
@@ -445,9 +448,16 @@ has 300 a month). To add a batch of people for the price of one:
    **Several Profiles**.
 2. Fill in the first person and press **Save and Add Another**. The form
    clears for the next one. Repeat for everyone.
-3. Each one shows **Waiting to go live** in the list, and a bar at the top
-   counts them. When you've added them all, press **Publish All** — one
-   deploy for the whole batch. They're live in about two minutes.
+3. Each one shows **Waiting to go live** in the list, a bar at the top counts
+   them, and **Publish All Now** sits right under the form. Press it whenever
+   you like — one deploy sends everything waiting, and they're live in about
+   two minutes.
+
+**There is no batch size and no maximum.** Two profiles publish exactly the
+way twenty do; nothing has to be "filled up" before you can send them. Do
+three today and three next week if that's how the shoots land — each publish
+is one deploy, so the only thing a bigger batch saves is credits, not
+anything you have to plan around.
 
 Waiting profiles are kept even if you close the portal; the bar is still
 there next time you sign in.
@@ -509,6 +519,11 @@ Netlify, add `ADMIN_PASSWORD_HASH` = that hash (and `ADMIN_USERNAME` if the
 username should change), then redeploy. That variable overrides the portal's
 own password until it is deleted; delete it once signed in if you want the
 portal's **Account** dialog to manage the password again.
+
+**Handing the site over.** `HANDOVER.md` at the root of the repo is the
+checklist for moving the GitHub repo and the Netlify site into Ryan's own
+accounts. Short version: two accounts, no third one — the admin portal's data
+lives in Netlify Blobs and travels with the Netlify site.
 
 **Security notes.** Passwords are stored only as scrypt hashes. Sessions are
 HMAC-signed, HttpOnly, Secure, SameSite=Strict cookies scoped to

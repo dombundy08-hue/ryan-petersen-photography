@@ -67,7 +67,7 @@
                 <label><input type="radio" name="mode" value="one" checked /> <span>One Profile</span></label>
                 <label><input type="radio" name="mode" value="many" /> <span>Several Profiles</span></label>
               </div>
-              <p class="hint" id="mode-hint">It goes live as soon as it's saved.</p>
+              <p class="hint" id="mode-hint">It goes live as soon as it&rsquo;s saved.</p>
             </fieldset>
 
             <div class="grid-2">
@@ -117,6 +117,18 @@
               <p id="progress-text" class="hint" aria-live="polite"></p>
             </div>
             <button class="btn btn-primary" type="submit" id="add-submit">Upload and Publish</button>
+
+            <!--
+              The publish control at the bottom of the form. Several Profiles
+              mode has no batch size to reach: two profiles publish the same
+              way twenty do, and this button sits right under the one Ryan
+              just pressed so he never has to scroll back up to the bar at the
+              top to send them live.
+            -->
+            <div id="batch" class="pending batch" hidden>
+              <p id="batch-text"></p>
+              <button type="button" class="btn btn-primary" id="publish-batch">Publish All Now</button>
+            </div>
           </form>
         </section>
 

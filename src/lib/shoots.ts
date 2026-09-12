@@ -203,23 +203,54 @@ export const allPhotos: (Photo & { category: PhotoCategory })[] = shoots
  * the front, so a shoot doesn't contribute four near-identical frames from
  * the same two minutes of the same session.
  */
-/** `n` photos spread across a gallery rather than its first `n` frames. */
-export function spreadSample<T>(items: T[], n: number): T[] {
+/**
+ * `n` photos spread across a gallery rather than its first `n` frames.
+ *
+ * Without a seed the pick is the frame at the start of each evenly spaced
+ * bucket — stable, and what the category teasers want. With a seed it is a
+ * random frame from *inside* each bucket: still spread across the whole
+ * session rather than clumped into one minute of it, but a different set of
+ * frames every build. That is what keeps the home hero from showing the same
+ * four photos of the same person for months on end.
+ */
+export function spreadSample<T>(items: T[], n: number, seed?: number): T[] {
   if (items.length <= n) return items;
   const stride = items.length / n;
-  return Array.from({ length: n }, (_, i) => items[Math.floor(i * stride)]);
+  if (seed === undefined) {
+    return Array.from({ length: n }, (_, i) => items[Math.floor(i * stride)]);
+  }
+  const nextRandom = randomFrom(seed);
+  return Array.from({ length: n }, (_, i) => {
+    const start = Math.floor(i * stride);
+    const end = Math.min(items.length, Math.max(start + 1, Math.floor((i + 1) * stride)));
+    const pick = start + Math.floor(nextRandom() * (end - start));
+    return items[Math.min(pick, items.length - 1)];
+  });
 }
 
-/** Changes once a day, so each day's build features a different mix. */
-const BUILD_SEED = Math.floor(Date.now() / 86_400_000);
-
-function seededShuffle<T>(items: T[], seed = BUILD_SEED): T[] {
-  const pool = [...items];
-  let s = seed || 1;
-  const nextRandom = () => {
+/** A small deterministic PRNG — same seed, same sequence. */
+function randomFrom(seed: number): () => number {
+  let s = (seed || 1) & 0x7fffffff;
+  return () => {
     s = (s * 1103515245 + 12345) & 0x7fffffff;
     return s / 0x7fffffff;
   };
+}
+
+/**
+ * Re-rolled once per build, so every deploy features a different mix.
+ *
+ * This used to be the day number, which meant two deploys on the same day
+ * produced an identical hero — and on a site that only rebuilds when Ryan
+ * publishes, "changes once a day" in practice meant "never changes". The
+ * value is read at build time on the server and baked into the pre-rendered
+ * HTML, so it can't cause a hydration mismatch.
+ */
+const BUILD_SEED = Math.floor(Math.random() * 0x7fffffff) || 1;
+
+function seededShuffle<T>(items: T[], seed = BUILD_SEED): T[] {
+  const pool = [...items];
+  const nextRandom = randomFrom(seed);
   for (let i = pool.length - 1; i > 0; i--) {
     const j = Math.floor(nextRandom() * (i + 1));
     [pool[i], pool[j]] = [pool[j], pool[i]];
@@ -235,25 +266,58 @@ function seededShuffle<T>(items: T[], seed = BUILD_SEED): T[] {
  * few days of builds everyone takes a turn. The client still shuffles the
  * chosen set per visit (use-crossfade).
  */
-export function budgetedSample<T>(galleries: T[][], max: number, perGallery: number): T[][] {
+export function budgetedSample<T>(
+  galleries: T[][],
+  max: number,
+  perGallery: number,
+  seed?: number
+): T[][] {
   const nonEmpty = galleries.filter((gallery) => gallery.length > 0);
-  const chosen = nonEmpty.length > max ? seededShuffle(nonEmpty).slice(0, max) : nonEmpty;
+  const chosen = nonEmpty.length > max ? seededShuffle(nonEmpty, seed).slice(0, max) : nonEmpty;
   const share = Math.max(1, Math.min(perGallery, Math.floor(max / Math.max(chosen.length, 1))));
-  return chosen.map((gallery) => spreadSample(gallery, share));
+  return chosen.map((gallery) => spreadSample(gallery, share, seed));
 }
 
 const HERO_MAX_PHOTOS = 24;
 const HERO_MAX_PER_SHOOT = 4;
 
-export const heroPhotos: (Photo & { category: PhotoCategory })[] = budgetedSample(
-  shoots.map((shoot) =>
-    shoot.photos
-      .filter((photo) => photo.heroEligible !== false)
-      .map((photo) => ({ ...photo, category: shoot.category }))
-  ),
-  HERO_MAX_PHOTOS,
-  HERO_MAX_PER_SHOOT
-).flat();
+/**
+ * Round-robin across galleries: person A's first frame, person B's first,
+ * person C's first, then everyone's second, and so on.
+ *
+ * `.flat()` used to concatenate them, which put all four of one person's
+ * photos next to each other. The carousel shuffles per visit on the client,
+ * so that ordering was invisible after a few seconds — but the *first* frame,
+ * the one baked into the static HTML and shown to every visitor before any
+ * JavaScript runs, was always the first photo of the alphabetically first
+ * shoot. Interleaving plus the per-build seed means that opening frame is a
+ * different person's photo after every publish.
+ */
+function interleave<T>(galleries: T[][]): T[] {
+  const longest = galleries.reduce((n, gallery) => Math.max(n, gallery.length), 0);
+  const out: T[] = [];
+  for (let i = 0; i < longest; i++) {
+    for (const gallery of galleries) {
+      if (i < gallery.length) out.push(gallery[i]);
+    }
+  }
+  return out;
+}
+
+export const heroPhotos: (Photo & { category: PhotoCategory })[] = interleave(
+  seededShuffle(
+    budgetedSample(
+      shoots.map((shoot) =>
+        shoot.photos
+          .filter((photo) => photo.heroEligible !== false)
+          .map((photo) => ({ ...photo, category: shoot.category }))
+      ),
+      HERO_MAX_PHOTOS,
+      HERO_MAX_PER_SHOOT,
+      BUILD_SEED
+    )
+  )
+);
 
 /**
  * Every photo across every shoot, unfiltered — for decorative uses (e.g. a
