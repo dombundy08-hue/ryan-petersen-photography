@@ -1,6 +1,10 @@
 #!/usr/bin/env node
 /**
- * Build-time focal point extraction.
+ * Build-time focal point extraction (and photo dimensions).
+ *
+ * The manifest also records each photo's displayed width and height. The home
+ * hero shows photos whole, side by side, so it needs every photo's aspect
+ * ratio at render time to size each slot before the image has loaded.
  *
  * Every photo on the site is displayed through `object-fit: cover` in a box
  * whose aspect ratio (21:9 hero, 4:5 profile card, 3:4 portrait tile) rarely
@@ -321,6 +325,19 @@ function detectSkin(data, width, height) {
   return focalFromSkin(connectedComponents(mask, width, height), width, height);
 }
 
+/**
+ * Displayed size — EXIF orientation applied, so a phone photo stored sideways
+ * reports the way a browser will show it.
+ */
+export async function readSize(file) {
+  const meta = await sharp(file, { failOn: "none" }).metadata();
+  const swap = (meta.orientation ?? 1) >= 5;
+  const width = swap ? meta.height : meta.width;
+  const height = swap ? meta.width : meta.height;
+  if (!width || !height) throw new Error("no dimensions");
+  return { width, height };
+}
+
 export async function computeFocalPoint(file) {
   const work = await workingCopy(file, false);
 
@@ -413,6 +430,10 @@ export async function main(argv = process.argv.slice(2)) {
   for (const [key, value] of Object.entries(existing)) {
     if (live.has(key) && value && typeof value.objectPosition === "string") {
       manifest[key] = { objectPosition: value.objectPosition };
+      if (value.width > 0 && value.height > 0) {
+        manifest[key].width = value.width;
+        manifest[key].height = value.height;
+      }
     }
   }
 
@@ -421,11 +442,27 @@ export async function main(argv = process.argv.slice(2)) {
 
   for (const file of files) {
     const key = publicKey(file);
-    if (manifest[key]) continue;
+    if (manifest[key]) {
+      // Entries written before dimensions were recorded only need the cheap
+      // header read, not another focal-point pass.
+      if (!manifest[key].width) {
+        try {
+          Object.assign(manifest[key], await readSize(file));
+        } catch {
+          /* no size: the hero falls back to a default ratio for this photo */
+        }
+      }
+      continue;
+    }
 
     try {
       const result = await computeFocalPoint(file);
       manifest[key] = { objectPosition: result.objectPosition };
+      try {
+        Object.assign(manifest[key], await readSize(file));
+      } catch {
+        /* as above */
+      }
       computed++;
       if (verbose) console.log(`  ${key} -> ${result.objectPosition} (${result.source})`);
     } catch (error) {

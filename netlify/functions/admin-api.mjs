@@ -1,7 +1,7 @@
 /**
  * The admin portal's API — every request from public/admin/admin.js lands
  * here. Sign-in, the profile list, photo upload, save, hide/unhide, delete,
- * and the Account (username/password) change.
+ * the About Me photos, and the Account (username/password) change.
  *
  * Mutating requests must carry `x-rs-admin: 1`. A cross-site form or image
  * tag cannot set a custom header, and the session cookie is SameSite=Strict,
@@ -15,7 +15,9 @@ import {
   autoPublishEnabled,
   clearFailedLogins,
   createSessionCookie,
+  MAX_ABOUT_PHOTOS,
   ensureSeeded,
+  getAboutPhotos,
   getCredential,
   inBatches,
   json,
@@ -27,6 +29,7 @@ import {
   readJson,
   readSession,
   recordFailedLogin,
+  saveAboutPhotos,
   saveCredential,
   shootsStore,
   slugify,
@@ -72,6 +75,8 @@ export default async (req, context) => {
     if (route === "shoots" && !id && method === "POST") return await createShoot(req);
     if (route === "shoots" && id && method === "PATCH") return await setHidden(id, req);
     if (route === "shoots" && id && method === "DELETE") return await deleteShoot(id);
+    if (route === "about" && method === "GET") return json({ photos: await getAboutPhotos() });
+    if (route === "about" && method === "PUT") return await saveAbout(req);
     if (route === "photos" && method === "POST") return await uploadPhoto(req, url);
     if (route === "publish" && method === "POST") return json(await publishSite("publish now"));
 
@@ -268,6 +273,42 @@ async function deleteShoot(slug) {
 
   const publish = await publishSite(`deleted "${record.title}"`);
   return json({ ok: true, ...publish });
+}
+
+/**
+ * Replace the About Me photo list (order = display order, first leads).
+ *
+ * Each entry must be either a photo uploaded through this portal, or one
+ * already in the list — that is how the committed /images/... photos survive a
+ * save, while an arbitrary path typed into a request is refused. Uploaded
+ * photos that are no longer listed are deleted from Blobs; the copy in the
+ * live deploy stays until the rebuild replaces it.
+ */
+async function saveAbout(req) {
+  const body = await readJson(req);
+  const photos = Array.isArray(body.photos) ? body.photos : [];
+  if (photos.length > MAX_ABOUT_PHOTOS) {
+    return json({ error: `The About page can hold up to ${MAX_ABOUT_PHOTOS} photos.` }, 400);
+  }
+
+  const current = await getAboutPhotos();
+  const known = new Set(current);
+  if (!photos.every((src) => typeof src === "string" && (MEDIA_SRC.test(src) || known.has(src)))) {
+    return json({ error: "One of the photos didn't upload properly. Remove it and try again." }, 400);
+  }
+  if (new Set(photos).size !== photos.length) return json({ error: "A photo is listed twice." }, 400);
+
+  await saveAboutPhotos(photos);
+
+  const kept = new Set(photos);
+  const stale = current
+    .filter((src) => !kept.has(src) && MEDIA_SRC.test(src))
+    .map((src) => src.slice("/media/".length));
+  const media = mediaStore();
+  await inBatches(stale, 20, (key) => media.delete(key));
+
+  const publish = await publishSite("updated the About Me photos");
+  return json({ ok: true, photos, ...publish });
 }
 
 async function uploadPhoto(req, url) {

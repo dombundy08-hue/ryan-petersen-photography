@@ -14,7 +14,11 @@
   const MAX_BYTES = 4 * 1024 * 1024; // under the server's 4.5 MB ceiling
   const UPLOADS_AT_ONCE = 3;
 
-  const state = { session: null, files: [], titleTouched: false, busy: false, shoots: [], mode: "one", pending: 0 };
+  const state = {
+    session: null, files: [], titleTouched: false, busy: false, shoots: [], mode: "one", pending: 0,
+    // About Me photos: items are {src} (already on the site) or {file, url} (chosen, not uploaded yet).
+    about: { items: [], loaded: false, busy: false },
+  };
 
   const MODE_TEXT = {
     one: { hint: "It goes live as soon as it's saved.", button: "Upload and Publish" },
@@ -188,6 +192,7 @@
 
   $("#subject").addEventListener("input", updateTitle);
   $("#category").addEventListener("change", updateTitle);
+  $("#category").addEventListener("change", showCategoryView);
   $("#title").addEventListener("input", (event) => {
     state.titleTouched = event.target.value.trim() !== "";
   });
@@ -408,6 +413,7 @@
 
     const subjectName = $("#subject").value.trim();
     const category = $("#category").value;
+    if (category === "about") return;
     const title = $("#title").value.trim() || suggestTitle(subjectName, category);
     const description = $("#description").value.trim();
 
@@ -471,7 +477,216 @@
   });
 
   window.addEventListener("beforeunload", (event) => {
-    if (state.busy) event.preventDefault();
+    if (state.busy || state.about.busy) event.preventDefault();
+  });
+
+  // -------------------------------------------------------------------------
+  // About Me photos — the "About Me" category swaps the profile form for the
+  // list of photos of Ryan on the About page.
+  // -------------------------------------------------------------------------
+
+  const fileName = (src) => decodeURIComponent(src.split("/").pop() || src);
+
+  function showCategoryView() {
+    const about = $("#category").value === "about";
+    $("#profile-fields").hidden = about;
+    $("#about-panel").hidden = !about;
+    $("#add-title").textContent = about ? "About Me Photos" : "Add a Profile";
+    $("#add-hint").textContent = about
+      ? "The photos of you on the About page."
+      : "Pick a category, name it after the person or family, add the photos. It publishes by itself.";
+    if (about && !state.about.loaded) loadAbout();
+  }
+
+  async function loadAbout() {
+    $("#about-error").textContent = "";
+    try {
+      const { photos } = await api("about");
+      state.about.items = photos.map((src) => ({ src, name: fileName(src) }));
+      state.about.loaded = true;
+      renderAbout();
+    } catch (error) {
+      if (error.status !== 401) $("#about-error").textContent = error.message;
+    }
+  }
+
+  function renderAbout() {
+    const list = $("#about-thumbs");
+    list.textContent = "";
+    const { items } = state.about;
+    $("#about-empty").hidden = items.length > 0;
+
+    items.forEach((item, index) => {
+      const li = document.createElement("li");
+
+      const frame = document.createElement("div");
+      frame.className = "frame";
+      const img = document.createElement("img");
+      img.alt = "";
+      img.loading = "lazy";
+      img.decoding = "async";
+      if (item.url) img.src = item.url;
+      else setThumb(img, item.src);
+      frame.append(img);
+      if (index === 0) {
+        const badge = document.createElement("span");
+        badge.className = "badge";
+        badge.textContent = "Leads";
+        frame.append(badge);
+      }
+
+      const name = document.createElement("p");
+      name.className = "name";
+      name.textContent = item.file ? `${item.name} (new)` : item.name;
+
+      const row = document.createElement("div");
+      row.className = "row";
+      const make = (label, className, action, aria) => {
+        const b = document.createElement("button");
+        b.type = "button";
+        b.className = `btn ${className}`;
+        b.textContent = label;
+        b.dataset.action = action;
+        b.dataset.index = String(index);
+        b.setAttribute("aria-label", `${aria} ${item.name}`);
+        return b;
+      };
+      if (index > 0) row.append(make("Make First", "btn-quiet", "first", "Make"));
+      row.append(make("Remove", "btn-danger", "remove", "Remove"));
+
+      li.append(frame, name, row);
+      list.append(li);
+    });
+  }
+
+  function markAboutChanged() {
+    $("#about-note").textContent = "You have changes that aren't live yet — press Save and Publish.";
+    renderAbout();
+  }
+
+  $("#about-thumbs").addEventListener("click", (event) => {
+    const b = event.target.closest("button[data-action]");
+    if (!b || state.about.busy) return;
+    const { items } = state.about;
+    const index = Number(b.dataset.index);
+    if (b.dataset.action === "remove") {
+      const [removed] = items.splice(index, 1);
+      if (removed.url) URL.revokeObjectURL(removed.url);
+    } else if (b.dataset.action === "first") {
+      items.unshift(...items.splice(index, 1));
+    }
+    markAboutChanged();
+  });
+
+  function addAboutFiles(fileList) {
+    const { items } = state.about;
+    const known = new Set(items.filter((item) => item.file).map((item) => item.key));
+    let skipped = 0;
+    for (const file of fileList) {
+      if (!(file.type.startsWith("image/") || /\.(heic|heif)$/i.test(file.name))) {
+        skipped++;
+        continue;
+      }
+      const key = `${file.name}|${file.size}|${file.lastModified}`;
+      if (known.has(key)) continue;
+      known.add(key);
+      items.push({ key, file, name: file.name, url: URL.createObjectURL(file) });
+    }
+    $("#about-error").textContent = skipped ? `${plural(skipped, "file")} skipped — only photos can be added.` : "";
+    markAboutChanged();
+  }
+
+  $("#about-photos").addEventListener("change", (event) => {
+    addAboutFiles(event.target.files);
+    event.target.value = "";
+  });
+
+  const aboutDrop = $("#about-dropzone");
+  ["dragenter", "dragover"].forEach((type) =>
+    aboutDrop.addEventListener(type, (event) => {
+      event.preventDefault();
+      aboutDrop.classList.add("is-over");
+    })
+  );
+  ["dragleave", "drop"].forEach((type) =>
+    aboutDrop.addEventListener(type, () => aboutDrop.classList.remove("is-over"))
+  );
+  aboutDrop.addEventListener("drop", (event) => {
+    event.preventDefault();
+    if (!state.about.busy && event.dataTransfer?.files) addAboutFiles(event.dataTransfer.files);
+  });
+
+  function setAboutBusy(busy) {
+    state.about.busy = busy;
+    document.querySelectorAll("#about-panel input, #about-panel button").forEach((el) => {
+      el.disabled = busy;
+    });
+    $("#category").disabled = busy;
+    $("#about-progress-wrap").hidden = !busy;
+  }
+
+  $("#about-save").addEventListener("click", async () => {
+    if (state.about.busy) return;
+    const error = $("#about-error");
+    error.textContent = "";
+    const items = state.about.items.slice();
+    // A photo uploaded by an earlier, failed save already has its src.
+    const fresh = items.filter((item) => item.file && !item.src);
+
+    if (!items.length && !window.confirm("Remove every photo? The About page will show a “photo coming soon” box until you add one.")) {
+      return;
+    }
+
+    setAboutBusy(true);
+    const draft = crypto.randomUUID();
+    const failures = [];
+    let done = 0;
+    let next = 0;
+    const setAboutProgress = (text) => {
+      $("#about-progress").value = fresh.length ? Math.round((done / fresh.length) * 100) : 100;
+      $("#about-progress-text").textContent = text;
+    };
+    if (fresh.length) setAboutProgress(`Uploading photos: 0 of ${fresh.length}`);
+
+    async function worker() {
+      while (next < fresh.length) {
+        const item = fresh[next++];
+        try {
+          item.src = (await uploadPhoto(await toJpeg(item.file), draft)).src;
+        } catch (err) {
+          if (err.status === 401) throw err;
+          failures.push(`${item.name} (${err.message})`);
+        }
+        done++;
+        setAboutProgress(`Uploading photos: ${done} of ${fresh.length}`);
+      }
+    }
+
+    try {
+      await Promise.all(Array.from({ length: Math.min(UPLOADS_AT_ONCE, fresh.length) }, worker));
+      const photos = items.map((item) => item.src).filter(Boolean);
+
+      if (failures.length) {
+        const goOn =
+          photos.length > 0 &&
+          window.confirm(
+            `${plural(failures.length, "photo")} couldn't be uploaded:\n\n${failures.join("\n")}\n\nSave the other ${plural(photos.length, "photo")} anyway?`
+          );
+        if (!goOn) throw new ApiError(`Nothing was saved. ${failures.join("; ")}`);
+      }
+
+      setAboutProgress("Saving…");
+      const result = await api("about", { method: "PUT", body: { photos } });
+      state.about.items.forEach((item) => item.url && URL.revokeObjectURL(item.url));
+      state.about.items = result.photos.map((src) => ({ src, name: fileName(src) }));
+      $("#about-note").textContent = "";
+      renderAbout();
+      announce(publishMessage(result, "Your About Me photos are saved."));
+    } catch (err) {
+      if (err.status !== 401) error.textContent = err.message;
+    } finally {
+      setAboutBusy(false);
+    }
   });
 
   // -------------------------------------------------------------------------

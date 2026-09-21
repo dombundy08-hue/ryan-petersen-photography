@@ -16,6 +16,9 @@ import focalPoints from "../../content/generated/focal-points.json";
 
 interface FocalPointEntry {
   objectPosition: string;
+  /** Displayed size in pixels; absent on entries the script couldn't read. */
+  width?: number;
+  height?: number;
 }
 
 const manifest: Record<string, FocalPointEntry> = focalPoints;
@@ -66,6 +69,17 @@ function normalize(src: string): string {
 export function getFocalPoint(src: string): string | undefined {
   if (!src) return undefined;
   return manifest[normalize(src)]?.objectPosition;
+}
+
+/** A photo's displayed pixel size from the manifest, or undefined if unknown. */
+export function getPhotoSize(
+  src: string
+): { width: number; height: number } | undefined {
+  if (!src) return undefined;
+  const entry = manifest[normalize(src)];
+  return entry?.width && entry?.height
+    ? { width: entry.width, height: entry.height }
+    : undefined;
 }
 
 /**

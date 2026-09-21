@@ -1,6 +1,7 @@
 /**
- * Build plugin: before `npm run build`, rewrite content/shoots/ from Netlify
- * Blobs and copy the photos those shoots use into public/media/.
+ * Build plugin: before `npm run build`, rewrite content/shoots/ (and the
+ * About page photo list in content/settings/about.json) from Netlify Blobs and
+ * copy the photos they use into public/media/.
  *
  * The admin portal (public/admin/ + netlify/functions/admin-api.mjs) saves
  * profiles to the `shoots` store and photos to the `media` store, then fires
@@ -28,6 +29,7 @@ import { getStore } from "@netlify/blobs";
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..", "..", "..");
 const SHOOTS_DIR = path.join(ROOT, "content", "shoots");
 const MEDIA_DIR = path.join(ROOT, "public", "media");
+const ABOUT_FILE = path.join(ROOT, "content", "settings", "about.json");
 const MEDIA_SRC = /^\/media\/([a-z0-9-]{8,40}\/[A-Za-z0-9_-]{12}\.jpg)$/;
 const DOWNLOADS_AT_ONCE = 8;
 
@@ -82,9 +84,41 @@ async function downloadAll(media, keys) {
   return missing;
 }
 
+/**
+ * The About Me photos, saved from the portal's About Me category. Independent
+ * of the shoots seed: until Ryan saves them once there is no `about` record and
+ * the committed content/settings/about.json stands. Other keys in that file
+ * are kept as they are.
+ */
+async function syncAbout(stores) {
+  const about = await stores.admin.get("about", { type: "json" });
+  if (!Array.isArray(about?.photos)) return "";
+
+  const mediaKeys = about.photos.map((src) => MEDIA_SRC.exec(src ?? "")?.[1]).filter(Boolean);
+  const missing = await downloadAll(stores.media, mediaKeys);
+  const photos = about.photos.filter((src) => {
+    const key = MEDIA_SRC.exec(src ?? "")?.[1];
+    return !key || !missing.has(key);
+  });
+
+  let existing = {};
+  try {
+    existing = JSON.parse(await fs.readFile(ABOUT_FILE, "utf-8"));
+  } catch {
+    /* no file yet: start from empty */
+  }
+  await fs.mkdir(path.dirname(ABOUT_FILE), { recursive: true });
+  const next = { ...existing, photo: photos[0] ?? "", morePhotos: photos.slice(1) };
+  await fs.writeFile(ABOUT_FILE, `${JSON.stringify(next, null, 2)}\n`);
+  return `${photos.length} About Me photos` + (missing.size ? ` (${missing.size} missing and skipped)` : "");
+}
+
 export const onPreBuild = async ({ constants, utils }) => {
   try {
     const stores = await openStores(constants);
+    const aboutNote = await syncAbout(stores);
+    if (aboutNote) console.log(`content-from-blobs: ${aboutNote}`);
+
     if (!(await stores.admin.get("seeded"))) {
       console.log("content-from-blobs: admin portal not used yet, building from committed content/shoots/");
       return;

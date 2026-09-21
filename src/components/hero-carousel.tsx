@@ -1,51 +1,210 @@
 "use client";
 
+import { useCallback, useEffect, useRef, useState } from "react";
+import type { CSSProperties } from "react";
+import { flushSync } from "react-dom";
+import Image from "next/image";
 import Link from "next/link";
-import { Phone } from "lucide-react";
+import { Pause, Phone, Play } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { CrossfadeLayers } from "@/components/crossfade-layers";
-import { useCrossfade } from "@/hooks/use-crossfade";
-import type { Photo } from "@/lib/shoots";
+import type { HeroPhoto } from "@/lib/shoots";
 import { TEL_HREF } from "@/lib/contact";
 
+/** How fast the strip slides left. Slow enough to take a photo in. */
+const SPEED_PX_PER_S = 40;
+/** Keep this much strip queued past the right edge so nothing pops in on screen. */
+const RIGHT_BUFFER_PX = 400;
+
+interface Entry {
+  id: number;
+  photo: HeroPhoto;
+  /** Queued on the client after load — fades in rather than appearing. */
+  fresh: boolean;
+}
+
+function shuffle<T>(items: T[]): T[] {
+  const pool = [...items];
+  for (let i = pool.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [pool[i], pool[j]] = [pool[j], pool[i]];
+  }
+  return pool;
+}
+
 /**
- * Default crop for the hero's wide banner.
+ * Endless random picks from the pool: a shuffled bag that is emptied before it
+ * is reshuffled, so every photo comes round once per cycle, and one that is
+ * already on screen is skipped whenever the pool is big enough to allow it.
+ */
+function createPicker(photos: HeroPhoto[]) {
+  let bag: HeroPhoto[] = [];
+  return (onScreen: Set<string>): HeroPhoto => {
+    if (bag.length === 0) bag = shuffle(photos);
+    if (photos.length > onScreen.size) {
+      for (let tries = bag.length; tries > 0 && onScreen.has(bag[bag.length - 1].src); tries--) {
+        bag.unshift(bag.pop()!);
+      }
+    }
+    return bag.pop()!;
+  };
+}
+
+const ratioOf = (photo: HeroPhoto) =>
+  Math.round((photo.width / photo.height) * 10000) / 10000;
+
+/**
+ * The hero: a filmstrip of whole photographs, edge to edge, sliding left.
  *
- * A centred crop of a portrait photo cuts the head off, because the subject
- * sits in the upper third of the frame. 30% biases toward faces without
- * needing every photo tagged by hand — and any photo where that still
- * misses can set its own `objectPosition` in the admin, which this now
- * honours (it previously hardcoded the crop and ignored the field).
+ * Every slot is exactly as tall as the hero and as wide as its photo's own
+ * aspect ratio, so nothing is cropped — no face can be cut off, whatever the
+ * screen. Photos touch with no gap. Each slot is a random pick from the
+ * portfolio pool (`heroPhotos`), so the strip differs on every visit and grows
+ * with the portfolio; the first photo is the one baked into the page so it
+ * paints before any script runs.
+ *
+ * The strip moves by a transform written straight to the DOM each frame (no
+ * React render per frame). React re-renders only when a photo has fully left
+ * the screen — it is dropped from the front and a new random one is queued at
+ * the back — so only a handful of <img> elements are ever mounted however big
+ * the portfolio gets (see use-crossfade for why that matters on phones).
  */
-const HERO_CROP = "50% 30%";
+export function HeroCarousel({ photos }: { photos: HeroPhoto[] }) {
+  const [queue, setQueue] = useState<Entry[]>(() =>
+    photos.slice(0, 1).map((photo, i) => ({ id: i, photo, fresh: false }))
+  );
+  const [paused, setPaused] = useState(false);
+  const [reducedMotion, setReducedMotion] = useState(false);
 
-/**
- * FOCAL POINT — single source of this carousel's object-position.
- * Add the build-time focal-point manifest lookup here (between the
- * per-photo override and the default) when it lands; nothing else in this
- * file reads object-position.
- */
-const heroCrop = (photo: Photo) => photo.objectPosition ?? HERO_CROP;
+  const viewRef = useRef<HTMLDivElement>(null);
+  const trackRef = useRef<HTMLDivElement>(null);
+  const offsetRef = useRef(0);
+  const nextId = useRef(1);
+  const pausedRef = useRef(false);
+  const pickRef = useRef<ReturnType<typeof createPicker> | null>(null);
 
-export function HeroCarousel({ photos }: { photos: Photo[] }) {
-  // Rotation, decode-ahead, Ken Burns and the memory bound all live in
-  // `useCrossfade` — including the reason only two <Image> elements are ever
-  // mounted no matter how large this pool gets.
-  const { layers, currentIndex } = useCrossfade(photos, { kenBurns: true });
+  useEffect(() => {
+    pausedRef.current = paused;
+  }, [paused]);
+
+  useEffect(() => {
+    const query = window.matchMedia("(prefers-reduced-motion: reduce)");
+    const onChange = () => setReducedMotion(query.matches);
+    onChange();
+    query.addEventListener("change", onChange);
+    return () => query.removeEventListener("change", onChange);
+  }, []);
+
+  /**
+   * Drop the front photo once it is fully past the left edge, and queue a new
+   * random one at the back whenever the strip is shorter than the screen plus a
+   * buffer. `commit` lets the animation loop apply the change synchronously so
+   * the offset reset and the DOM change land in the same frame — otherwise the
+   * strip would jump back for one frame.
+   */
+  const rebalance = useCallback(
+    (commit: (update: () => void) => void) => {
+      const track = trackRef.current;
+      const view = viewRef.current;
+      if (!track || !view || photos.length === 0) return;
+      pickRef.current ??= createPicker(photos);
+
+      const first = track.firstElementChild as HTMLElement | null;
+      const firstWidth = first ? first.getBoundingClientRect().width : 0;
+      const drop = first !== null && track.childElementCount > 1 && offsetRef.current >= firstWidth;
+      const offset = drop ? offsetRef.current - firstWidth : offsetRef.current;
+      const length = track.getBoundingClientRect().width - (drop ? firstWidth : 0);
+      const grow = length - offset < view.clientWidth + RIGHT_BUFFER_PX;
+      if (!drop && !grow) return;
+
+      offsetRef.current = offset;
+      commit(() => {
+        setQueue((current) => {
+          const kept = drop ? current.slice(1) : current;
+          if (!grow) return kept;
+          const photo = pickRef.current!(new Set(kept.map((entry) => entry.photo.src)));
+          return [...kept, { id: nextId.current++, photo, fresh: true }];
+        });
+      });
+    },
+    [photos]
+  );
+
+  // Reduced motion: the strip stands still, so all that's left to do is fill
+  // the screen with photos — once on mount and again on every resize.
+  useEffect(() => {
+    const view = viewRef.current;
+    if (!reducedMotion || !view) return;
+    const fill = () => rebalance((update) => update());
+    fill();
+    const observer = new ResizeObserver(fill);
+    observer.observe(view);
+    return () => observer.disconnect();
+  }, [rebalance, reducedMotion, queue.length]);
+
+  useEffect(() => {
+    if (reducedMotion) {
+      offsetRef.current = 0;
+      if (trackRef.current) trackRef.current.style.transform = "";
+      return;
+    }
+    let raf = 0;
+    let last = 0;
+    const step = (now: number) => {
+      raf = requestAnimationFrame(step);
+      const track = trackRef.current;
+      if (!track) return;
+      const dt = last ? Math.min(now - last, 100) : 0;
+      last = now;
+      if (!pausedRef.current) offsetRef.current += (SPEED_PX_PER_S * dt) / 1000;
+      rebalance((update) => flushSync(update));
+      track.style.transform = `translate3d(${-offsetRef.current}px,0,0)`;
+    };
+    raf = requestAnimationFrame(step);
+    return () => cancelAnimationFrame(raf);
+  }, [rebalance, reducedMotion]);
 
   return (
-    <div className="relative flex h-[85vh] min-h-[560px] w-full items-center justify-center overflow-hidden bg-background">
-      <CrossfadeLayers
-        layers={layers}
-        sizes="100vw"
-        objectPosition={heroCrop}
-      />
+    <div
+      ref={viewRef}
+      className="relative w-full overflow-hidden bg-background"
+      style={
+        {
+          // One height for the strip, every slot and the `sizes` hints below.
+          "--hero-h": "max(85vh, 560px)",
+          height: "var(--hero-h)",
+        } as CSSProperties
+      }
+    >
+      <div ref={trackRef} className="absolute top-0 left-0 flex w-max will-change-transform">
+        {queue.map(({ id, photo, fresh }) => {
+          const ratio = ratioOf(photo);
+          return (
+            <div
+              key={id}
+              className={"relative flex-none" + (fresh ? " animate-in fade-in duration-700" : "")}
+              style={{
+                height: "var(--hero-h)",
+                width: `calc(var(--hero-h) * ${ratio})`,
+              }}
+            >
+              <Image
+                src={photo.src}
+                alt={photo.alt}
+                fill
+                priority={id === 0}
+                sizes={`calc(max(85vh, 560px) * ${ratio})`}
+                className="object-contain"
+              />
+            </div>
+          );
+        })}
+      </div>
 
       <div
         className="absolute inset-0 z-[3]"
         /* Heavier than a card's floor: this one carries the H1 and both
-           CTAs over a photograph whose brightness changes every few
-           seconds, so it has to hold the worst frame in the rotation, not
+           CTAs over a photograph whose brightness changes as the strip
+           slides, so it has to hold the worst frame in the rotation, not
            the average one. */
         style={{
           background:
@@ -53,68 +212,71 @@ export function HeroCarousel({ photos }: { photos: Photo[] }) {
         }}
       />
 
-      <div className="relative z-10 mx-auto max-w-3xl px-4 text-center sm:px-6">
-        <h1 className="font-heading text-4xl font-medium italic tracking-tight text-foreground sm:text-6xl md:text-7xl">
-          Creating memorable moments, one photo at a time.
-        </h1>
-        <p className="mx-auto mt-6 max-w-xl text-base text-foreground/80 sm:text-lg">
-          Senior, family, nature and custom photography — local to
-          Frederick, Colorado, and focused on making you feel comfortable in
-          front of the camera.
-        </p>
-        {/* Book a Session leads, as the filled/primary button. View My Work
-            is the secondary. On a phone the primary dials directly; on
-            desktop a tel: link is a dead end, so it goes to the contact
-            page instead. Both are rendered and swapped by CSS rather than
-            by JS, so the correct one is right on first paint. */}
-        <div className="mt-10 flex flex-col items-center justify-center gap-3 sm:flex-row">
-          <Button
-            size="lg"
-            className="w-full sm:hidden"
-            nativeButton={false}
-            render={<a href={TEL_HREF} />}
-          >
-            <Phone className="size-4" aria-hidden="true" />
-            Call to Book a Session
-          </Button>
-          <Button
-            size="lg"
-            className="hidden sm:inline-flex"
-            nativeButton={false}
-            render={<Link href="/contact" />}
-          >
-            Book a Session
-          </Button>
-          {/* Solid, not outlined. The rubric caps CTAs at solid fill — an
-              outline button over a photograph is the classic AI-site tell,
-              and it's also the least legible thing you can put on a frame
-              whose brightness changes every five seconds. Secondary reads
-              as subordinate to the gold primary without going hollow. */}
-          <Button
-            size="lg"
-            variant="secondary"
-            className="w-full sm:w-auto"
-            nativeButton={false}
-            render={<Link href="/portfolio" />}
-          >
-            View My Work
-          </Button>
+      <div className="absolute inset-0 z-10 flex items-center justify-center">
+        <div className="mx-auto max-w-3xl px-4 text-center sm:px-6">
+          <h1 className="font-heading text-4xl font-medium italic tracking-tight text-foreground sm:text-6xl md:text-7xl">
+            Creating memorable moments, one photo at a time.
+          </h1>
+          <p className="mx-auto mt-6 max-w-xl text-base text-foreground/80 sm:text-lg">
+            Senior, family, nature and custom photography — local to
+            Frederick, Colorado, and focused on making you feel comfortable in
+            front of the camera.
+          </p>
+          {/* Book a Session leads, as the filled/primary button. View My Work
+              is the secondary. On a phone the primary dials directly; on
+              desktop a tel: link is a dead end, so it goes to the contact
+              page instead. Both are rendered and swapped by CSS rather than
+              by JS, so the correct one is right on first paint. */}
+          <div className="mt-10 flex flex-col items-center justify-center gap-3 sm:flex-row">
+            <Button
+              size="lg"
+              className="w-full sm:hidden"
+              nativeButton={false}
+              render={<a href={TEL_HREF} />}
+            >
+              <Phone className="size-4" aria-hidden="true" />
+              Call to Book a Session
+            </Button>
+            <Button
+              size="lg"
+              className="hidden sm:inline-flex"
+              nativeButton={false}
+              render={<Link href="/contact" />}
+            >
+              Book a Session
+            </Button>
+            {/* Solid, not outlined. The rubric caps CTAs at solid fill — an
+                outline button over a photograph is the classic AI-site tell,
+                and it's also the least legible thing you can put on a frame
+                whose brightness keeps changing. Secondary reads as
+                subordinate to the gold primary without going hollow. */}
+            <Button
+              size="lg"
+              variant="secondary"
+              className="w-full sm:w-auto"
+              nativeButton={false}
+              render={<Link href="/portfolio" />}
+            >
+              View My Work
+            </Button>
+          </div>
         </div>
       </div>
 
-      {photos.length > 1 && (
-        <div className="absolute bottom-6 left-1/2 z-10 flex -translate-x-1/2 gap-2">
-          {photos.map((photo, i) => (
-            <span
-              key={photo.src}
-              className={
-                "h-1 rounded-full transition-all duration-500 " +
-                (currentIndex === i ? "w-6 bg-primary" : "w-2 bg-foreground/40")
-              }
-              aria-hidden="true"
-            />
-          ))}
-        </div>
+      {!reducedMotion && (
+        <Button
+          size="icon"
+          variant="secondary"
+          className="absolute right-4 bottom-4 z-10"
+          aria-label={paused ? "Play the photo slideshow" : "Pause the photo slideshow"}
+          onClick={() => setPaused((value) => !value)}
+        >
+          {paused ? (
+            <Play className="size-4" aria-hidden="true" />
+          ) : (
+            <Pause className="size-4" aria-hidden="true" />
+          )}
+        </Button>
       )}
     </div>
   );

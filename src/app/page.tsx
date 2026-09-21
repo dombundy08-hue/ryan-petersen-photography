@@ -1,10 +1,9 @@
-﻿import Image from "next/image";
-import Link from "next/link";
-import { ArrowRight, Camera } from "lucide-react";
+﻿import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Section } from "@/components/section";
 import { HeroCarousel } from "@/components/hero-carousel";
-import { heroPhotos, shootsByCategory } from "@/lib/shoots";
+import { SpecialtyTile } from "@/components/specialty-tile";
+import { categoryTilePhotos, heroPhotos } from "@/lib/shoots";
 import { CATEGORIES } from "@/lib/categories";
 import type { Metadata } from "next";
 import { canonical } from "@/lib/site";
@@ -53,58 +52,16 @@ export default function Home() {
           </h2>
         </div>
         <div className="mt-12 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
-          {SPECIALTIES.map(({ title, description, href, category }) => {
-            const photo =
-              shootsByCategory(category)
-                .flatMap((shoot) => shoot.photos)
-                .find((p) => p.heroEligible !== false) ??
-              shootsByCategory(category)[0]?.photos[0];
-            return (
-              <Link
-                key={title}
-                href={href}
-                className="group relative flex aspect-[3/4] flex-col justify-end overflow-hidden rounded-xl border border-border bg-secondary"
-              >
-                {photo ? (
-                  <Image
-                    src={photo.src}
-                    alt={photo.alt}
-                    fill
-                    sizes="(max-width: 640px) 100vw, 33vw"
-                    style={{ objectPosition: photo.objectPosition ?? "50% 35%" }}
-                    className="object-cover brightness-[0.92] transition-[filter] duration-500 group-hover:brightness-105"
-                  />
-                ) : (
-                  <div className="absolute inset-0 flex items-center justify-center">
-                    <Camera
-                      className="size-10 text-foreground/20"
-                      strokeWidth={1.5}
-                      aria-hidden="true"
-                    />
-                  </div>
-                )}
-                <div
-                  className="absolute inset-0"
-                  style={{
-                    background:
-                      "linear-gradient(180deg, transparent 40%, var(--scrim) 100%)",
-                  }}
-                />
-                <div className="relative p-6">
-                  <h3 className="font-heading text-xl font-medium text-foreground">
-                    {title}
-                  </h3>
-                  <p className="mt-1 text-sm text-foreground/75">
-                    {description}
-                  </p>
-                  <span className="mt-3 inline-flex items-center gap-1 text-sm font-medium text-primary">
-                    {photo ? "See the gallery" : "Coming soon"}
-                    <ArrowRight className="size-4 transition-transform group-hover:translate-x-0.5" />
-                  </span>
-                </div>
-              </Link>
-            );
-          })}
+          {SPECIALTIES.map(({ title, description, href, category }, index) => (
+            <SpecialtyTile
+              key={title}
+              title={title}
+              description={description}
+              href={href}
+              index={index}
+              photos={categoryTilePhotos(category)}
+            />
+          ))}
         </div>
       </Section>
 

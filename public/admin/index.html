@@ -58,9 +58,23 @@
 
         <section class="card" aria-labelledby="add-title">
           <h2 id="add-title">Add a Profile</h2>
-          <p class="hint">Name it after the person or family, pick a category, add the photos. It publishes by itself.</p>
+          <p class="hint" id="add-hint">Pick a category, name it after the person or family, add the photos. It publishes by itself.</p>
 
           <form id="add-form" novalidate>
+            <div class="field">
+              <label for="category">Category</label>
+              <select id="category" required aria-describedby="category-hint">
+                <option value="">Choose one…</option>
+                <option value="senior">Senior</option>
+                <option value="family">Family</option>
+                <option value="nature">Nature</option>
+                <option value="custom">Custom Shots</option>
+                <option value="about">About Me</option>
+              </select>
+              <p class="hint" id="category-hint">Pick About Me to change the photos of you on the About page.</p>
+            </div>
+
+            <div id="profile-fields">
             <fieldset class="mode">
               <legend class="label">How Many Profiles?</legend>
               <div class="segmented">
@@ -70,22 +84,10 @@
               <p class="hint" id="mode-hint">It goes live as soon as it&rsquo;s saved.</p>
             </fieldset>
 
-            <div class="grid-2">
-              <div class="field">
-                <label for="subject">Name</label>
-                <input id="subject" maxlength="60" autocomplete="off" required aria-describedby="subject-hint" />
-                <p class="hint" id="subject-hint">The person or family — e.g. Dominic, or Bundy.</p>
-              </div>
-              <div class="field">
-                <label for="category">Category</label>
-                <select id="category" required>
-                  <option value="">Choose one…</option>
-                  <option value="senior">Senior</option>
-                  <option value="family">Family</option>
-                  <option value="nature">Nature</option>
-                  <option value="custom">Custom Shots</option>
-                </select>
-              </div>
+            <div class="field">
+              <label for="subject">Name</label>
+              <input id="subject" maxlength="60" autocomplete="off" required aria-describedby="subject-hint" />
+              <p class="hint" id="subject-hint">The person or family — e.g. Dominic, or Bundy.</p>
             </div>
 
             <div class="field">
@@ -129,7 +131,36 @@
               <p id="batch-text"></p>
               <button type="button" class="btn btn-primary" id="publish-batch">Publish All Now</button>
             </div>
+            </div>
           </form>
+
+          <!--
+            The About Me category. Not a profile: one ordered list of photos of
+            Ryan for the About page. Nothing here is live until Save and Publish
+            — Remove and Make First only change the list on screen.
+          -->
+          <div id="about-panel" hidden>
+            <p class="hint">These are the photos of you on the About page, in the order visitors see them — the first one leads. Remove any you don&rsquo;t want, move one to the front, or add new ones. Nothing changes on the site until you press Save and Publish.</p>
+            <p id="about-empty" class="hint" hidden>No photos yet. The About page shows a &ldquo;photo coming soon&rdquo; box until you add one.</p>
+            <ul id="about-thumbs" class="thumbs" aria-label="Your About Me photos"></ul>
+
+            <div class="field about-add">
+              <p class="label" id="about-photos-label">Add Photos of Yourself</p>
+              <input id="about-photos" type="file" accept="image/*" multiple class="sr-only" aria-labelledby="about-photos-label" />
+              <label class="dropzone" id="about-dropzone" for="about-photos">
+                <span class="dropzone-title">Choose Photos or Drag Them Here</span>
+                <span class="hint">JPG, PNG or WebP — big photos are resized for the web automatically.</span>
+              </label>
+            </div>
+
+            <p id="about-note" class="hint" aria-live="polite"></p>
+            <p id="about-error" class="error" role="alert"></p>
+            <div id="about-progress-wrap" class="progress" hidden>
+              <progress id="about-progress" max="100" value="0"></progress>
+              <p id="about-progress-text" class="hint" aria-live="polite"></p>
+            </div>
+            <button class="btn btn-primary" type="button" id="about-save">Save and Publish</button>
+          </div>
         </section>
 
         <section class="card" aria-labelledby="list-title">

@@ -8,8 +8,10 @@ interface AboutSettingsFile {
 }
 
 /**
- * Read from content/settings/about.json. Edited in the repo, not through the
- * admin portal — the portal only manages photo shoots.
+ * Read from content/settings/about.json. On Netlify the photo list is
+ * rewritten before every build from the admin portal's "About Me" category
+ * (netlify/plugins/content-from-blobs); the committed file is the seed and
+ * what `next dev` shows locally. An empty `photo` shows the placeholder.
  */
 function loadAboutSettings(): AboutSettingsFile {
   const filePath = path.join(

@@ -15,6 +15,7 @@ import ballfieldSunset from "./seed/ballfield-sunset.json";
 import dominickSeniorSession from "./seed/dominick-senior-session.json";
 import lakesideFamilySession from "./seed/lakeside-family-session.json";
 import samuraiDetail from "./seed/samurai-detail.json";
+import aboutSeed from "./seed/about.json";
 
 export const SEED_SHOOTS = [
   autumnSeniorSession,
@@ -23,3 +24,10 @@ export const SEED_SHOOTS = [
   lakesideFamilySession,
   samuraiDetail,
 ];
+
+/**
+ * The About page photos as they were before the portal managed them (a frozen
+ * copy of content/settings/about.json). The portal shows these until Ryan
+ * saves the About Me photos for the first time.
+ */
+export const SEED_ABOUT_PHOTOS = aboutSeed.photos;

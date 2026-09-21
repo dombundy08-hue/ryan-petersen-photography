@@ -1,7 +1,7 @@
 import fs from "node:fs";
 import path from "node:path";
 import { withBasePath } from "@/lib/base-path";
-import { resolveObjectPosition } from "@/lib/focal-points";
+import { getPhotoSize, resolveObjectPosition } from "@/lib/focal-points";
 
 export type PhotoCategory = "senior" | "family" | "nature" | "custom";
 
@@ -26,6 +26,13 @@ export interface Photo {
    * cuts off the subject; most photos don't need it.
    */
   objectPosition?: string;
+  /**
+   * Displayed pixel size, filled in at build time from the focal-point
+   * manifest. The home hero shows every photo whole, so it needs the aspect
+   * ratio up front to size each slot before the image has loaded.
+   */
+  width?: number;
+  height?: number;
 }
 
 export interface Shoot {
@@ -86,18 +93,16 @@ function deriveAlt(shoot: RawShoot): string {
 }
 
 /**
- * Whether a photo with no explicit flag should be allowed in the home
- * hero.
+ * Whether a photo with no explicit flag may appear in the home hero.
  *
- * The hero is a rotating band of faces, so it wants people. A bulk upload
- * carries no per-photo flags, and defaulting everything to eligible would
- * quietly fill the hero with wheel arches and landscapes the moment Ryan
- * adds a car shoot. Category is the honest proxy: senior and family are
- * people, nature and custom are not. An explicit per-photo value always
- * wins over this default.
+ * The hero used to crop every photo into a wide banner, so it was limited to
+ * people (senior, family) to keep a wheel arch or a skyline from being
+ * cropped into nonsense. It now shows each photo whole, so nothing gets
+ * cropped and every category is fair game — the hero draws from the whole
+ * portfolio. An explicit per-photo `heroEligible: false` still wins.
  */
-function defaultHeroEligible(category: PhotoCategory): boolean {
-  return category === "senior" || category === "family";
+function defaultHeroEligible(): boolean {
+  return true;
 }
 
 function normalizePhoto(input: PhotoInput, shoot: RawShoot): Photo {
@@ -108,7 +113,8 @@ function normalizePhoto(input: PhotoInput, shoot: RawShoot): Photo {
     ...photo,
     src: withBasePath(photo.src),
     alt: photo.alt?.trim() ? photo.alt : deriveAlt(shoot),
-    heroEligible: photo.heroEligible ?? defaultHeroEligible(shoot.category),
+    heroEligible: photo.heroEligible ?? defaultHeroEligible(),
+    ...getPhotoSize(photo.src),
     /**
      * Resolved once, here, rather than in each of the six components that
      * display a photo. This runs at build time on the server, so the
@@ -278,20 +284,18 @@ export function budgetedSample<T>(
   return chosen.map((gallery) => spreadSample(gallery, share, seed));
 }
 
-const HERO_MAX_PHOTOS = 24;
-const HERO_MAX_PER_SHOOT = 4;
+const HERO_MAX_PHOTOS = 60;
+const HERO_MAX_PER_SHOOT = 12;
+const CATEGORY_TILE_MAX_PHOTOS = 16;
+const CATEGORY_TILE_MAX_PER_SHOOT = 6;
 
 /**
  * Round-robin across galleries: person A's first frame, person B's first,
  * person C's first, then everyone's second, and so on.
  *
- * `.flat()` used to concatenate them, which put all four of one person's
- * photos next to each other. The carousel shuffles per visit on the client,
- * so that ordering was invisible after a few seconds — but the *first* frame,
- * the one baked into the static HTML and shown to every visitor before any
- * JavaScript runs, was always the first photo of the alphabetically first
- * shoot. Interleaving plus the per-build seed means that opening frame is a
- * different person's photo after every publish.
+ * `.flat()` used to concatenate them, which put all of one person's photos
+ * next to each other. Interleaving means neighbours in the pool are different
+ * people wherever that's possible.
  */
 function interleave<T>(galleries: T[][]): T[] {
   const longest = galleries.reduce((n, gallery) => Math.max(n, gallery.length), 0);
@@ -304,20 +308,66 @@ function interleave<T>(galleries: T[][]): T[] {
   return out;
 }
 
-export const heroPhotos: (Photo & { category: PhotoCategory })[] = interleave(
+/**
+ * A hero slot: just what the filmstrip needs. The whole pool is serialized
+ * into the page, so every extra field is repeated once per photo.
+ */
+export interface HeroPhoto {
+  src: string;
+  alt: string;
+  /** Aspect-ratio inputs. Falls back to a 3:2 landscape if the size is unknown. */
+  width: number;
+  height: number;
+}
+
+/**
+ * The hero's pool — up to HERO_MAX_PHOTOS frames drawn evenly from every
+ * shoot, so it grows as the portfolio does (each new shoot adds its share, up
+ * to the cap). The filmstrip picks from this pool at random on every visit;
+ * the per-build seed also re-rolls which frames make the pool and which one
+ * opens the strip, so a publish always changes the mix.
+ */
+export const heroPhotos: HeroPhoto[] = interleave(
   seededShuffle(
     budgetedSample(
       shoots.map((shoot) =>
-        shoot.photos
-          .filter((photo) => photo.heroEligible !== false)
-          .map((photo) => ({ ...photo, category: shoot.category }))
+        shoot.photos.filter((photo) => photo.heroEligible !== false)
       ),
       HERO_MAX_PHOTOS,
       HERO_MAX_PER_SHOOT,
       BUILD_SEED
     )
   )
-);
+).map((photo) => ({
+  src: photo.src,
+  alt: photo.alt,
+  width: photo.width ?? 3,
+  height: photo.height ?? 2,
+}));
+
+/** A photo for a "What I shoot" tile: crop-safe fields only, no flags. */
+export interface CategoryTilePhoto {
+  src: string;
+  alt: string;
+  objectPosition?: string;
+}
+
+/**
+ * The rotation pool behind one category's tile on the home page: a fair share
+ * of every shoot in the category, interleaved so consecutive frames are
+ * different people, re-rolled every build. Grows with the category, capped so
+ * the page stays the same size at 10 sessions or 500.
+ */
+export function categoryTilePhotos(category: PhotoCategory): CategoryTilePhoto[] {
+  return interleave(
+    budgetedSample(
+      shootsByCategory(category).map((shoot) => shoot.photos),
+      CATEGORY_TILE_MAX_PHOTOS,
+      CATEGORY_TILE_MAX_PER_SHOOT,
+      BUILD_SEED
+    )
+  ).map(({ src, alt, objectPosition }) => ({ src, alt, objectPosition }));
+}
 
 /**
  * Every photo across every shoot, unfiltered — for decorative uses (e.g. a

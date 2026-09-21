@@ -9,7 +9,8 @@
  *           the build reads (netlify/plugins/content-from-blobs)
  *   media   uploaded photos, keyed "<draft id>/<photo id>.jpg"
  *   admin   the login credential, the session-signing secret, failed-login
- *           counters, and the one-time "seeded" marker
+ *           counters, the one-time "seeded" marker, and the About Me photo
+ *           list (key "about", read by the build plugin)
  *
  * WHICH PASSWORD IS ACTIVE, in order:
  *   1. ADMIN_PASSWORD_HASH (+ optional ADMIN_USERNAME) in Netlify's
@@ -26,7 +27,7 @@ import crypto from "node:crypto";
 import { getStore } from "@netlify/blobs";
 import { verifyPassword, hashPassword } from "./password-hash.mjs";
 import { BOOTSTRAP_CREDENTIAL } from "./admin-bootstrap.mjs";
-import { SEED_SHOOTS } from "./seed-shoots.mjs";
+import { SEED_ABOUT_PHOTOS, SEED_SHOOTS } from "./seed-shoots.mjs";
 
 export { verifyPassword };
 
@@ -78,6 +79,23 @@ export async function ensureSeeded() {
     await admin.setJSON("seeded", { at: new Date().toISOString(), count });
   }
   seededThisInstance = true;
+}
+
+// ---------------------------------------------------------------------------
+// About Me photos — Ryan's own photos for the About page. One ordered list,
+// first photo leads. Until the first save the portal shows the seed, i.e.
+// what content/settings/about.json held before the portal managed it.
+// ---------------------------------------------------------------------------
+
+export const MAX_ABOUT_PHOTOS = 24;
+
+export async function getAboutPhotos() {
+  const saved = await adminStore().get("about", { type: "json" });
+  return Array.isArray(saved?.photos) ? saved.photos : [...SEED_ABOUT_PHOTOS];
+}
+
+export async function saveAboutPhotos(photos) {
+  await adminStore().setJSON("about", { photos, updatedAt: new Date().toISOString() });
 }
 
 // ---------------------------------------------------------------------------
