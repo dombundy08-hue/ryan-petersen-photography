@@ -328,18 +328,27 @@ The manifest is committed and the script is incremental, so a build only
 processes newly-added photos. Run `node scripts/focal-points.mjs --force` to
 recompute everything after changing the algorithm.
 
-### The hero is a rotation of *people*
+### The hero is a filmstrip of whole photos
 
-The home hero pulls at most a few frames **per shoot** (`heroPhotos` in
-`src/lib/shoots.ts`), not every eligible photo. One senior gallery has 113
-photos and another has one; feeding all of them to a shuffled carousel
-means the same face nearly every time. Capping per shoot makes the hero
-rotate through *people*, and it self-balances — a new person gets the same
-share as everyone already there.
+The home hero (`src/components/hero-carousel.tsx`) is not a cropped banner
+any more, so face-centering does not apply to it. Each photo is shown whole
+at the hero's full height, its width set by its own aspect ratio (recorded in
+the focal-point manifest as `width`/`height`), photos touching with no gap,
+sliding left forever. Each new slot is a random pick from `heroPhotos`, so
+every visit is different.
 
-Photos are hero-eligible by category default: senior and family are people,
-nature and custom are not. An explicit `heroEligible` on a photo overrides
-that.
+`heroPhotos` (`src/lib/shoots.ts`) takes at most 12 frames **per shoot** and
+60 in total, drawn from every category. One senior gallery has 113 photos
+and another has one; a per-shoot cap keeps the strip a rotation of *people*,
+and it self-balances — a new session gets the same share as everyone already
+there, so the pool grows as the portfolio does. An explicit
+`heroEligible: false` on a photo still keeps it out.
+
+### What I shoot tiles
+
+Each tile on the home page slowly crossfades through photos from its
+category (`categoryTilePhotos`, same engine and pace as the `/portfolio`
+tiles).
 
 ---
 
@@ -464,6 +473,17 @@ there next time you sign in.
 
 Deleting from the portal only affects the website. Your own copies on your
 computer or card are untouched.
+
+### Changing the Photos of You on the About Page
+
+In **Add a Profile**, set **Category** to **About Me**. The form is replaced
+by the photos currently on your About page, first one leading.
+
+- **Make First** moves a photo to the front. **Remove** takes it off.
+- Drop new photos into the box to add them.
+- Nothing changes on the site until you press **Save and Publish** (one
+  deploy, live in about two minutes). Removed photos are deleted for good
+  from the portal at that point.
 
 ### Photo Descriptions (Why You Don't Have to Type Them)
 
