@@ -87,8 +87,8 @@ they stay put — but Ryan should own them.
 - **Search Console** — property `ryanshutter.com` (domain property, sitemap
   submitted). Settings → Users and permissions → Add user → Ryan's Google
   email as **Owner**.
-- **Google Analytics** — account **RyanShutter**, property
-  `ryanshutter.com`, tag `G-WFLH1TPF76` (in `src/components/analytics.tsx`,
+- **Google Analytics** — account **Ryan Petersen Photography**, property
+  `ryanshutter.com`, tag `G-0YWQPLEMGC` (in `src/components/analytics.tsx`,
   disclosed on `/privacy`). Admin → Account access management → add Ryan's
   Google email as **Administrator**.
 
