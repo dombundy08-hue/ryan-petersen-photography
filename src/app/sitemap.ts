@@ -20,6 +20,8 @@ export default function sitemap(): MetadataRoute.Sitemap {
     { route: "/portfolio", priority: 0.9 },
     { route: "/about", priority: 0.7 },
     { route: "/contact", priority: 0.7 },
+    { route: "/privacy", priority: 0.2 },
+    { route: "/accessibility", priority: 0.2 },
   ];
 
   // One directory per category, from the same list that generates them.

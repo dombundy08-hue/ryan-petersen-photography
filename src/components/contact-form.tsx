@@ -174,6 +174,13 @@ export function ContactForm() {
       >
         {status === "sending" ? "Sending..." : "Send Message"}
       </Button>
+      <p className="text-sm text-muted-foreground">
+        Your details are only used to reply to you. See the{" "}
+        <a href="/privacy/" className="underline underline-offset-2 hover:text-foreground">
+          Privacy Policy
+        </a>
+        .
+      </p>
     </form>
   );
 }

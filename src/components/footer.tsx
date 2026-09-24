@@ -52,6 +52,14 @@ export function Footer() {
         reserved. ·{" "}
         <Link href="/contact" className="hover:text-foreground">
           Get in touch
+        </Link>{" "}
+        ·{" "}
+        <Link href="/privacy" className="hover:text-foreground">
+          Privacy
+        </Link>{" "}
+        ·{" "}
+        <Link href="/accessibility" className="hover:text-foreground">
+          Accessibility
         </Link>
       </div>
     </footer>

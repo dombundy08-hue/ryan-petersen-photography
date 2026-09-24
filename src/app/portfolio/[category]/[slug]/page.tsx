@@ -43,6 +43,21 @@ function totalPhotoBytes(shoot: Shoot): number {
   }, 0);
 }
 
+/**
+ * Shoots added through the admin often carry a one-line description
+ * ("Raul's senior photos"), which makes a thin search snippet. Anything
+ * under ~120 characters gets a factual tail from the category and place;
+ * a full description written in the admin is used as-is.
+ */
+function metaDescription(shoot: Shoot): string {
+  const own = shoot.description.trim();
+  if (own.length >= 120) return own;
+  const kind = getCategory(shoot.category)?.title ?? "Photos";
+  const tail = `${kind} by Ryan Petersen, a photographer in Frederick, CO — view the full gallery or book your own session.`;
+  const joined = own ? `${own.replace(/[.!]?$/, ".")} ${tail}` : tail;
+  return joined.length <= 160 ? joined : `${joined.slice(0, 157).replace(/\s+\S*$/, "")}…`;
+}
+
 export function generateStaticParams() {
   return shoots.map((shoot) => ({
     category: shoot.category,
@@ -56,15 +71,16 @@ export async function generateMetadata({
   const { category, slug } = await params;
   const shoot = getShoot(category, slug);
   if (!shoot) return {};
+  const description = metaDescription(shoot);
   return {
     title: shoot.title,
-    description: shoot.description,
+    description,
     alternates: {
       canonical: canonical(`portfolio/${shoot.category}/${shoot.slug}`),
     },
     openGraph: {
       title: shoot.title,
-      description: shoot.description,
+      description,
       type: "article",
       images: shoot.photos.slice(0, 1).map((p) => ({ url: p.src })),
     },

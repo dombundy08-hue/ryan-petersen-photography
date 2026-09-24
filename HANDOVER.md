@@ -79,10 +79,25 @@ password he was given, then immediately clicks **Account** and sets his own
 password. From that moment the starter password in the repo is dead — the
 portal ignores it once a password has been saved.
 
+## 3b. Google Search Console and Analytics
+
+These are Google accounts, not part of the website, so nothing breaks if
+they stay put — but Ryan should own them.
+
+- **Search Console** — property `ryanshutter.com` (domain property, sitemap
+  submitted). Settings → Users and permissions → Add user → Ryan's Google
+  email as **Owner**.
+- **Google Analytics** — account **RyanShutter**, property
+  `ryanshutter.com`, tag `G-WFLH1TPF76` (in `src/components/analytics.tsx`,
+  disclosed on `/privacy`). Admin → Account access management → add Ryan's
+  Google email as **Administrator**.
+
+Both need a Google account (a Gmail address is fine).
+
 ## 4. Tidy up, once Ryan confirms he's in
 
 - Old owner leaves the Netlify team and removes themselves as a GitHub
-  collaborator.
+  collaborator, and from Search Console and Google Analytics.
 - Ryan turns on **transfer lock** for the domain at Porkbun.
 - Ryan keeps the recovery route somewhere safe: if he is ever locked out of
   `/admin/`, the fix is in Netlify, not in code — see *Locked Out* in
