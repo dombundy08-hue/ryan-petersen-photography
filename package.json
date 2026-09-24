@@ -20,7 +20,7 @@
     "jszip": "^3.10.1",
     "lucide-react": "^1.28.0",
     "motion": "^12.43.0",
-    "next": "16.3.0",
+    "next": "16.3.6",
     "react": "19.2.8",
     "react-dom": "19.2.8",
     "shadcn": "^4.16.1",
@@ -33,7 +33,7 @@
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "eslint": "^9",
-    "eslint-config-next": "16.3.0",
+    "eslint-config-next": "16.3.6",
     "sharp": "^0.35.4",
     "tailwindcss": "^4",
     "typescript": "^5"
